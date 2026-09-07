@@ -194,12 +194,9 @@ private struct ItemSummary: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            VStack(alignment: .leading, spacing: 5) {
-                Kicker("Read from your photos")
-                Text("\(listing.brand) \(listing.clothingType)")
-                    .font(BowerFont.serif(32))
-                    .foregroundStyle(theme.text)
-            }
+            Text("\(listing.brand) \(listing.clothingType)")
+                .font(BowerFont.serif(32))
+                .foregroundStyle(theme.text)
 
             Button { withAnimation(.easeOut(duration: 0.2)) { open.toggle() } } label: {
                 Text(open ? "Close" : "Not right?")
@@ -287,20 +284,17 @@ private struct PriceSection: View {
             BowerCard(padding: 18, dashed: true, fill: theme.subtle) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .top) {
-                        Kicker("Rough · from the photos")
+                        if let l = model.listing {
+                            PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 44)
+                        }
                         Spacer()
-                        Text("GUESS")
+                        Text("ESTIMATE")
                             .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.6)
                             .foregroundStyle(theme.text)
                             .padding(.vertical, 3).padding(.horizontal, 7)
                             .background(theme.pollen.opacity(0.2))
                             .clipShape(RoundedRectangle(cornerRadius: 5))
                     }
-                    if let l = model.listing {
-                        PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 44)
-                    }
-                    Text("Roughly what this looks like it's worth, judged from the photos alone. It hasn't looked at a single real listing yet — one figure across all \(model.enabled.count == 3 ? "three" : "\(model.enabled.count)") platforms.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
             }
 
@@ -312,7 +306,7 @@ private struct PriceSection: View {
                         disabled: state.remaining == 0) {
                 model.search()
             }
-            Text("Reads live listings on each platform you sell on. Anywhere from 40 seconds to a few minutes.")
+            Text("Search across other platforms for an accurate figure.")
                 .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
         }
     }
@@ -464,10 +458,8 @@ private struct ListingSection: View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
                 Kicker("The listing")
-                Text("Written for \(model.platform.name)").font(BowerFont.serif(27)).foregroundStyle(theme.text)
-                Text("In their voice, with the dropdown values their form wants. " +
-                     (model.platform == state.preferred ? "Your preferred reseller — change it in Settings." : "Switch and it gets rewritten."))
-                    .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                Text("Into \(model.enabled.map(\.name).joined(separator: ", "))")
+                    .font(BowerFont.serif(27)).foregroundStyle(theme.text)
             }
 
             if model.enabled.count > 1 {

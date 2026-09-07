@@ -76,7 +76,7 @@ struct CaptureScreen: View {
                     BowerButton(title: "Take a photo", icon: "camera") { openCamera() }
                     BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
                 } else {
-                    BowerButton(title: "Have a squiz") { state.screen = .analysing }
+                    BowerButton(title: "Read my photos") { state.screen = .analysing }
                     HStack(spacing: 9) {
                         BowerButton(title: "Upload more", kind: .secondary) { showLibrary = true }
                         Button("Clear") { state.photos = [] }
