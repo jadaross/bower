@@ -76,3 +76,21 @@ describe("normalizeAnalysisResult", () => {
     expect(() => parseAnalysisResult(JSON.stringify({ tag_data }))).toThrow();
   });
 });
+
+describe("escapeControlCharsInStrings (raw newlines in model output)", () => {
+  const listing = { brand: "Carhartt" };
+  const tag_data = { brand: "Carhartt" };
+
+  it("parses a description that contains a real newline", () => {
+    // A literal newline inside the string — what the model emits and what
+    // JSON.parse would otherwise reject.
+    const raw = `{"listing":${JSON.stringify(listing).slice(0, -1)},"description":"line one\nline two"},"tag_data":${JSON.stringify(tag_data)}}`;
+    const out = parseAnalysisResult(raw);
+    expect(out.listing).toBeDefined();
+  });
+
+  it("does not mangle already-escaped content", () => {
+    const good = JSON.stringify({ listing, tag_data, extra: "a\nb\tc" });
+    expect(() => parseAnalysisResult(good)).not.toThrow();
+  });
+});
