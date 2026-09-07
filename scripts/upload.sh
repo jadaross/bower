@@ -51,11 +51,19 @@ xcodebuild archive \
   -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"} -quiet
 echo "archived"
 
+# Manual signing with the distribution certificate + App Store profile that live
+# in the keychain and ~/Library/MobileDevice/Provisioning Profiles. Self-contained:
+# no Xcode account session (which expires) and no cloud signing (which the API key
+# cannot do). Falls back to ExportOptions.plist if the manual one is absent.
+EXPORT_PLIST=ExportOptions.plist
+[[ -f ExportOptions-manual.plist ]] && EXPORT_PLIST=ExportOptions-manual.plist
+# AUTH (the API key) authenticates the UPLOAD. Manual signing means xcodebuild
+# never attempts cloud signing, so the App-Manager key — which can upload but
+# not cloud-sign — is exactly enough.
 xcodebuild -exportArchive \
   -archivePath "$OUT/bower.xcarchive" \
-  -exportOptionsPlist ExportOptions.plist \
-  -exportPath "$OUT/export" \
-  -allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"} -quiet
+  -exportOptionsPlist "$EXPORT_PLIST" \
+  -exportPath "$OUT/export" ${AUTH[@]+"${AUTH[@]}"} -quiet
 echo "uploaded build $NEXT — App Store Connect is processing it"
 
 cd ../..
