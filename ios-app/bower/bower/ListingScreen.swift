@@ -457,8 +457,7 @@ private struct ListingSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
-                Kicker("The listing")
-                Text("Into \(model.enabled.map(\.name).joined(separator: ", "))")
+                Text("The listing")
                     .font(BowerFont.serif(27)).foregroundStyle(theme.text)
             }
 
@@ -555,12 +554,8 @@ private struct ListingSection: View {
                         }
                     }
                     Hairline()
-                    HStack {
-                        Text("\(c.description.split(separator: " ").count) words\(model.edited ? " · edited by you" : "")")
-                            .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-                        Spacer()
-                        CopyButton(text: model.fullText, label: "Copy the lot", big: true)
-                    }
+                    Text("\(c.description.split(separator: " ").count) words\(model.edited ? " · edited by you" : "")")
+                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                 } else if model.formatError {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Couldn't write the listing.").font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.text)

@@ -93,6 +93,7 @@ struct RootView: View {
         }
         .environment(\.bower, theme)
         .animation(.snappy(duration: 0.22), value: state.screen)
+        .task { await state.loadProfileIfSignedIn() }
     }
 
     @ViewBuilder private var nav: some View {

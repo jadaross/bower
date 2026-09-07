@@ -35,7 +35,7 @@ struct AnalysingScreen: View {
             ArchFill(progress: fill, stroke: .white, fillColor: theme.sheen, dot: theme.pollen)
                 .frame(width: 190, height: 190)
             VStack(spacing: 14) {
-                Text("Reading")
+                Text("Sussing it out")
                     .font(BowerFont.serif(40))
                     .foregroundStyle(.white)
                 if let title {

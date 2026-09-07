@@ -174,6 +174,15 @@ final class AppState {
         screen = onboardingComplete ? .capture : .platforms
     }
 
+    /// Called once at launch. A returning user's Enabled Platforms, Preferred
+    /// Platform and allowance live on the server; without this the app shows
+    /// the hardcoded defaults until Settings is opened — which read as "it
+    /// forgot what I chose".
+    func loadProfileIfSignedIn() async {
+        guard session.hasSession else { return }
+        await loadProfile()
+    }
+
     func loadProfile() async {
         guard let p = try? await api.profile() else { return }
         apply(p)
