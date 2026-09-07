@@ -162,7 +162,7 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
   const client = anthropicClient();
   const message = await client.messages.create({
     model: MODELS.analyse,
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [
       {
         role: "user",
@@ -185,7 +185,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
         const client = anthropicClient();
         const stream = await client.messages.create({
           model: MODELS.analyse,
-          max_tokens: 2048,
+          max_tokens: 4096,
           stream: true,
           messages: [
             {
