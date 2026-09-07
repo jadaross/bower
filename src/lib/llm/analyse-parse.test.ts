@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { extractJsonObject, parseAnalysisResult } from "./analyse-parse";
-import { analysisResult } from "@/test/fixtures";
+import { analysisResult , analysisResultWire} from "@/test/fixtures";
 
 describe("extractJsonObject", () => {
   it("returns a bare JSON object unchanged", () => {
@@ -27,7 +27,7 @@ describe("extractJsonObject", () => {
 
 describe("parseAnalysisResult", () => {
   it("parses a complete result", () => {
-    expect(parseAnalysisResult(JSON.stringify(analysisResult))).toEqual(analysisResult);
+    expect(parseAnalysisResult(JSON.stringify(analysisResult))).toEqual(analysisResultWire);
   });
 
   it("parses a result wrapped in prose", () => {
@@ -47,5 +47,32 @@ describe("parseAnalysisResult", () => {
   it("throws when tag_data is missing", () => {
     const { tag_data: _omitted, ...rest } = analysisResult;
     expect(() => parseAnalysisResult(JSON.stringify(rest))).toThrow(/missing required/);
+  });
+});
+
+describe("normalizeAnalysisResult", () => {
+  const listing = { brand: "Carhartt" } as never;
+  const tag_data = { brand: "Carhartt" } as never;
+
+  it("fills a well-formed photo_analysis when the model omits it", () => {
+    const out = parseAnalysisResult(JSON.stringify({ listing, tag_data }));
+    expect(out.photo_analysis).toEqual({
+      scores: [],
+      missing_shots: [],
+      suggestions: [],
+      has_tag_photo: false,
+      ready_to_list: true,
+    });
+  });
+
+  it("keeps a photo_analysis the model did provide", () => {
+    const photo_analysis = { scores: [], missing_shots: [], suggestions: [], has_tag_photo: true, ready_to_list: false };
+    const out = parseAnalysisResult(JSON.stringify({ listing, tag_data, photo_analysis }));
+    expect(out.photo_analysis).toEqual(photo_analysis);
+  });
+
+  it("still throws when listing or tag_data is missing", () => {
+    expect(() => parseAnalysisResult(JSON.stringify({ listing }))).toThrow();
+    expect(() => parseAnalysisResult(JSON.stringify({ tag_data }))).toThrow();
   });
 });

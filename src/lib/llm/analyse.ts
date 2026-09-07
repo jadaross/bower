@@ -194,11 +194,19 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             },
           ],
         });
+        // Buffer the model's text, then emit one normalized JSON document. The
+        // model's template only produces `listing` and `tag_data`, so the raw
+        // stream is missing `photo_analysis` and would fail the client's decode.
+        // The client buffers to completion before decoding anyway, so emitting
+        // the whole normalized document rather than token-by-token costs it
+        // nothing and guarantees a complete contract.
+        let buffer = "";
         for await (const chunk of stream) {
           if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-            controller.enqueue(chunk.delta.text);
+            buffer += chunk.delta.text;
           }
         }
+        controller.enqueue(JSON.stringify(parseAnalysisResult(buffer)));
         controller.close();
       } catch (err) {
         controller.error(err);

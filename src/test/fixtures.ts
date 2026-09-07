@@ -41,6 +41,24 @@ export const analysisResult: AnalysisResult = {
   listing,
 };
 
+/**
+ * What the server actually puts on the wire: the model's output plus the
+ * photo_analysis compatibility section the analyse path fills in for the
+ * shipped iOS client. Not typed as AnalysisResult — that type no longer models
+ * photo_analysis.
+ */
+export const analysisResultWire = {
+  photo_analysis: {
+    scores: [],
+    missing_shots: [],
+    suggestions: [],
+    has_tag_photo: false,
+    ready_to_list: true,
+  },
+  tag_data: analysisResult.tag_data,
+  listing: analysisResult.listing,
+};
+
 /** A text response in the shape the Anthropic SDK returns. */
 export function textMessage(text: string) {
   return { content: [{ type: "text" as const, text }] };

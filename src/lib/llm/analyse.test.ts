@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { analysisResult, textMessage, textStream } from "@/test/fixtures";
+import { analysisResult, textMessage, textStream , analysisResultWire} from "@/test/fixtures";
 import { readStringStream, toStringStreamResponse } from "@/lib/streaming-text";
 
 const create = vi.fn();
@@ -70,7 +70,7 @@ describe("analyseListing — prompt", () => {
 
 describe("analyseListing — response handling", () => {
   it("returns a parsed AnalysisResult", async () => {
-    expect(await analyseListing({ photos: [PHOTO], tone: "casual" })).toEqual(analysisResult);
+    expect(await analyseListing({ photos: [PHOTO], tone: "casual" })).toEqual(analysisResultWire);
   });
 
   it("throws when the model returns an incomplete result", async () => {
@@ -90,29 +90,47 @@ describe("analyseListingStream", () => {
     const assembled = await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
-    expect(JSON.parse(assembled)).toEqual(analysisResult);
+    expect(JSON.parse(assembled)).toEqual(analysisResultWire);
   });
 
   it("requests a streaming completion", async () => {
-    create.mockResolvedValue(textStream(["{}"]));
+    create.mockResolvedValue(textStream([JSON.stringify(analysisResult)]));
     await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
     expect(lastCall().stream).toBe(true);
   });
 
-  it("ignores non-text deltas", async () => {
+  it("emits a normalized document, filling photo_analysis the model omitted", async () => {
+    const withoutPhotoAnalysis = { tag_data: analysisResult.tag_data, listing: analysisResult.listing };
+    create.mockResolvedValue(textStream([JSON.stringify(withoutPhotoAnalysis)]));
+    const assembled = await readStringStream(
+      toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
+    );
+    const doc = JSON.parse(assembled);
+    expect(doc.photo_analysis).toEqual({
+      scores: [],
+      missing_shots: [],
+      suggestions: [],
+      has_tag_photo: false,
+      ready_to_list: true,
+    });
+    expect(doc.listing).toEqual(analysisResult.listing);
+  });
+
+  it("ignores non-text deltas, keeping only the text that forms the JSON", async () => {
+    const json = JSON.stringify(analysisResult);
     create.mockResolvedValue({
       async *[Symbol.asyncIterator]() {
         yield { type: "message_start" };
-        yield { type: "content_block_delta", delta: { type: "text_delta", text: "kept" } };
+        yield { type: "content_block_delta", delta: { type: "text_delta", text: json } };
         yield { type: "content_block_stop" };
       },
     });
     const assembled = await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
-    expect(assembled).toBe("kept");
+    expect(JSON.parse(assembled)).toEqual(analysisResultWire);
   });
 
   it("surfaces an API failure as a stream error", async () => {
