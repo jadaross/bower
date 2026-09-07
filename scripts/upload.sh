@@ -23,6 +23,11 @@
 # role "App Manager". The .p8 downloads once; keep it outside the repo.
 set -euo pipefail
 
+# Load the App Store Connect API key ids if present (gitignored), so uploads
+# authenticate with the key instead of a Xcode account session that expires.
+_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+[[ -f "$_ROOT/.asc-key.env" ]] && source "$_ROOT/.asc-key.env"
+
 AUTH=()
 if [[ -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
   KEY_PATH="${ASC_KEY_PATH:-$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8}"

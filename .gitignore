@@ -33,3 +33,4 @@ build/
 
 # macOS
 .DS_Store
+.asc-key.env
