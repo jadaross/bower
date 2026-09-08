@@ -14,12 +14,12 @@ struct ListingScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             if let listing = model.listing {
-                ItemSummary(listing: Binding(get: { listing }, set: { model.listing = $0 }))
+                ItemSummary(listing: listing)
                 PriceSection(model: model)
                     .padding(.horizontal, 22)
                 Hairline().padding(.horizontal, 22)
                 ListingSection(model: model)
-                BowerButton(title: "Next item", kind: .secondary) { state.newItem() }
+                HStack { Spacer(); NewItemButton { state.newItem() }; Spacer() }
                     .padding(.horizontal, 22)
             }
         }
@@ -188,75 +188,15 @@ final class ListingModel {
 // MARK: - Item summary
 
 private struct ItemSummary: View {
-    @Binding var listing: NeutralListing
+    let listing: NeutralListing
     @Environment(\.bower) private var theme
-    @State private var open = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("\(listing.brand) \(listing.clothingType)")
-                .font(BowerFont.serif(32))
-                .foregroundStyle(theme.text)
-
-            Button { withAnimation(.easeOut(duration: 0.2)) { open.toggle() } } label: {
-                Text(open ? "Close" : "Not right?")
-                    .font(BowerFont.ui(12, weight: .semibold))
-                    .foregroundStyle(theme.satin)
-                    .padding(.vertical, 4)
-            }
-            .buttonStyle(.plain)
-
-            if open {
-                BowerGroup {
-                    field("Brand", $listing.brand, evidence: "Chest label")
-                    Hairline()
-                    field("Item", $listing.clothingType)
-                    Hairline()
-                    field("Colour", $listing.colourPrimary)
-                    Hairline()
-                    conditionRow
-                    Hairline()
-                    field("Size", $listing.size, evidence: "Care tag")
-                    Hairline()
-                    field("Material", $listing.material, evidence: "Care tag")
-                }
-                Text("Changes here feed the search, not the text already written. Switch platform or reset to rewrite.")
-                    .font(BowerFont.ui(11.5))
-                    .foregroundStyle(theme.muted)
-            }
-        }
-        .padding(.horizontal, 22)
-    }
-
-    private func field(_ label: String, _ value: Binding<String>, evidence: String? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Kicker(label)
-            TextField(label, text: value)
-                .font(BowerFont.ui(15, weight: .medium))
-                .foregroundStyle(theme.text)
-            if let evidence {
-                HStack(spacing: 4) {
-                    Image(systemName: "checkmark").font(.system(size: 8, weight: .bold)).foregroundStyle(theme.moss)
-                    Text(evidence).font(BowerFont.ui(10)).foregroundStyle(theme.muted)
-                }
-                .padding(.vertical, 2).padding(.horizontal, 7)
-                .background(theme.subtle)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-            }
-        }
-        .padding(.vertical, 12).padding(.horizontal, 16)
-    }
-
-    private var conditionRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Kicker("Condition")
-            Picker("Condition", selection: $listing.condition) {
-                ForEach([WireCondition.newWithTags, .excellent, .good, .fair], id: \.self) { Text($0.rawValue).tag($0) }
-            }
-            .pickerStyle(.menu)
-            .tint(theme.text)
-        }
-        .padding(.vertical, 12).padding(.horizontal, 16)
+        Text("\(listing.brand) \(listing.clothingType)")
+            .font(BowerFont.serif(32))
+            .foregroundStyle(theme.text)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 22)
     }
 }
 
@@ -553,9 +493,7 @@ private struct ListingSection: View {
                             }
                         }
                     }
-                    Hairline()
-                    Text("\(c.description.split(separator: " ").count) words\(model.edited ? " · edited by you" : "")")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+
                 } else if model.formatError {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Couldn't write the listing.").font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.text)

@@ -122,11 +122,7 @@ struct RootView: View {
             BowerNav(title: "Price and listing") {
                 BackButton(label: "Photos") { state.screen = .capture }
             } trailing: {
-                Button { state.newItem() } label: {
-                    Text("New").font(BowerFont.ui(15, weight: .medium))
-                        .foregroundStyle(theme.satin)
-                }
-                .buttonStyle(.plain)
+                NewItemButton { state.newItem() }
             }
         case .settings:
             BowerNav(title: "Settings", large: true) {

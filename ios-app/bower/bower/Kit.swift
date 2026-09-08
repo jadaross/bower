@@ -295,6 +295,30 @@ struct BowerGroup<Content: View>: View {
     }
 }
 
+/// The one way to move on to the next item — same look and label wherever it
+/// appears (the listing screen's header and its foot), so "what do I tap to go
+/// next" is never a question. Its own colour marks it as the forward action.
+struct NewItemButton: View {
+    let action: () -> Void
+    @Environment(\.bower) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: "plus").font(.system(size: 12, weight: .bold))
+                Text("New item")
+            }
+            .font(BowerFont.ui(14, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.vertical, 9)
+            .padding(.horizontal, 16)
+            .background(theme.satin)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct Hairline: View {
     @Environment(\.bower) private var theme
     var body: some View { Rectangle().fill(theme.line).frame(height: 0.5) }
