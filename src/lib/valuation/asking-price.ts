@@ -2,7 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
 import { platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "@/lib/llm/client";
-import { extractJsonObject } from "@/lib/llm/analyse-parse";
+import { parseJsonObject } from "@/lib/llm/analyse-parse";
 import type { ValuationProvider } from "./provider";
 
 /**
@@ -158,6 +158,6 @@ export const askingPriceProvider: ValuationProvider = {
       throw new Error("Valuation request was declined by the model");
     }
 
-    return coerceBand(JSON.parse(extractJsonObject(textOf(response.content))) as RawBand);
+    return coerceBand(parseJsonObject(textOf(response.content)) as RawBand);
   },
 };

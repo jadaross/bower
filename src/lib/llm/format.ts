@@ -1,7 +1,7 @@
 import type { Listing, Platform, PlatformListing, Tone } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "./client";
-import { extractJsonObject } from "./analyse-parse";
+import { parseJsonObject } from "./analyse-parse";
 
 export interface FormatInput {
   listing: Listing;
@@ -75,11 +75,11 @@ export async function formatListing(input: FormatInput): Promise<PlatformListing
   const client = anthropicClient();
   const message = await client.messages.create({
     model: MODELS.format,
-    max_tokens: 512,
+    max_tokens: 1536,
     messages: [{ role: "user", content: buildPrompt(input) }],
   });
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  const parsed = JSON.parse(extractJsonObject(text)) as PlatformListing;
+  const parsed = parseJsonObject(text) as PlatformListing;
   if (!parsed.title || !parsed.description) {
     throw new Error("PlatformListing missing title or description");
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractJsonObject, parseAnalysisResult } from "./analyse-parse";
+import { extractJsonObject, parseAnalysisResult, parseJsonObject } from "./analyse-parse";
 import { analysisResult , analysisResultWire} from "@/test/fixtures";
 
 describe("extractJsonObject", () => {
@@ -92,5 +92,20 @@ describe("escapeControlCharsInStrings (raw newlines in model output)", () => {
   it("does not mangle already-escaped content", () => {
     const good = JSON.stringify({ listing, tag_data, extra: "a\nb\tc" });
     expect(() => parseAnalysisResult(good)).not.toThrow();
+  });
+});
+
+describe("parseJsonObject", () => {
+  it("parses an object carrying a raw newline inside a string value", () => {
+    // Models routinely emit multi-line descriptions with real newlines, which
+    // is invalid JSON — this is the exact input that used to drop the stream.
+    const raw = '{"title":"Jacket","description":"Line one\nLine two"}';
+    const parsed = parseJsonObject(raw) as { description: string };
+    expect(parsed.description).toBe("Line one\nLine two");
+  });
+
+  it("parses a fenced object with a raw tab inside a string", () => {
+    const raw = '```json\n{"a":"x\ty"}\n```';
+    expect((parseJsonObject(raw) as { a: string }).a).toBe("x\ty");
   });
 });

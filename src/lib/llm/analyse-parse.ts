@@ -86,9 +86,19 @@ export function escapeControlCharsInStrings(input: string): string {
   return out;
 }
 
+
+/**
+ * The one hardened free-text-JSON parse path, shared by every LLM boundary
+ * that still returns JSON as prose: extract the object, escape any raw control
+ * characters inside its strings, then parse. Throws on genuinely unparsable
+ * output. Structured outputs (see `structured.ts`) supersede this call by call.
+ */
+export function parseJsonObject(text: string): unknown {
+  return JSON.parse(escapeControlCharsInStrings(extractJsonObject(text)));
+}
+
 export function parseAnalysisResult(buffer: string): AnalysisResultWire {
-  const json = escapeControlCharsInStrings(extractJsonObject(buffer));
   return normalizeAnalysisResult(
-    JSON.parse(json) as Partial<AnalysisResult> & { photo_analysis?: PhotoAnalysisCompat }
+    parseJsonObject(buffer) as Partial<AnalysisResult> & { photo_analysis?: PhotoAnalysisCompat }
   );
 }
