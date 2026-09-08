@@ -8,7 +8,9 @@ TITLE: use as many of the 80 characters as you can with the item's REAL attribut
 
 DESCRIPTION: factual and complete, roughly 80-200 words. Include brand, model/style name, material, and — whenever the source provides them — laid-flat measurements (pit-to-pit, length, sleeve). Disclose condition specifically and name any flaws with reference to the photos; accurate condition is tied to search visibility and to who pays for a "not as described" return (the seller always does). Close with postage expectations ("sent tracked, dispatched within 1 working day") when appropriate. Real searchable keywords, no hashtags, no flattery in place of detail.
 
-ITEM SPECIFICS: populate every field in the schema below — do not just mention an attribute in prose, MIRROR it into the specific. Brand, Size and Colour are required by eBay and a blank specific makes the listing invisible to that filter.`;
+ITEM SPECIFICS: populate every field in the schema below — do not just mention an attribute in prose, MIRROR it into the specific. Brand, Size and Colour are required by eBay and a blank specific makes the listing invisible to that filter.
+
+VOICE: factual and neutral — a clear product description, not a personal note. No emoji, no "why I'm selling", no warm sign-off, no personality. State exactly what the item is, its condition, and what is included, in that order, in plain buyer language.`;
 
 const fieldsSchema = `Return these fields in the "fields" array, in this order. Use the EXACT label strings and pick values from the allowed sets:
 

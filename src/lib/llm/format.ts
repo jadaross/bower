@@ -9,11 +9,23 @@ export interface FormatInput {
   tone: Tone;
 }
 
+// Applies to every platform. The line between "a person who writes well" and
+// "AI" on these marketplaces is facts + honesty + plain language — see
+// docs/research/seller-voice.md.
+const VOICE_CORE = `VOICE — non-negotiable, all platforms:
+- Every sentence must carry information: a measurement, a condition note, a fit note, a material, or a genuine reason for selling. If a sentence only conveys vibe, cut it — that is what reads as AI-written.
+- Never use empty praise ("nice", "pretty", "good", "gorgeous", "stunning", "beautiful", "lovely", "timeless") or retail/marketing clichés ("elevate your wardrobe", "must-have", "perfect addition to any collection", "effortlessly chic", "transitions from day to night", "exude", "look no further", "grab this beauty"). Buyers do not search for these and they mark a listing as fake.
+- Do not oversell or contradict the condition. If there is a flaw, name it plainly; if you are unsure, be modest, not glowing.
+- Use British English and British terms throughout: colour, grey, jumper, trainers, dungarees, postage (not "shipping"), £ (not "$"). Sizes in UK format.
+- Do not stack adjectives. One descriptor anchored to a fact ("cosy oversized knit") is fine; three bare ones are not.`;
+
+// Tone is the user's dial on top of the platform's own voice above — it nudges
+// warmer or plainer, it does not override the platform register.
 const TONE_HINT: Record<Tone, string> = {
   casual:
-    "The description should be casual, friendly, and conversational — like how a real person sells on Depop or Vinted. Use natural language. Keep it genuine and relatable. No corporate speak.",
+    "Tone dial: lean to the warmer, more personal end of this platform's voice — contractions, a lighter touch — without adding fluff or breaking any rule above.",
   professional:
-    "The description should be clean, factual, and professional. Lead with the most important details. No slang. Focus on measurements, condition, fabric, and fit. Concise.",
+    "Tone dial: lean to the plainer, more formal end of this platform's voice — measurements, condition, fabric and fit first; concise; no slang — without stripping the platform's character where it has one.",
 };
 
 function buildPrompt({ listing, platform, tone }: FormatInput): string {
@@ -24,6 +36,8 @@ function buildPrompt({ listing, platform, tone }: FormatInput): string {
   return `You are a secondhand fashion listing specialist. Reformat the following clothing listing for ${platformMetadata[platform].name}.
 
 ${spec.promptFragment}
+
+${VOICE_CORE}
 
 ${TONE_HINT[tone]}
 

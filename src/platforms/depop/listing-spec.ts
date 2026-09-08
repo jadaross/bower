@@ -10,7 +10,9 @@ DESCRIPTION STRUCTURE: line 1 pseudo-title -> fit/measurements (pit-to-pit, leng
 
 HASHTAGS: put them in the "hashtags" array. MAXIMUM 5, each with a # prefix and each genuinely relevant — mix garment type + brand + style/era (e.g. #carhartt #detroitjacket #workwear #vintage #streetwear). Fewer relevant tags beat five padded ones. Never tag a brand the item is not. Keep the hashtags consistent with the Style/Age/Source fields.
 
-Make Offer is on every listing (buyers expect ~15% off), so the copy may gently welcome offers.`;
+Make Offer is on every listing (buyers expect ~15% off), so the copy may gently welcome offers.
+
+VOICE: casual and friendly, like texting a mate about something cool you found. Keep the honest core (condition, fit, measurements, any flaws) but lead with style — era and aesthetic words are welcome where accurate (y2k, vintage, oversized, grunge, streetwear). A short styling suggestion and a light call-to-action ("dm me", "open to offers") fit the platform. Emoji are fine in moderation. Genuine, not salesy.`;
 
 const fieldsSchema = `Return these fields in the "fields" array, in this order. Use the EXACT label strings and pick values from the allowed sets:
 
