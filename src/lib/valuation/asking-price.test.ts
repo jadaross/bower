@@ -162,9 +162,13 @@ describe("askingPriceProvider.band", () => {
     expect(result.reasoning).toContain("listed at");
   });
 
-  it("parses a response wrapped in prose", async () => {
-    create.mockResolvedValue(reply(`Here's what I found:\n${JSON.stringify(band)}`));
-    expect((await askingPriceProvider.band(item, "vinted")).low).toBe(55);
+  it("constrains the response to the price-band schema", async () => {
+    const { priceBandSchema } = await import("@/lib/llm/schemas");
+    await askingPriceProvider.band(item, "vinted");
+    expect(create.mock.calls.at(-1)![0].output_config.format).toEqual({
+      type: "json_schema",
+      schema: priceBandSchema,
+    });
   });
 
   it("resumes when the search pauses the turn", async () => {

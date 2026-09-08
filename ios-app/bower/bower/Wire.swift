@@ -10,10 +10,27 @@ enum WireCondition: String, Codable, Sendable {
     case excellent   = "Excellent"
     case good        = "Good"
     case fair        = "Fair"
+
+    /// Defence in depth. The backend now constrains `condition` to these four
+    /// with a structured-output enum, but an older or misbehaving build should
+    /// show a slightly-wrong condition rather than fail the whole decode and
+    /// blank the screen. Unknown → the neutral middle.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = WireCondition(rawValue: raw) ?? .good
+    }
 }
 
 enum Confidence: String, Codable, Sendable {
     case low, medium, high
+
+    /// Same reasoning as WireCondition: an unexpected value degrades to the
+    /// most conservative reading (`low`) instead of dropping the Price Band.
+    /// Covers both `confidence` and `sellLikelihood`.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = Confidence(rawValue: raw) ?? .low
+    }
 }
 
 // MARK: - analyse

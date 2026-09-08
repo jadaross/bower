@@ -2,7 +2,8 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
 import { platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "@/lib/llm/client";
-import { parseJsonObject } from "@/lib/llm/analyse-parse";
+import { jsonSchemaFormat, parseStructuredContent } from "@/lib/llm/structured";
+import { priceBandSchema } from "@/lib/llm/schemas";
 import type { ValuationProvider } from "./provider";
 
 /**
@@ -117,13 +118,6 @@ export function coerceBand(raw: RawBand): PriceBand {
   };
 }
 
-function textOf(content: Anthropic.Messages.ContentBlock[]): string {
-  return content
-    .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
-}
-
 /** Server tools can hand back `pause_turn` mid-search; resume by echoing. */
 const MAX_RESUMES = 3;
 
@@ -136,7 +130,7 @@ const MAX_RESUMES = 3;
 const REQUEST: Omit<Anthropic.Messages.MessageCreateParamsNonStreaming, "messages"> = {
   model: MODELS.valuation,
   max_tokens: 4000,
-  output_config: { effort: "low" },
+  output_config: { effort: "low", format: jsonSchemaFormat(priceBandSchema) },
   tools: [WEB_SEARCH],
 };
 
@@ -158,6 +152,6 @@ export const askingPriceProvider: ValuationProvider = {
       throw new Error("Valuation request was declined by the model");
     }
 
-    return coerceBand(parseJsonObject(textOf(response.content)) as RawBand);
+    return coerceBand(parseStructuredContent<RawBand>(response.content));
   },
 };
