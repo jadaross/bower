@@ -5,6 +5,8 @@ import { recommend, valuate } from "@/lib/valuation";
 import type { ValuationItem } from "@/lib/types";
 
 export const runtime = "nodejs";
+// The web-search valuation and the image read can run long; allow the max.
+export const maxDuration = 300;
 
 interface RequestBody {
   item: ValuationItem;

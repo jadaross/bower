@@ -62,10 +62,11 @@ struct BowerAPI: BowerAPIClient {
 
     // MARK: Requests
 
-    private func request(_ path: String, method: String = "GET", body: (any Encodable)? = nil) async throws -> URLRequest {
+    private func request(_ path: String, method: String = "GET", body: (any Encodable)? = nil, timeout: TimeInterval = 60) async throws -> URLRequest {
         guard let token = await session.accessToken() else { throw APIError.notSignedIn }
         var r = URLRequest(url: baseURL.appending(path: path))
         r.httpMethod = method
+        r.timeoutInterval = timeout
         r.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         if let body {
             r.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -77,12 +78,12 @@ struct BowerAPI: BowerAPIClient {
     /// Runs a request, and on an expired token refreshes once and runs it again.
     /// Any other auth failure is terminal — a corrupt session should surface as
     /// a sign-out, not as a retry loop.
-    private func send<T: Decodable>(_ path: String, method: String = "GET", body: (any Encodable)? = nil, as: T.Type) async throws -> T {
+    private func send<T: Decodable>(_ path: String, method: String = "GET", body: (any Encodable)? = nil, timeout: TimeInterval = 60, as: T.Type) async throws -> T {
         do {
-            return try await perform(try await request(path, method: method, body: body), as: T.self)
+            return try await perform(try await request(path, method: method, body: body, timeout: timeout), as: T.self)
         } catch let error as APIError where error.isRecoverableBySignInRefresh {
             _ = try await session.refresh()
-            return try await perform(try await request(path, method: method, body: body), as: T.self)
+            return try await perform(try await request(path, method: method, body: body, timeout: timeout), as: T.self)
         }
     }
 
@@ -154,7 +155,9 @@ struct BowerAPI: BowerAPIClient {
 
     func valuate(item: ValuationItem) async throws -> ValuationResponse {
         struct Body: Encodable { let item: ValuationItem }
-        return try await send("/api/valuate", method: "POST", body: Body(item: item), as: ValuationResponse.self)
+        // The web-search valuation can take minutes; the default 60s request
+        // timeout was cutting long searches off as a "connection dropped".
+        return try await send("/api/valuate", method: "POST", body: Body(item: item), timeout: 300, as: ValuationResponse.self)
     }
 
     func format(listing: NeutralListing, platform: Platform, tone: Tone) async throws -> PlatformListing {

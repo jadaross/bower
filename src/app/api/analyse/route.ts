@@ -5,6 +5,8 @@ import { toStringStreamResponse } from "@/lib/streaming-text";
 import type { Platform, Tone } from "@/lib/types";
 
 export const runtime = "nodejs";
+// The web-search valuation and the image read can run long; allow the max.
+export const maxDuration = 300;
 
 interface RequestBody {
   images: string[];
