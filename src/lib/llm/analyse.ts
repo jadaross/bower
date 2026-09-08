@@ -2,6 +2,8 @@ import type { AnalysisResult, Platform, Tone } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "./client";
 import { parseAnalysisResult } from "./analyse-parse";
+import { jsonSchemaFormat } from "./structured";
+import { analysisResultSchema } from "./schemas";
 export { parseAnalysisResult };
 
 export interface AnalyseInput {
@@ -163,6 +165,7 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
   const message = await client.messages.create({
     model: MODELS.analyse,
     max_tokens: 4096,
+    output_config: { format: jsonSchemaFormat(analysisResultSchema) },
     messages: [
       {
         role: "user",
@@ -187,6 +190,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
           model: MODELS.analyse,
           max_tokens: 4096,
           stream: true,
+          output_config: { format: jsonSchemaFormat(analysisResultSchema) },
           messages: [
             {
               role: "user",

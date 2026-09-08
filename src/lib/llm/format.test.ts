@@ -58,10 +58,13 @@ describe("formatListing — response handling", () => {
     expect(result).toEqual(platformListing);
   });
 
-  it("parses a response wrapped in markdown fences", async () => {
-    create.mockResolvedValue(textMessage("```json\n" + JSON.stringify(platformListing) + "\n```"));
-    const result = await formatListing({ listing, platform: "vinted", tone: "casual" });
-    expect(result.title).toBe(platformListing.title);
+  it("constrains the response to the platform-listing schema", async () => {
+    const { platformListingSchema } = await import("./schemas");
+    await formatListing({ listing, platform: "vinted", tone: "casual" });
+    expect(create.mock.calls.at(-1)![0].output_config.format).toEqual({
+      type: "json_schema",
+      schema: platformListingSchema,
+    });
   });
 
   it("defaults hashtags to an empty array when the model omits them", async () => {

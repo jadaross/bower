@@ -1,7 +1,8 @@
 import type { Platform, PlatformListing } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
-import { MODELS, anthropicClient } from "./client";
-import { parseJsonObject } from "./analyse-parse";
+import { MODELS } from "./client";
+import { createStructured } from "./structured";
+import { platformListingSchema } from "./schemas";
 
 export interface RefineInput {
   platform: Platform;
@@ -20,17 +21,6 @@ ${JSON.stringify(listing, null, 2)}
 Apply these refinements (do them all, in order):
 ${instructions.map((i, idx) => `${idx + 1}. ${i}`).join("\n")}
 
-Return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON:
-
-{
-  "title": "",
-  "description": "",
-  "hashtags": [],
-  "fields": [
-    { "label": "", "value": "", "hint": "" }
-  ]
-}
-
 Rules:
 - Apply every refinement above. If two refinements conflict, the later one wins.
 - Keep all factual details accurate — only change style, length, and format.
@@ -40,14 +30,14 @@ Rules:
 }
 
 export async function refineListing(input: RefineInput): Promise<PlatformListing> {
-  const client = anthropicClient();
-  const message = await client.messages.create({
-    model: MODELS.refine,
-    max_tokens: 1536,
-    messages: [{ role: "user", content: buildPrompt(input) }],
-  });
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
-  const parsed = parseJsonObject(text) as PlatformListing;
+  const parsed = await createStructured<PlatformListing>(
+    {
+      model: MODELS.refine,
+      max_tokens: 1536,
+      messages: [{ role: "user", content: buildPrompt(input) }],
+    },
+    platformListingSchema
+  );
   if (!parsed.title || !parsed.description) {
     throw new Error("Refined PlatformListing missing title or description");
   }

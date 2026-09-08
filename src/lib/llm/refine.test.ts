@@ -43,6 +43,15 @@ describe("refineListing — prompt", () => {
     await refineListing({ platform: "vinted", listing: platformListing, instructions: ["a", "b"] });
     expect(lastPrompt()).toContain("the later one wins");
   });
+
+  it("constrains the response to the platform-listing schema", async () => {
+    const { platformListingSchema } = await import("./schemas");
+    await refineListing({ platform: "vinted", listing: platformListing, instructions: ["x"] });
+    expect(create.mock.calls.at(-1)![0].output_config.format).toEqual({
+      type: "json_schema",
+      schema: platformListingSchema,
+    });
+  });
 });
 
 describe("refineListing — response handling", () => {

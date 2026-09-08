@@ -1,7 +1,8 @@
 import type { Listing, Platform, PlatformListing, Tone } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
-import { MODELS, anthropicClient } from "./client";
-import { parseJsonObject } from "./analyse-parse";
+import { MODELS } from "./client";
+import { createStructured } from "./structured";
+import { platformListingSchema } from "./schemas";
 
 export interface FormatInput {
   listing: Listing;
@@ -44,17 +45,6 @@ ${TONE_HINT[tone]}
 Source listing (neutral format):
 ${JSON.stringify(source, null, 2)}
 
-Return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON:
-
-{
-  "title": "",
-  "description": "",
-  "hashtags": [],
-  "fields": [
-    { "label": "", "value": "", "hint": "" }
-  ]
-}
-
 Rules for title / description / hashtags:
 - title: adapt to platform requirements (max chars, format conventions)
 - description: rewrite for platform audience and length requirements
@@ -72,14 +62,14 @@ For every field:
 }
 
 export async function formatListing(input: FormatInput): Promise<PlatformListing> {
-  const client = anthropicClient();
-  const message = await client.messages.create({
-    model: MODELS.format,
-    max_tokens: 1536,
-    messages: [{ role: "user", content: buildPrompt(input) }],
-  });
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
-  const parsed = parseJsonObject(text) as PlatformListing;
+  const parsed = await createStructured<PlatformListing>(
+    {
+      model: MODELS.format,
+      max_tokens: 1536,
+      messages: [{ role: "user", content: buildPrompt(input) }],
+    },
+    platformListingSchema
+  );
   if (!parsed.title || !parsed.description) {
     throw new Error("PlatformListing missing title or description");
   }
