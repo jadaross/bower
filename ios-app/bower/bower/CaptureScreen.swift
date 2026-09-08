@@ -13,7 +13,6 @@ struct CaptureScreen: View {
     @State private var showSheet = false
     @State private var libraryItems: [PhotosPickerItem] = []
     @State private var showLibrary = false
-    @State private var hints = true
     @State private var importing = false
 
     private var empty: Bool { state.photos.isEmpty }
@@ -97,22 +96,14 @@ struct CaptureScreen: View {
             }
         }
         .padding(.horizontal, 22)
-        .padding(.top, 2)
+        .padding(.top, 16)
         .padding(.bottom, 30)
     }
 
     private var suggestions: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Kicker("Worth including")
-                Spacer()
-                Button(hints ? "Hide" : "Show") { withAnimation(.easeOut(duration: 0.2)) { hints.toggle() } }
-                    .buttonStyle(.plain)
-                    .font(BowerFont.ui(12, weight: .semibold))
-                    .foregroundStyle(theme.satin)
-            }
-            if hints {
-                FlowLayout(spacing: 7) {
+            Kicker("Worth including")
+            FlowLayout(spacing: 7) {
                     ForEach(SuggestedShot.allCases) { shot in
                         let covered = state.photos.contains { $0.shot == shot }
                         Button {
@@ -136,10 +127,6 @@ struct CaptureScreen: View {
                         }
                         .buttonStyle(.plain)
                     }
-                }
-                Text("Suggestions only — tap one to shoot it, or ignore them and upload whatever you have.")
-                    .font(BowerFont.ui(11.5))
-                    .foregroundStyle(theme.muted)
             }
         }
         .padding(.vertical, 12)

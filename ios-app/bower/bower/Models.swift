@@ -51,7 +51,7 @@ enum RefinementChip: String, CaseIterable, Identifiable {
         case .shorter:      "Shorter"
         case .longer:       "More detail"
         case .casual:       "More casual"
-        case .serious:      "Less serious"
+        case .serious:      "More professional"
         case .measurements: "+ Measurements"
         case .hashtags:     "+ Hashtags"
         case .condition:    "Stress condition"

@@ -55,9 +55,10 @@ struct AnalysingScreen: View {
     private func start() {
         phase = .reading
         title = nil
-        // Ease toward nearly full over the typical read, then snap on arrival.
-        fill = 0
-        withAnimation(.easeOut(duration: 9)) { fill = 0.88 }
+        // Breathe continuously while reading — a rising/falling fill that never
+        // stalls at the top — then snap to full when the result lands.
+        fill = 0.15
+        withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) { fill = 1.0 }
 
         task = Task {
             do {
@@ -70,7 +71,7 @@ struct AnalysingScreen: View {
                 guard !Task.isCancelled else { return }
                 state.analysis = result
                 state.used += 1
-                withAnimation(.easeIn(duration: 0.25)) { fill = 1 }
+                withAnimation(.easeOut(duration: 0.3)) { fill = 1 }
                 try? await Task.sleep(for: .milliseconds(320))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {

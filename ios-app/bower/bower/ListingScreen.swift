@@ -220,20 +220,37 @@ private struct PriceSection: View {
     // The guess. Openly a guess — dashed border, a badge, and copy that says
     // it has not looked at a single real listing.
     private var estimated: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            BowerCard(padding: 18, dashed: true, fill: theme.subtle) {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(alignment: .top) {
+        VStack(alignment: .leading, spacing: 10) {
+            BowerCard(padding: 16, dashed: true, fill: theme.subtle) {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .center, spacing: 12) {
                         if let l = model.listing {
-                            PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 44)
+                            PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
                         }
-                        Spacer()
+                        Spacer(minLength: 8)
+                        Button { model.search() } label: {
+                            Text(state.remaining > 0 ? "Get a real price" : "No searches left")
+                                .font(BowerFont.ui(13, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .padding(.vertical, 10).padding(.horizontal, 14)
+                                .background(state.remaining > 0 ? theme.satin : theme.muted)
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(state.remaining == 0)
+                    }
+                    HStack {
                         Text("ESTIMATE")
                             .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.6)
                             .foregroundStyle(theme.text)
                             .padding(.vertical, 3).padding(.horizontal, 7)
                             .background(theme.pollen.opacity(0.2))
                             .clipShape(RoundedRectangle(cornerRadius: 5))
+                        Spacer()
+                        if state.remaining > 0 {
+                            Text("costs 1 of \(state.remaining)")
+                                .font(BowerFont.mono(10)).foregroundStyle(theme.muted)
+                        }
                     }
                 }
             }
@@ -241,12 +258,7 @@ private struct PriceSection: View {
             if let e = model.searchError {
                 Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
             }
-
-            BowerButton(title: state.remaining > 0 ? "Get a real price · costs 1 of \(state.remaining)" : "No searches left this month",
-                        disabled: state.remaining == 0) {
-                model.search()
-            }
-            Text("Search across other platforms for an accurate figure.")
+            Text("Searches live listings across your platforms for an accurate figure.")
                 .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
         }
     }
@@ -411,40 +423,31 @@ private struct ListingSection: View {
 
             card
 
-            VStack(alignment: .leading, spacing: 8) {
-                Kicker("Tone")
-                Segmented(
-                    options: Tone.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.label) },
-                    selection: Binding(get: { model.tone.rawValue }, set: { if let t = Tone(rawValue: $0) { model.setTone(t) } })
-                )
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Kicker("Nudge it")
-                    Spacer()
-                    if !model.chips.isEmpty {
-                        Button("Reset") { model.resetChips() }
-                            .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.satin)
-                    }
+            // Nudge it — a few one-tap rewrites sitting right under the listing.
+            // Tone folded in here; a separate control was doing the same job.
+            HStack(spacing: 7) {
+                if !model.chips.isEmpty {
+                    Button("Reset") { model.resetChips() }
+                        .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
                 }
-                FlowLayout(spacing: 7) {
-                    ForEach(RefinementChip.allCases) { chip in
-                        let on = model.chips.contains(chip)
-                        Button { model.toggle(chip) } label: {
-                            HStack(spacing: 5) {
-                                if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
-                                Text(chip.label)
-                            }
-                            .font(BowerFont.ui(12.5, weight: .medium))
-                            .foregroundStyle(on ? .white : theme.text)
-                            .padding(.vertical, 8).padding(.horizontal, 13)
-                            .background(on ? theme.satin : theme.card)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(on ? .clear : theme.line, lineWidth: 0.5))
+                Spacer(minLength: 0)
+            }
+            FlowLayout(spacing: 7) {
+                ForEach([RefinementChip.shorter, .longer, .serious, .casual]) { chip in
+                    let on = model.chips.contains(chip)
+                    Button { model.toggle(chip) } label: {
+                        HStack(spacing: 5) {
+                            if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
+                            Text(chip.label)
                         }
-                        .buttonStyle(.plain)
+                        .font(BowerFont.ui(12.5, weight: .medium))
+                        .foregroundStyle(on ? .white : theme.text)
+                        .padding(.vertical, 8).padding(.horizontal, 13)
+                        .background(on ? theme.satin : theme.card)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(on ? .clear : theme.line, lineWidth: 0.5))
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
