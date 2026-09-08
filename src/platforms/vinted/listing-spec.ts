@@ -2,8 +2,11 @@ import type { PlatformListing } from "@/lib/types";
 import type { ChipId } from "@/lib/chip-vocab";
 import type { PlatformListingSpec } from "../types";
 
-const promptFragment =
-  'Format for Vinted: Vinted has NO hashtag system — its search is pure keyword matching against title and description. Leave the "hashtags" array EMPTY ([]). Instead, make sure brand, item type, size, colour, material, and any distinctive search terms appear naturally in the title and first sentence of the description. Title max 60 characters, sentence case (capitalise first word and proper nouns only — no title case). Description: 3–4 sentences max 80 words. MUST include the item size in the description. Each sentence goes on its own line with a blank line between them. Do NOT suggest outfit pairings, styling ideas, or what to wear it with — focus on fabric, condition, fit, and key details only.';
+const promptFragment = `Format for Vinted. Vinted has NO hashtag-based ranking and NO documented title-length limit — its search matches keywords against the catalog plus the structured fields, so correct fields matter more than clever prose. Keep the "hashtags" array to AT MOST a few (0-6) genuinely relevant terms (e.g. #workwear, #vintage) — never a second brand name, and never a brand other than the one in the Brand field (Vinted's Catalogue Rules forbid it anywhere in the listing).
+
+TITLE: Brand + item type + key descriptor (colour/material/style) + size. Sentence case (capitalise first word and proper nouns only). Aim for ~40-60 characters so it is not truncated in the grid. No emojis, no hashtags, no second brand. Do NOT use empty filler words Vinted discourages ("nice", "pretty", "lovely", "gorgeous", "stunning").
+
+DESCRIPTION: facts over adjectives, 3-5 short lines, each on its own line with a blank line between. MUST state the size. SHOULD include measurements (pit-to-pit, length, sleeve in cm) whenever the source provides them — Vinted expects them. State condition honestly using Vinted's own flaw vocabulary where relevant (marks, stains, holes, rips, fraying, pilling, fading, odours) and say if the home is smoke-free. End with a short bundle invite such as "Bundle with my other items to save on postage." Do NOT tell the buyer there are "no fees" — buyers pay a mandatory fee at checkout. Do NOT suggest outfit pairings or styling ideas; keep to fabric, fit, condition, and key details.`;
 
 const fieldsSchema = `Return these fields in the "fields" array, in this order. Use the EXACT label strings and pick values from the allowed sets:
 

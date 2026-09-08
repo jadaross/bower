@@ -151,10 +151,11 @@ describe("recommend — output", () => {
   });
 
   it("applies the fee after ranking, for the net figure", () => {
-    const result = recommend(valuation({ depop: band(100, 100), vinted: band(20, 30) }));
-    expect(result!.platform).toBe("depop");
+    // eBay charges a real fee; Depop's UK seller fee was removed in Mar 2024.
+    const result = recommend(valuation({ ebay: band(100, 100), vinted: band(20, 30) }));
+    expect(result!.platform).toBe("ebay");
     expect(result!.listAt).toBe(100);
-    expect(result!.net).toBe(90); // Depop takes 10%
+    expect(result!.net).toBe(87); // eBay takes 13.25%
   });
 
   it("takes nothing off on Vinted", () => {

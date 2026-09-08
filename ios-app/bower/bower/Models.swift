@@ -22,7 +22,7 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     var note: String {
         switch self {
         case .vinted: "No seller fees · EU buyers"
-        case .depop:  "10% fee · Gen-Z UK/US"
+        case .depop:  "No seller fees · Gen-Z UK/US"
         case .ebay:   "13.25% fee · global reach"
         }
     }

@@ -6,7 +6,8 @@ import { netPrice, platformMetadata } from "@/platforms";
  *
  * The ranking signal is the Price Band weighted by how readily the item sells
  * there — deliberately NOT net-after-fees. Vinted charges sellers 0% against
- * Depop's 10% and eBay's 13.25%, so ranking on net would return Vinted every
+ * Depop's 0% (its UK seller fee was removed in Mar 2024) and eBay's 13.25%, so
+ * ranking on net would skew toward the fee-free platforms every
  * single time and this function would be a constant with a paragraph attached.
  * Fees are applied afterwards, for display only. See ADR-0004.
  */
