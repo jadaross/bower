@@ -33,6 +33,8 @@ protocol BowerAPIClient: Sendable {
     func refine(listing: PlatformListing, platform: Platform, instructions: [String]) async throws -> PlatformListing
     /// Deletes the account. Required by App Review for any app with sign-up.
     func deleteAccount() async throws
+    /// The caller's past items, newest first. Text only — no photos.
+    func history() async throws -> [HistoryItem]
 }
 
 // MARK: - Live
@@ -161,6 +163,10 @@ struct BowerAPI: BowerAPIClient {
         struct Body: Encodable { let preferredPlatform: Platform }
         return try await send("/api/profile", method: "PATCH",
                               body: Body(preferredPlatform: platform), as: ProfileResponse.self)
+    }
+
+    func history() async throws -> [HistoryItem] {
+        try await send("/api/history", as: HistoryResponse.self).items
     }
 
     func deleteAccount() async throws {

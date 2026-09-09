@@ -189,6 +189,37 @@ struct ValuationItem: Codable, Sendable {
     }
 }
 
+// MARK: - history
+
+/// A Valuation as stored on a history row. Mirrors the server's StoredValuation.
+struct StoredValuation: Codable, Sendable {
+    let perPlatform: [String: PriceBand]
+    let query: String?
+    let recommendation: Recommendation?
+}
+
+/// One past item. Text only — no photos are stored (ADR-0008).
+struct HistoryItem: Codable, Sendable, Identifiable {
+    let id: String
+    let createdAt: String
+    let sessionId: String?
+    let brand: String
+    let clothingType: String
+    let title: String
+    let colourPrimary: String?
+    let size: String?
+    let condition: String
+    let priceMin: Double?
+    let priceMax: Double?
+    let preferredPlatform: Platform?
+    /// Present once a real price search ran for this item.
+    let valuation: StoredValuation?
+}
+
+struct HistoryResponse: Codable, Sendable {
+    let items: [HistoryItem]
+}
+
 // MARK: - profile
 
 struct ProfileResponse: Codable, Sendable {

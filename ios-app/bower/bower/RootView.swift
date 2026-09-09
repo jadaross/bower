@@ -110,19 +110,34 @@ struct RootView: View {
             BowerNav(title: "bower", large: true, wordmark: true) {
                 EmptyView()
             } trailing: {
-                Button { state.screen = .settings } label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 20))
-                        .foregroundStyle(theme.text)
+                HStack(spacing: 18) {
+                    Button { state.screen = .history } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 19))
+                            .foregroundStyle(theme.text)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("History")
+                    Button { state.screen = .settings } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 20))
+                            .foregroundStyle(theme.text)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Settings")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Settings")
             }
         case .listing:
             BowerNav(title: "Price and listing") {
                 BackButton(label: "Photos") { state.screen = .capture }
             } trailing: {
                 NewItemButton { state.newItem() }
+            }
+        case .history:
+            BowerNav(title: "History", large: true) {
+                BackButton { state.screen = .capture }
+            } trailing: {
+                EmptyView()
             }
         case .settings:
             BowerNav(title: "Settings", large: true) {
@@ -140,6 +155,7 @@ struct RootView: View {
         case .capture:   CaptureScreen()
         case .analysing: AnalysingScreen()
         case .listing:   ListingScreen()
+        case .history:   HistoryScreen()
         case .settings:  SettingsScreen()
         }
     }

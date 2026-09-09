@@ -140,7 +140,7 @@ enum SuggestedShot: String, CaseIterable, Identifiable {
 /// Six screens. Confirm was folded into `listing` — correction happens there
 /// under "Not right?" rather than as a stop of its own.
 enum Screen: String, Hashable {
-    case signin, platforms, capture, analysing, listing, settings
+    case signin, platforms, capture, analysing, listing, settings, history
 }
 
 // MARK: - App state

@@ -75,6 +75,33 @@ struct StubAPI: BowerAPIClient {
 
     func deleteAccount() async throws { await wait() }
 
+    func history() async throws -> [HistoryItem] {
+        await wait()
+        func band(_ lo: Double, _ hi: Double, _ p: Platform) -> PriceBand {
+            PriceBand(low: lo, high: hi, currency: "GBP", confidence: .medium,
+                      sellLikelihood: .medium, comparables: [], reasoning: "Listed at £\(Int(lo))–£\(Int(hi)) on \(p.name).")
+        }
+        return [
+            HistoryItem(
+                id: "h1", createdAt: "2026-09-09T08:30:00Z", sessionId: "s1",
+                brand: "Carhartt", clothingType: "Detroit jacket", title: "Carhartt Detroit Jacket — Hamilton Brown, M",
+                colourPrimary: "Hamilton brown", size: "M", condition: "Good",
+                priceMin: 18, priceMax: 26, preferredPlatform: .depop,
+                valuation: StoredValuation(
+                    perPlatform: [Platform.depop.rawValue: band(42, 58, .depop), Platform.vinted.rawValue: band(34, 46, .vinted)],
+                    query: "Carhartt Detroit jacket M brown",
+                    recommendation: Recommendation(platform: .depop, listAt: 50, net: 45, currency: "GBP",
+                                                   reasoning: "Vintage Carhartt moves on Depop.", runnersUp: []))
+            ),
+            HistoryItem(
+                id: "h2", createdAt: "2026-09-07T19:05:00Z", sessionId: "s2",
+                brand: "Levi's", clothingType: "501 jeans", title: "Levi's 501 Original, W32 L34",
+                colourPrimary: "Mid wash", size: "W32 L34", condition: "Excellent",
+                priceMin: 22, priceMax: 34, preferredPlatform: .vinted, valuation: nil
+            ),
+        ]
+    }
+
     func valuate(item: ValuationItem) async throws -> ValuationResponse {
         try await Task.sleep(for: .seconds(3))
         func band(_ lo: Double, _ hi: Double, _ n: Int, _ p: Platform) -> PriceBand {
