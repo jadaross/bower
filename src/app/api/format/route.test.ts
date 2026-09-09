@@ -36,6 +36,7 @@ describe("POST /api/format", () => {
       listing,
       platform: "depop",
       tone: "professional",
+      onTraceId: expect.any(Function),
     });
   });
 
