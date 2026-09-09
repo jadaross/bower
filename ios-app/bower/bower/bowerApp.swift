@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct bowerApp: App {
+    @UIApplicationDelegateAdaptor(BowerAppDelegate.self) private var delegate
     @State private var state: AppState
 
     init() {

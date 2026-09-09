@@ -111,10 +111,13 @@ final class ListingModel {
         elapsed = 0
         searchError = nil
         searchTask = Task {
+            // Counted from the clock, not by ticks: the ticker stops while the
+            // app is suspended but the search does not.
+            let started = Date()
             let ticker = Task {
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(1))
-                    elapsed += 1
+                    elapsed = Int(Date().timeIntervalSince(started))
                 }
             }
             defer { ticker.cancel() }
@@ -308,7 +311,7 @@ private struct PriceSection: View {
                     }
                 }
                 .padding(.top, 14)
-                Text("Up to a few minutes. Keep the app open.")
+                Text("Up to a few minutes. Fine to lock the screen.")
                     .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                     .padding(.top, 12)
             }

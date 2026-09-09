@@ -114,19 +114,24 @@ struct BowerAPI: BowerAPIClient {
     /// Runs a request, and on an expired token refreshes once and runs it again.
     /// Any other auth failure is terminal — a corrupt session should surface as
     /// a sign-out, not as a retry loop.
-    private func send<T: Decodable>(_ path: String, method: String = "GET", body: (any Encodable)? = nil, timeout: TimeInterval = 60, as: T.Type) async throws -> T {
+    private func send<T: Decodable>(_ path: String, method: String = "GET", body: (any Encodable)? = nil, timeout: TimeInterval = 60,
+                                    durable: Bool = false, as: T.Type) async throws -> T {
         do {
-            return try await perform(try await request(path, method: method, body: body, timeout: timeout), as: T.self)
+            return try await perform(try await request(path, method: method, body: body, timeout: timeout), durable: durable, as: T.self)
         } catch let error as APIError where error.isRecoverableBySignInRefresh {
             _ = try await session.refresh()
-            return try await perform(try await request(path, method: method, body: body, timeout: timeout), as: T.self)
+            return try await perform(try await request(path, method: method, body: body, timeout: timeout), durable: durable, as: T.self)
         }
     }
 
-    private func perform<T: Decodable>(_ req: URLRequest, as: T.Type) async throws -> T {
+    private func perform<T: Decodable>(_ req: URLRequest, durable: Bool = false, as: T.Type) async throws -> T {
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await urlSession.data(for: req)
+            // A durable request rides a background session and outlives the
+            // app being suspended — see `BackgroundTransfer`.
+            (data, response) = durable
+                ? try await BackgroundTransfer.shared.perform(req)
+                : try await urlSession.data(for: req)
         } catch {
             throw APIError.transport(error)
         }
@@ -202,9 +207,10 @@ struct BowerAPI: BowerAPIClient {
 
     func valuate(item: ValuationItem) async throws -> ValuationResponse {
         struct Body: Encodable { let item: ValuationItem }
-        // The web-search valuation can take minutes; the default 60s request
-        // timeout was cutting long searches off as a "connection dropped".
-        return try await send("/api/valuate", method: "POST", body: Body(item: item), timeout: 300, as: ValuationResponse.self)
+        // The web-search valuation can take minutes. It goes through the
+        // background session so locking the phone or switching apps mid-search
+        // no longer kills it; the timeout is the session's, not this one.
+        return try await send("/api/valuate", method: "POST", body: Body(item: item), timeout: 600, durable: true, as: ValuationResponse.self)
     }
 
     func format(listing: NeutralListing, platform: Platform, tone: Tone) async throws -> PlatformListing {
