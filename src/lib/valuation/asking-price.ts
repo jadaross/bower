@@ -143,9 +143,9 @@ export const askingPriceProvider: ValuationProvider = {
     ];
 
     const generation = beginGeneration({
-      name: "valuate",
+      name: `valuate:${platform}`,
       model: MODELS.valuation,
-      input: messages,
+      input: { item, platform },
       modelParameters: { max_tokens: 4000 },
     });
 

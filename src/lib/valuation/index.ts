@@ -1,5 +1,6 @@
 import type { Platform, PriceBand, Valuation, ValuationItem } from "@/lib/types";
 import { askingPriceProvider, describeItem } from "./asking-price";
+import { observeParent } from "@/lib/observability";
 import { readCache, writeCache } from "./cache";
 import type { ValuationProvider } from "./provider";
 
@@ -27,6 +28,7 @@ export async function valuate(
 
   const unique = [...new Set(enabledPlatforms)];
 
+  return observeParent("valuate", { item, platforms: unique }, async () => {
   const results = await Promise.allSettled(
     unique.map(async (platform): Promise<[Platform, PriceBand]> => {
       const cached = readCache(item, platform);
@@ -56,4 +58,5 @@ export async function valuate(
   }
 
   return { perPlatform, query: describeItem(item) };
+  });
 }

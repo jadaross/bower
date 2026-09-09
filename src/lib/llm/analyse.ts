@@ -175,7 +175,8 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
     {
       name: "analyse",
       model: MODELS.analyse,
-      input: messages,
+      // Never trace the base64 photos — log only the meaningful request shape.
+      input: { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length },
       modelParameters: { max_tokens: 4096 },
       trace: input.trace,
     },
@@ -214,7 +215,8 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
         generation = beginGeneration({
           name: "analyse",
           model: MODELS.analyse,
-          input: messages,
+          // Never trace the base64 photos — log only the meaningful request shape.
+          input: { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length },
           modelParameters: { max_tokens: 4096 },
           trace: input.trace,
         });

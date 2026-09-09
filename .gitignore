@@ -34,3 +34,7 @@ build/
 # macOS
 .DS_Store
 .asc-key.env
+
+# Skills CLI: vendored skill files + local Claude Code state (restore via skills-lock.json)
+.agents/
+.claude/
