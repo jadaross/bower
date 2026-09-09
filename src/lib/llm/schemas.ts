@@ -76,6 +76,7 @@ const listingSchema: Schema = {
   type: "object",
   additionalProperties: false,
   required: [
+    "title",
     "brand",
     "clothing_type",
     "colour_primary",
@@ -83,7 +84,6 @@ const listingSchema: Schema = {
     "condition",
     "size",
     "material",
-    "title",
     "description",
     "hashtags",
     "price_min",
@@ -91,6 +91,8 @@ const listingSchema: Schema = {
     "price_reasoning",
   ],
   properties: {
+    // Title first so it streams first — the client shows it while analysing.
+    title: { type: "string" },
     brand: { type: "string" },
     clothing_type: { type: "string" },
     colour_primary: { type: "string" },
@@ -98,7 +100,6 @@ const listingSchema: Schema = {
     condition: { type: "string", enum: [...CONDITION_VALUES] },
     size: { type: "string" },
     material: { type: "string" },
-    title: { type: "string" },
     description: { type: "string" },
     hashtags: { type: "array", items: { type: "string" } },
     price_min: { type: "number" },
@@ -115,10 +116,10 @@ const listingSchema: Schema = {
 export const analysisResultSchema: Schema = {
   type: "object",
   additionalProperties: false,
-  required: ["tag_data", "listing"],
+  required: ["listing", "tag_data"],
   properties: {
-    tag_data: tagDataSchema,
     listing: listingSchema,
+    tag_data: tagDataSchema,
   },
 };
 

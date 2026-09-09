@@ -97,9 +97,11 @@ pattern-matched out of the buffer the moment its closing quote arrives.
 
 ### Prompt design
 
-`analyse` returns a **single JSON object** in stream order: tag/label OCR (`tag_data`)
-first, because reading the labels grounds the listing and it is short, then the
-Neutral Listing — which carries the search-free price guess as `price_min`/`price_max`.
+`analyse` returns a **single JSON object** in stream order with the `listing`
+first and its `title` as the very first field, so the client shows the title the
+moment it streams (~2s, the image-reading floor). The tag/label OCR (`tag_data`)
+follows. The Neutral Listing carries the search-free price guess as
+`price_min`/`price_max`.
 That guess is never a Price Band; only `/api/valuate` produces those, and only with
 Comparables (ADR-0005). There is deliberately no photo-quality section: nothing
 displayed it and it delayed the title by a third of the output.

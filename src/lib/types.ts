@@ -62,10 +62,11 @@ export interface PlatformListing {
 }
 
 /**
- * The read. `tag_data` comes first in the document because reading the labels
- * before writing the listing is what grounds brand, size and fabric — and it
- * is short, so the title still arrives early in the stream. There is no photo
- * quality section: nothing displayed it, and it cost a third of the output.
+ * The read. The `listing` streams first — and its `title` is the very first
+ * field — so the client can show the title the moment it arrives (~2s, the
+ * image-reading floor) instead of waiting for `tag_data` to stream. The tag
+ * OCR follows. There is no photo quality section: nothing displayed it, and it
+ * cost a third of the output.
  */
 export interface AnalysisResult {
   tag_data: TagData;

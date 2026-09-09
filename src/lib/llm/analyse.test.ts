@@ -38,10 +38,13 @@ describe("analyseListing — prompt", () => {
     expect(prompt).not.toContain("photo_analysis");
   });
 
-  it("puts tag_data before the listing so the title streams early", async () => {
+  it("puts the title first so it streams before anything else", async () => {
     await analyseListing({ photos: [PHOTO], tone: "casual" });
     const prompt = lastCall().messages[0].content.at(-1).text as string;
-    expect(prompt.indexOf('"tag_data"')).toBeLessThan(prompt.indexOf('"listing"'));
+    // Title first, and the listing ahead of tag_data — so the client shows the
+    // title as soon as possible while analysing.
+    expect(prompt.indexOf('"title"')).toBeLessThan(prompt.indexOf('"tag_data"'));
+    expect(prompt.indexOf('"listing"')).toBeLessThan(prompt.indexOf('"tag_data"'));
   });
 
   it("asks for the platform's form fields only when a platform is supplied", async () => {

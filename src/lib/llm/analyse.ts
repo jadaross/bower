@@ -41,6 +41,24 @@ function jsonShape(platform?: Platform): string {
     ]`
     : "";
   return `{
+  "listing": {
+    "title": "",
+    "brand": "",
+    "clothing_type": "",
+    "colour_primary": "",
+    "colour_secondary": null,
+    "condition": "Good",
+    "size": "",
+    "material": "",
+    "description": "",
+    "hashtags": [],
+    "price_min": 0,
+    "price_max": 0,
+    "price_reasoning": "",
+    "gender": "women",
+    "main_category": "tops",
+    "subcategory": ""${fields}
+  },
   "tag_data": {
     "brand": null,
     "size": null,
@@ -51,24 +69,6 @@ function jsonShape(platform?: Platform): string {
     "rn_number": null,
     "style_number": null,
     "barcode_visible": false
-  },
-  "listing": {
-    "brand": "",
-    "clothing_type": "",
-    "colour_primary": "",
-    "colour_secondary": null,
-    "condition": "Good",
-    "size": "",
-    "material": "",
-    "title": "",
-    "description": "",
-    "hashtags": [],
-    "price_min": 0,
-    "price_max": 0,
-    "price_reasoning": "",
-    "gender": "women",
-    "main_category": "tops",
-    "subcategory": ""${fields}
   }
 }`;
 }
