@@ -131,10 +131,10 @@ final class ListingModel {
                 priceState = .searched
             } catch APIError.allowanceExhausted(let a) {
                 state.used = a.used; state.allowance = a.limit
-                searchError = "That's the lot for this month — no searches left."
+                searchError = "That's the lot for this month. No searches left."
                 priceState = .estimated
             } catch {
-                searchError = "The search didn't come back. Your guess is still here — try again when you have signal."
+                searchError = "The search didn't come back. Your guess is still here. Try again when you have signal."
                 priceState = .estimated
             }
         }

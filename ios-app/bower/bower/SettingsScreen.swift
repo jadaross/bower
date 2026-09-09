@@ -22,7 +22,7 @@ struct SettingsScreen: View {
                     }
                 }
                 if blocked != nil {
-                    Text("Keep at least one — there'd be nothing to price against.")
+                    Text("Keep at least one. Nothing to price against otherwise.")
                         .font(BowerFont.ui(12)).foregroundStyle(theme.coral).padding(.leading, 4)
                 }
             }
@@ -65,7 +65,7 @@ struct SettingsScreen: View {
                 Task { await state.signOut(); signingOut = false }
             }
 
-            Text("Photos are read and discarded — bower keeps no images. It does keep a text history of your items and their prices, cleared when you delete your account.")
+            Text("Photos are read and discarded. Bower keeps no images. It does keep a text history of your items and their prices, cleared when you delete your account.")
                 .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)

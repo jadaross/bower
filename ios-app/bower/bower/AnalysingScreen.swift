@@ -127,7 +127,7 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.coral,
             title: "The connection dropped",
-            body: "Your photos are still here — nothing was lost. Try again when you have signal."
+            body: "Your photos are still here. Try again when you have signal."
         ) {
             Button { start() } label: { primaryLabel("Try again", fg: theme.avenue, bg: .white) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white, bg: .white.opacity(0.12)) }

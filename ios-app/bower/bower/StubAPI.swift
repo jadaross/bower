@@ -45,7 +45,7 @@ struct StubAPI: BowerAPIClient {
         try await Task.sleep(for: .milliseconds(600))
         onProgress(.reading)
         try await Task.sleep(for: .milliseconds(1500))
-        onProgress(.title("Carhartt Detroit Jacket — Hamilton Brown, Size M"))
+        onProgress(.title("Carhartt Detroit Jacket, Hamilton Brown, Size M"))
         try await Task.sleep(for: .milliseconds(1500))
         onProgress(.finishing)
         try await Task.sleep(for: .milliseconds(900))
@@ -60,11 +60,11 @@ struct StubAPI: BowerAPIClient {
                 brand: "Carhartt", clothingType: "Detroit jacket",
                 colourPrimary: "Hamilton brown", colourSecondary: nil,
                 condition: .good, size: "M", material: "100% cotton duck",
-                title: "Carhartt Detroit Jacket — Hamilton Brown, Size M",
-                description: "Carhartt Detroit jacket in Hamilton brown, size M. 100% cotton duck with a corduroy collar and blanket lining. Good nick — light wear at the cuffs, no rips or stains, all poppers work.",
+                title: "Carhartt Detroit Jacket, Hamilton Brown, Size M",
+                description: "Carhartt Detroit jacket in Hamilton brown, size M. 100% cotton duck with a corduroy collar and blanket lining. Good nick, light wear at the cuffs, no rips or stains, all poppers work.",
                 hashtags: ["carhartt", "workwear", "detroitjacket"],
                 priceMin: 18, priceMax: 26,
-                priceReasoning: "Judged from the photos alone — no live listings were checked.",
+                priceReasoning: "Judged from the photos alone, no live listings were checked.",
                 gender: "men", mainCategory: "Coats & jackets", subcategory: "Workwear",
                 fields: platform == nil ? nil : [
                     ListingField(label: "Category", value: "Men > Clothing > Outerwear > Coats & jackets", hint: nil),
@@ -92,15 +92,15 @@ struct StubAPI: BowerAPIClient {
         return [
             HistoryItem(
                 id: "h1", createdAt: "2026-09-09T08:30:00Z", sessionId: "s1",
-                brand: "Carhartt", clothingType: "Detroit jacket", title: "Carhartt Detroit Jacket — Hamilton Brown, M",
+                brand: "Carhartt", clothingType: "Detroit jacket", title: "Carhartt Detroit Jacket, Hamilton Brown, M",
                 colourPrimary: "Hamilton brown", size: "M", condition: "Good",
                 priceMin: 18, priceMax: 26, preferredPlatform: .depop,
                 listing: NeutralListing(
                     brand: "Carhartt", clothingType: "Detroit jacket",
                     colourPrimary: "Hamilton brown", colourSecondary: nil,
                     condition: .good, size: "M", material: "100% cotton duck",
-                    title: "Carhartt Detroit Jacket — Hamilton Brown, Size M",
-                    description: "Carhartt Detroit jacket in Hamilton brown, size M. 100% cotton duck with a corduroy collar and blanket lining. Good nick — light wear at the cuffs, no rips or stains, all poppers work.",
+                    title: "Carhartt Detroit Jacket, Hamilton Brown, Size M",
+                    description: "Carhartt Detroit jacket in Hamilton brown, size M. 100% cotton duck with a corduroy collar and blanket lining. Good nick, light wear at the cuffs, no rips or stains, all poppers work.",
                     hashtags: ["carhartt", "workwear", "detroitjacket"],
                     priceMin: 18, priceMax: 26,
                     priceReasoning: "Judged from the photos alone.",
@@ -180,19 +180,19 @@ struct StubAPI: BowerAPIClient {
         case .depop:
             return PlatformListing(
                 title: "Vintage Carhartt Detroit Jacket 🤎 Brown M",
-                description: "Proper Carhartt Detroit jacket in Hamilton brown. Cotton duck, corduroy collar, blanket lining — the real one, not a repro.\n\nWorn in nicely, light cuff fade, no damage. Fits M, boxy on an S.\n\nDM for measurements or a bundle.",
+                description: "Proper Carhartt Detroit jacket in Hamilton brown. Cotton duck, corduroy collar, blanket lining. The real one, not a repro.\n\nWorn in nicely, light cuff fade, no damage. Fits M, boxy on an S.\n\nDM for measurements or a bundle.",
                 hashtags: ["carhartt", "vintage", "workwear", "detroitjacket", "y2k"],
                 fields: [
                     ListingField(label: "Category", value: "Menswear · Coats & Jackets", hint: nil),
                     ListingField(label: "Style", value: "Workwear", hint: nil),
                     ListingField(label: "Size", value: "M", hint: nil),
-                    ListingField(label: "Condition", value: "Used — excellent", hint: nil),
+                    ListingField(label: "Condition", value: "Used, excellent", hint: nil),
                 ]
             )
         case .vinted:
             return PlatformListing(
                 title: "Carhartt Detroit Jacket Hamilton Brown M",
-                description: "Carhartt Detroit jacket, Hamilton brown, size M. Cotton duck outer, corduroy collar, blanket lining.\n\nGood condition — cuffs have a little wear, everything else is sound.\n\nBundle for a discount. Posted within two days.",
+                description: "Carhartt Detroit jacket, Hamilton brown, size M. Cotton duck outer, corduroy collar, blanket lining.\n\nGood condition, cuffs have a little wear, everything else is sound.\n\nBundle for a discount. Posted within two days.",
                 hashtags: ["carhartt", "workwear", "detroitjacket"],
                 fields: [
                     ListingField(label: "Category", value: "Men · Jackets · Denim", hint: nil),

@@ -8,12 +8,12 @@ struct TipsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     private static let tips: [(SuggestedShot, String, String)] = [
-        (.front, "Daylight, plain wall", "Near a window, no flash. A bedsheet or a door works as a backdrop."),
-        (.front, "The whole piece in frame", "Flat on the floor or hung up. Straight on, not at an angle."),
-        (.tag, "Tag flat and in focus", "This is where the size, material and care instructions are read from."),
-        (.logo, "Brand label close in", "The neck or chest label confirms the brand and often the era."),
-        (.detail, "One detail shot", "Buttons, stitching, hardware — the things that separate real from repro."),
-        (.flaw, "Show the flaw", "Fade, a hole, a mark. Buyers ask anyway, and it stops returns."),
+        (.front, "Daylight, plain wall", "Near a window, no flash."),
+        (.front, "Whole piece in frame", "Flat or hung, straight on."),
+        (.tag, "Tag flat and in focus", "Size and material come from here."),
+        (.logo, "Brand label close in", "Neck or chest label."),
+        (.detail, "One detail", "Buttons, stitching, hardware."),
+        (.flaw, "Any flaw", "Buyers ask anyway."),
     ]
 
     var body: some View {
@@ -26,7 +26,7 @@ struct TipsSheet: View {
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
-            Text("None of it is required. Each one just makes the price and the listing sharper.")
+            Text("None of it is required. Each one sharpens the price.")
                 .font(BowerFont.ui(13))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)

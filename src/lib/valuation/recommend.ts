@@ -103,7 +103,7 @@ function explain(
     return `Listed about £${diff} above ${runnerUpName}, ${feeNote}.`;
   }
   if (winner.sell_likelihood !== runnerUp.sell_likelihood) {
-    return `Listed on par with ${runnerUpName}, but this kind of item moves more readily here — ${feeNote}.`;
+    return `Listed on par with ${runnerUpName}, but this kind of item moves more readily here, ${feeNote}.`;
   }
   return `Listed on par with ${runnerUpName}, ${feeNote}.`;
 }

@@ -123,7 +123,7 @@ enum SuggestedShot: String, CaseIterable, Identifiable {
         case .tag:    "Size and material, flat and lit"
         case .logo:   "Neck or chest label, close in"
         case .detail: "Buttons, stitching, hardware"
-        case .flaw:   "Fade, hole, mark — buyers ask"
+        case .flaw:   "Fade, hole, mark. Buyers ask"
         }
     }
 

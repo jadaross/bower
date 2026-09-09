@@ -20,7 +20,8 @@ const VOICE_CORE = `VOICE — non-negotiable, all platforms:
 - Never use empty praise ("nice", "pretty", "good", "gorgeous", "stunning", "beautiful", "lovely", "timeless") or retail/marketing clichés ("elevate your wardrobe", "must-have", "perfect addition to any collection", "effortlessly chic", "transitions from day to night", "exude", "look no further", "grab this beauty"). Buyers do not search for these and they mark a listing as fake.
 - Do not oversell or contradict the condition. If there is a flaw, name it plainly; if you are unsure, be modest, not glowing.
 - Use British English and British terms throughout: colour, grey, jumper, trainers, dungarees, postage (not "shipping"), £ (not "$"). Sizes in UK format.
-- Do not stack adjectives. One descriptor anchored to a fact ("cosy oversized knit") is fine; three bare ones are not.`;
+- Do not stack adjectives. One descriptor anchored to a fact ("cosy oversized knit") is fine; three bare ones are not.
+- Never use an em dash (—). Use a comma, a full stop, or a hyphen instead.`;
 
 // Tone is the user's dial on top of the platform's own voice above — it nudges
 // warmer or plainer, it does not override the platform register.

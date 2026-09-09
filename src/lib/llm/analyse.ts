@@ -75,6 +75,9 @@ function jsonShape(platform?: Platform): string {
 
 const COMMON_RULES = `Rules:
 
+STYLE:
+- Never use an em dash (—) anywhere in the title or description. Use a comma, a full stop, or a hyphen instead.
+
 TAG DATA:
 - Extract ALL readable text from any tag/label visible in any photo
 - rn_number: US FTC Registered Identification Number (format "RN XXXXX") — critical for vintage dating

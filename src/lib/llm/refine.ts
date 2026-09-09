@@ -26,7 +26,8 @@ ${instructions.map((i, idx) => `${idx + 1}. ${i}`).join("\n")}
 
 Rules:
 - Apply every refinement above. If two refinements conflict, the later one wins.
-- Keep all factual details accurate — only change style, length, and format.
+- Keep all factual details accurate; only change style, length, and format.
+- Never use an em dash (—). Use a comma, a full stop, or a hyphen instead.
 - Do NOT invent new information (no measurements unless asked; no condition claims that weren't in the source).
 - Respect platform format rules (title length, hashtag conventions).
 - "fields": return the EXACT SAME array that came in unless a refinement instruction specifically changes a structured value (e.g. an instruction like "set condition to Pre-owned – Fair"). Do not rewrite labels or values gratuitously.`;

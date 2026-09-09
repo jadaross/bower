@@ -157,14 +157,9 @@ struct CaptureScreen: View {
                     .frame(width: 62, height: 62)
                     .background(theme.satin)
                     .clipShape(Circle())
-                VStack(spacing: 5) {
-                    Text("Photograph the piece")
-                        .font(BowerFont.serif(32))
-                        .foregroundStyle(theme.text)
-                    Text("One photo is enough to start.")
-                        .font(BowerFont.ui(13.5))
-                        .foregroundStyle(theme.muted)
-                }
+                Text("Photograph the piece")
+                    .font(BowerFont.serif(32))
+                    .foregroundStyle(theme.text)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(minHeight: 260)
@@ -324,7 +319,7 @@ struct CaptureScreen: View {
                 }
             VStack(spacing: 6) {
                 Text("No camera access").font(BowerFont.serif(26)).foregroundStyle(theme.text)
-                Text("Bower can't see anything without it. Photos are read and thrown away — none are ever stored.")
+                Text("Bower can't see anything without it. Photos are read and thrown away, never stored.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.muted)
                     .multilineTextAlignment(.center)

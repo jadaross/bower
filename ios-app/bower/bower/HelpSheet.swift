@@ -10,13 +10,14 @@ struct HelpSheet: View {
 
     @State private var step = 0
 
-    private struct Step { let title: String; let body: String; let tip: String }
+    /// A tip is the yellow box, and it appears only when the step costs
+    /// something. Everything else is just the body.
+    private struct Step { let title: String; let body: String; var tip: String? = nil }
 
     private var steps: [Step] {
         [
             Step(title: "Photograph the piece",
-                 body: "Take them now or pick what you already have. The chips are suggestions, not slots — ignore them and upload twenty photos if you like.",
-                 tip: "The garment tag and brand label are what sharpen the price."),
+                 body: "Take them now or pick what you already have. Upload up to 20 photos."),
             Step(title: "Tap Price it",
                  body: "Bower reads the photos and tells you the brand, size, condition, material and a first estimate of what it's worth.",
                  tip: "A read costs 1 of your \(state.allowance) this month."),
@@ -24,8 +25,7 @@ struct HelpSheet: View {
                  body: "The estimate is a guess from the photos. Tap Get a real price and bower searches what similar things are listed at right now.",
                  tip: "A search costs 1 as well."),
             Step(title: "Copy it across",
-                 body: "Switch between Vinted, Depop and eBay. Title, description and every platform field has its own copy button.",
-                 tip: "Bower never posts for you — you paste it in yourself."),
+                 body: "Switch between Vinted, Depop and eBay. Title, description and every platform field has its own copy button. Bower never posts for you."),
         ]
     }
 
@@ -65,26 +65,28 @@ struct HelpSheet: View {
                     .lineSpacing(4)
                     .padding(.top, 8)
 
-                HStack(alignment: .top, spacing: 9) {
-                    Text("i")
-                        .font(BowerFont.ui(11, weight: .bold))
-                        .foregroundStyle(theme.ink)
-                        .frame(width: 16, height: 16)
-                        .background(theme.pollen)
-                        .clipShape(Circle())
-                        .padding(.top, 1)
-                    Text(s.tip)
-                        .font(BowerFont.ui(12.5))
-                        .foregroundStyle(theme.text)
-                        .lineSpacing(3)
+                if let tip = s.tip {
+                    HStack(alignment: .top, spacing: 9) {
+                        Text("i")
+                            .font(BowerFont.ui(11, weight: .bold))
+                            .foregroundStyle(theme.ink)
+                            .frame(width: 16, height: 16)
+                            .background(theme.pollen)
+                            .clipShape(Circle())
+                            .padding(.top, 1)
+                        Text(tip)
+                            .font(BowerFont.ui(12.5))
+                            .foregroundStyle(theme.text)
+                            .lineSpacing(3)
+                    }
+                    .padding(.vertical, 11)
+                    .padding(.horizontal, 13)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(theme.pollen.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.pollen.opacity(0.45), lineWidth: 0.5))
+                    .padding(.top, 14)
                 }
-                .padding(.vertical, 11)
-                .padding(.horizontal, 13)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(theme.pollen.opacity(0.14))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.pollen.opacity(0.45), lineWidth: 0.5))
-                .padding(.top, 14)
             }
             .padding(.top, 20)
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -98,24 +98,18 @@ private struct HistoryDetail: View {
                     Button("Done") { dismiss() }
                         .font(BowerFont.ui(14, weight: .medium)).foregroundStyle(theme.satin)
                 }
-                Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
+                    if let p = item.preferredPlatform {
+                        HStack(spacing: 6) {
+                            Circle().fill(p.tint).frame(width: 7, height: 7)
+                            Text("Written for \(p.name)").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                        }
+                    }
+                }
 
                 if let listing = item.listing {
                     listingCard(listing.asPlatformListing)
-                }
-
-                Kicker("Details")
-                BowerCard {
-                    VStack(alignment: .leading, spacing: 0) {
-                        detail("Brand", item.brand)
-                        detail("Type", item.clothingType)
-                        if let c = item.colourPrimary { detail("Colour", c) }
-                        if let s = item.size { detail("Size", s) }
-                        detail("Condition", item.condition)
-                        if let lo = item.priceMin, let hi = item.priceMax {
-                            detail("Guess", "£\(trim(lo))–£\(trim(hi))")
-                        }
-                    }
                 }
 
                 if let v = item.valuation, !v.perPlatform.isEmpty {
@@ -135,7 +129,7 @@ private struct HistoryDetail: View {
                             }
                         }
                         if let rec = v.recommendation {
-                            Text("Recommended: \(rec.platform.name) at £\(trim(rec.listAt)) — \(rec.reasoning)")
+                            Text("Ask £\(trim(rec.listAt)) on \(rec.platform.name).")
                                 .font(BowerFont.ui(12)).foregroundStyle(theme.muted).padding(.leading, 4)
                         }
                     }
@@ -145,16 +139,6 @@ private struct HistoryDetail: View {
         }
         .background(theme.bg.ignoresSafeArea())
         .environment(\.bower, theme)
-    }
-
-    private func detail(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label).font(BowerFont.ui(13)).foregroundStyle(theme.muted)
-            Spacer()
-            Text(value).font(BowerFont.ui(14)).foregroundStyle(theme.text)
-                .multilineTextAlignment(.trailing)
-        }
-        .padding(.vertical, 9)
     }
 
     /// The listing as it was first seen — every field, each copyable.
@@ -227,7 +211,7 @@ enum HistoryFormat {
         if let lo = item.priceMin, let hi = item.priceMax {
             return "£\(Int(lo.rounded()))–£\(Int(hi.rounded()))"
         }
-        return "—"
+        return ""
     }
 
     private static let parsers: [ISO8601DateFormatter] = {
