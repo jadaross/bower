@@ -123,11 +123,14 @@ export const analysisResultSchema: Schema = {
   },
 };
 
-/** One Comparable — an ASKING price for a currently-listed item. */
+/**
+ * One Comparable — an ASKING price for a currently-listed item. The url is
+ * required: a comparable the user cannot open is dropped server-side anyway.
+ */
 const comparableSchema: Schema = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "price", "currency", "platform"],
+  required: ["title", "price", "currency", "platform", "url"],
   properties: {
     title: { type: "string" },
     price: { type: "number" },

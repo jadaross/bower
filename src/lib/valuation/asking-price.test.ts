@@ -7,9 +7,8 @@ vi.mock("@/lib/llm/client", async (importOriginal) => ({
   anthropicClient: () => ({ messages: { create } }),
 }));
 
-const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem } = await import(
-  "./asking-price"
-);
+const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem, listingUrl } =
+  await import("./asking-price");
 
 const item: ValuationItem = {
   brand: "Carhartt",
@@ -27,10 +26,27 @@ const band = {
   sell_likelihood: "medium",
   reasoning: "Similar Detroit jackets are listed at £55–£85.",
   comparables: [
-    { title: "Carhartt Detroit M", price: 60, currency: "GBP", platform: "vinted", url: "https://x" },
-    { title: "Carhartt Detroit M brown", price: 78, currency: "GBP", platform: "depop" },
+    {
+      title: "Carhartt Detroit M",
+      price: 60,
+      currency: "GBP",
+      platform: "vinted",
+      url: "https://www.vinted.co.uk/items/4821093321-carhartt-detroit-jacket",
+    },
+    {
+      title: "Carhartt Detroit M brown",
+      price: 78,
+      currency: "GBP",
+      platform: "vinted",
+      url: "https://www.vinted.co.uk/items/4790011234-carhartt-detroit",
+    },
   ],
 };
+
+/** A comparable that links to one listing on the named platform. */
+function comp(platform: string, url: string, price = 10) {
+  return { title: `on ${platform}`, price, currency: "GBP", platform, url };
+}
 
 function reply(text: string, stop_reason = "end_turn") {
   return { content: [{ type: "text", text }], stop_reason };
@@ -74,6 +90,57 @@ describe("buildValuationPrompt", () => {
     expect(prompt).toContain("a confident guess is not");
   });
 
+  it("no longer invites a fallback to other marketplaces", () => {
+    const prompt = buildValuationPrompt(item, "ebay");
+    expect(prompt).not.toMatch(/fall back/i);
+    expect(prompt).toContain("Only eBay counts");
+  });
+
+  it("shows what a link to one listing looks like", () => {
+    expect(buildValuationPrompt(item, "ebay")).toContain("https://www.ebay.co.uk/itm/<id>");
+    expect(buildValuationPrompt(item, "depop")).toContain("depop.com/products/");
+  });
+});
+
+describe("listingUrl", () => {
+  it("accepts a Vinted item page", () => {
+    const url = "https://www.vinted.co.uk/items/4821093321-carhartt-detroit-jacket";
+    expect(listingUrl(url, "vinted")).toBe(url);
+  });
+
+  it("accepts an eBay item page, with or without the slug", () => {
+    expect(listingUrl("https://www.ebay.co.uk/itm/256431122334", "ebay")).toBeDefined();
+    expect(
+      listingUrl("https://www.ebay.co.uk/itm/Carhartt-Detroit-Jacket/256431122334?hash=1", "ebay")
+    ).toBeDefined();
+  });
+
+  it("accepts a Depop product page", () => {
+    expect(
+      listingUrl("https://www.depop.com/products/jo-carhartt-detroit-jacket/", "depop")
+    ).toBeDefined();
+  });
+
+  it("rejects a brand page, a catalogue search and the homepage", () => {
+    expect(listingUrl("https://www.vinted.co.uk/brand/carhartt", "vinted")).toBeUndefined();
+    expect(
+      listingUrl("https://www.vinted.co.uk/catalog?brand_ids[]=53&search_text=detroit", "vinted")
+    ).toBeUndefined();
+    expect(listingUrl("https://www.vinted.co.uk/", "vinted")).toBeUndefined();
+    expect(listingUrl("https://www.ebay.co.uk/sch/i.html?_nkw=carhartt+detroit", "ebay")).toBeUndefined();
+    expect(listingUrl("https://www.depop.com/search/?q=carhartt", "depop")).toBeUndefined();
+  });
+
+  it("rejects a listing on a different platform", () => {
+    expect(listingUrl("https://www.vinted.co.uk/items/4821093321-jacket", "ebay")).toBeUndefined();
+    expect(listingUrl("https://www.ebay.com/itm/256431122334", "ebay")).toBeUndefined();
+  });
+
+  it("rejects anything that is not a string", () => {
+    expect(listingUrl(undefined, "vinted")).toBeUndefined();
+    expect(listingUrl(42, "vinted")).toBeUndefined();
+  });
+
   it("distinguishes price confidence from sell likelihood", () => {
     const prompt = buildValuationPrompt(item, "vinted");
     expect(prompt).toContain("how sure you are of the PRICE");
@@ -87,7 +154,7 @@ describe("buildValuationPrompt", () => {
 
 describe("coerceBand", () => {
   it("passes a well-formed band through", () => {
-    const result = coerceBand(band);
+    const result = coerceBand(band, "vinted");
     expect(result.low).toBe(55);
     expect(result.high).toBe(85);
     expect(result.confidence).toBe("high");
@@ -95,50 +162,95 @@ describe("coerceBand", () => {
   });
 
   it("orders low and high even when the model inverts them", () => {
-    const result = coerceBand({ ...band, low: 85, high: 55 });
+    const result = coerceBand({ ...band, low: 85, high: 55 }, "vinted");
     expect(result.low).toBe(55);
     expect(result.high).toBe(85);
   });
 
   it("downgrades confidence to low when there are no comparables", () => {
-    expect(coerceBand({ ...band, comparables: [] }).confidence).toBe("low");
+    expect(coerceBand({ ...band, comparables: [] }, "vinted").confidence).toBe("low");
   });
 
   it("downgrades an unrecognised confidence value to low", () => {
-    expect(coerceBand({ ...band, confidence: "very sure" }).confidence).toBe("low");
+    expect(coerceBand({ ...band, confidence: "very sure" }, "vinted").confidence).toBe("low");
   });
 
   it("drops malformed comparables rather than failing", () => {
-    const result = coerceBand({
-      ...band,
-      comparables: [{ title: "ok", price: 10 }, { title: "no price" }, "nonsense", null],
-    });
+    const result = coerceBand(
+      {
+        ...band,
+        comparables: [
+          comp("vinted", "https://www.vinted.co.uk/items/1-ok"),
+          { title: "no price", url: "https://www.vinted.co.uk/items/2-x" },
+          "nonsense",
+          null,
+        ],
+      },
+      "vinted"
+    );
     expect(result.comparables).toHaveLength(1);
   });
 
   it("caps comparables at five", () => {
-    const many = Array.from({ length: 9 }, (_, i) => ({ title: `c${i}`, price: 10 + i }));
-    expect(coerceBand({ ...band, comparables: many }).comparables).toHaveLength(5);
+    const many = Array.from({ length: 9 }, (_, i) =>
+      comp("vinted", `https://www.vinted.co.uk/items/${100 + i}-c${i}`, 10 + i)
+    );
+    expect(coerceBand({ ...band, comparables: many }, "vinted").comparables).toHaveLength(5);
   });
 
-  it("labels an unknown marketplace as other", () => {
-    const result = coerceBand({
-      ...band,
-      comparables: [{ title: "x", price: 10, platform: "grailed" }],
-    });
-    expect(result.comparables[0].platform).toBe("other");
+  // The eBay band once came back with five Vinted listings under an eBay
+  // heading. A comparable on another platform is not a comparable here.
+  it("drops comparables that live on a different platform", () => {
+    const result = coerceBand(
+      {
+        ...band,
+        comparables: [
+          comp("vinted", "https://www.vinted.co.uk/items/1-a"),
+          comp("ebay", "https://www.ebay.co.uk/itm/256431122334"),
+          comp("depop", "https://www.depop.com/products/jo-a/"),
+        ],
+      },
+      "ebay"
+    );
+    expect(result.comparables).toHaveLength(1);
+    expect(result.comparables[0].url).toContain("ebay.co.uk/itm/");
+  });
+
+  it("drops comparables whose link is not an individual listing", () => {
+    const result = coerceBand(
+      {
+        ...band,
+        comparables: [
+          comp("vinted", "https://www.vinted.co.uk/brand/carhartt"),
+          comp("vinted", "https://www.vinted.co.uk/catalog?search_text=carhartt"),
+          { title: "no link at all", price: 12, currency: "GBP", platform: "vinted" },
+          comp("vinted", "https://www.vinted.co.uk/items/4821093321-carhartt"),
+        ],
+      },
+      "vinted"
+    );
+    expect(result.comparables).toHaveLength(1);
+    expect(result.comparables[0].url).toContain("/items/4821093321");
+  });
+
+  it("names the platform from the link, not from the model", () => {
+    const result = coerceBand(
+      { ...band, comparables: [comp("other", "https://www.vinted.co.uk/items/1-a")] },
+      "vinted"
+    );
+    expect(result.comparables[0].platform).toBe("vinted");
   });
 
   it("defaults the currency to GBP", () => {
-    expect(coerceBand({ ...band, currency: undefined }).currency).toBe("GBP");
+    expect(coerceBand({ ...band, currency: undefined }, "vinted").currency).toBe("GBP");
   });
 
   it("throws when low/high are not numbers", () => {
-    expect(() => coerceBand({ ...band, low: "cheap" })).toThrow(/numeric low\/high/);
+    expect(() => coerceBand({ ...band, low: "cheap" }, "vinted")).toThrow(/numeric low\/high/);
   });
 
   it("throws on a non-positive price", () => {
-    expect(() => coerceBand({ ...band, low: 0, high: 0 })).toThrow(/non-positive/);
+    expect(() => coerceBand({ ...band, low: 0, high: 0 }, "vinted")).toThrow(/non-positive/);
   });
 });
 
@@ -148,6 +260,13 @@ describe("askingPriceProvider.band", () => {
     const tools = create.mock.calls.at(-1)![0].tools;
     expect(tools[0].type).toBe("web_search_20260209");
     expect(tools[0].user_location.country).toBe("GB");
+  });
+
+  it("confines the search to the platform being priced", async () => {
+    await askingPriceProvider.band(item, "ebay");
+    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["ebay.co.uk"]);
+    await askingPriceProvider.band(item, "depop");
+    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["depop.com"]);
   });
 
   it("uses the valuation model", async () => {

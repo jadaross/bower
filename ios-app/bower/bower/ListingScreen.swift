@@ -696,23 +696,14 @@ private struct CompsSheet: View {
             ScrollView {
                 VStack(spacing: 9) {
                     ForEach(comps) { c in
-                        Link(destination: URL(string: c.url ?? "") ?? URL(string: "https://\(platform.rawValue).com")!) {
-                            HStack(spacing: 12) {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(c.title).font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.leading)
-                                    Text(c.platform.capitalized).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
-                                }
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text("£\(Int(c.price))").font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
-                                    HStack(spacing: 3) { Text("Open"); Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .bold)) }
-                                        .font(BowerFont.ui(10.5)).foregroundStyle(theme.satin)
-                                }
-                            }
-                            .padding(12)
-                            .background(theme.card)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.line, lineWidth: 0.5))
+                        // The server only keeps comparables that link to one
+                        // listing on this platform, so "Open" goes to that
+                        // listing. A row without a link is shown as evidence
+                        // only — never sent to the platform's front page.
+                        if let url = c.url.flatMap(URL.init(string:)) {
+                            Link(destination: url) { compRow(c, openable: true) }
+                        } else {
+                            compRow(c, openable: false)
                         }
                     }
                     Text("Asking prices from listings live today. None of these have necessarily sold.")
@@ -725,5 +716,26 @@ private struct CompsSheet: View {
         .environment(\.bower, .of(scheme))
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+
+    private func compRow(_ c: ComparableListing, openable: Bool) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(c.title).font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.leading)
+                Text(c.platform.capitalized).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("£\(Int(c.price))").font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
+                if openable {
+                    HStack(spacing: 3) { Text("Open"); Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .bold)) }
+                        .font(BowerFont.ui(10.5)).foregroundStyle(theme.satin)
+                }
+            }
+        }
+        .padding(12)
+        .background(theme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.line, lineWidth: 0.5))
     }
 }

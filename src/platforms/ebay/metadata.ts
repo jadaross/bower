@@ -9,4 +9,7 @@ export const metadata: PlatformMetadata = {
   color: "#0064d2",
   appUrl: "ebay://",
   webUrl: "https://www.ebay.co.uk/",
+  searchDomains: ["ebay.co.uk"],
+  itemUrl: /^https?:\/\/(?:www\.)?ebay\.co\.uk\/itm\/(?:[^/?#]+\/)?\d+/i,
+  itemUrlExample: "https://www.ebay.co.uk/itm/<id>",
 };

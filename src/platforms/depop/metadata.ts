@@ -9,4 +9,7 @@ export const metadata: PlatformMetadata = {
   color: "#f00d2d",
   appUrl: "depop://",
   webUrl: "https://www.depop.com/",
+  searchDomains: ["depop.com"],
+  itemUrl: /^https?:\/\/(?:www\.)?depop\.com\/products\/[^/?#]+/i,
+  itemUrlExample: "https://www.depop.com/products/<seller>-<slug>/",
 };
