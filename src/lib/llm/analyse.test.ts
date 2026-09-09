@@ -93,7 +93,7 @@ describe("analyseListingStream", () => {
     const assembled = await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
-    expect(JSON.parse(assembled)).toEqual(analysisResultWire);
+    expect(JSON.parse(assembled)).toEqual(analysisResult);
   });
 
   it("requests a streaming completion", async () => {
@@ -104,20 +104,14 @@ describe("analyseListingStream", () => {
     expect(lastCall().stream).toBe(true);
   });
 
-  it("emits a normalized document, filling photo_analysis the model omitted", async () => {
-    const withoutPhotoAnalysis = { tag_data: analysisResult.tag_data, listing: analysisResult.listing };
-    create.mockResolvedValue(textStream([JSON.stringify(withoutPhotoAnalysis)]));
+  it("streams the raw listing (no legacy photo_analysis section)", async () => {
+    create.mockResolvedValue(textStream([JSON.stringify(analysisResult)]));
     const assembled = await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
     const doc = JSON.parse(assembled);
-    expect(doc.photo_analysis).toEqual({
-      scores: [],
-      missing_shots: [],
-      suggestions: [],
-      has_tag_photo: false,
-      ready_to_list: true,
-    });
+    expect(doc.photo_analysis).toBeUndefined();
+    expect(doc.tag_data).toEqual(analysisResult.tag_data);
     expect(doc.listing).toEqual(analysisResult.listing);
   });
 
@@ -133,7 +127,7 @@ describe("analyseListingStream", () => {
     const assembled = await readStringStream(
       toStringStreamResponse(analyseListingStream({ photos: [PHOTO], tone: "casual" }))
     );
-    expect(JSON.parse(assembled)).toEqual(analysisResultWire);
+    expect(JSON.parse(assembled)).toEqual(analysisResult);
   });
 
   it("surfaces an API failure as a stream error", async () => {

@@ -233,13 +233,16 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
           output_config: { format: jsonSchemaFormat(analysisResultSchema) },
           messages,
         });
-        // Buffer the model's text, then emit one normalized JSON document. The
-        // model's template only produces `listing` and `tag_data`, so the raw
-        // stream is missing `photo_analysis` and would fail the client's decode.
-        // The client buffers to completion before decoding anyway, so emitting
-        // the whole normalized document rather than token-by-token costs it
-        // nothing and guarantees a complete contract.
+        // Stream the model's text to the client as it arrives, so the title —
+        // now the first field — reaches the client in ~2s while the rest keeps
+        // streaming, instead of the client waiting for the whole ~7s document.
+        // The trace id (known up front) is prepended and the model's opening
+        // brace dropped, so the assembled stream stays one valid JSON object;
+        // the raw buffer is kept for the history write and the recorded output.
+        // The current client does not need the legacy `photo_analysis` section.
+        controller.enqueue(analyseTraceId ? `{"trace_id":${JSON.stringify(analyseTraceId)},` : "{");
         let buffer = "";
+        let strippedOpen = false;
         let inputTokens: number | undefined;
         let outputTokens: number | undefined;
         for await (const chunk of stream) {
@@ -247,16 +250,24 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             inputTokens = chunk.message?.usage?.input_tokens;
           } else if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
             buffer += chunk.delta.text;
+            let out = chunk.delta.text;
+            if (!strippedOpen) {
+              const idx = out.indexOf("{");
+              if (idx === -1) continue; // whitespace before the object — nothing to send yet
+              out = out.slice(idx + 1); // drop the model's opening brace; we sent ours
+              strippedOpen = true;
+            }
+            if (out) controller.enqueue(out);
           } else if (chunk.type === "message_delta") {
             outputTokens = chunk.usage?.output_tokens ?? outputTokens;
           }
         }
-        const parsed = parseAnalysisResult(buffer) as ReturnType<typeof parseAnalysisResult> & { trace_id?: string };
-        if (analyseTraceId) parsed.trace_id = analyseTraceId;
-        const doc = JSON.stringify(parsed);
+        const parsed = parseAnalysisResult(buffer);
         input.onResult?.(parsed);
-        generation?.finish({ output: doc, usage: { input: inputTokens, output: outputTokens } });
-        controller.enqueue(doc);
+        generation?.finish({
+          output: JSON.stringify({ ...parsed, trace_id: analyseTraceId }),
+          usage: { input: inputTokens, output: outputTokens },
+        });
         controller.close();
       } catch (err) {
         generation?.fail(err);
