@@ -63,7 +63,7 @@ struct SignInScreen: View {
                     }
                 }
 
-                Text("Photos are read and thrown away. Bower keeps no listings, no history and no images.")
+                Text("Photos are read and thrown away — bower keeps no images.")
                     .font(BowerFont.ui(11.5))
                     .foregroundStyle(theme.muted)
                     .multilineTextAlignment(.center)
