@@ -1,6 +1,6 @@
 export const metadata = { title: "bower — privacy" };
 
-const updated = "4 September 2026";
+const updated = "9 September 2026";
 
 export default function Privacy() {
   return (
@@ -31,6 +31,11 @@ export default function Privacy() {
           <strong>Your platform preferences and usage count.</strong> Which platforms you sell on,
           which one you prefer, and how many reads and searches you have used this month.
         </li>
+        <li>
+          <strong>Your item history.</strong> The listing text bower writes for you and any price
+          results are saved to your account so you can see what you have run. This is
+          <strong>text only &mdash; no photos</strong>, and it is removed when you delete your account.
+        </li>
       </ul>
 
       <h2>Where it goes</h2>
@@ -45,6 +50,11 @@ export default function Privacy() {
         <li>
           <strong>Vercel</strong> hosts bower&rsquo;s backend.
         </li>
+        <li>
+          <strong>Langfuse</strong> records how the app is performing &mdash; the listing text, token
+          counts and timings of each request, tied to your account id for support and debugging.
+          Your <strong>photos are never sent to Langfuse</strong>.
+        </li>
       </ul>
       <p>
         bower has no analytics, no advertising, and no tracking. It does not sell or share your
@@ -53,8 +63,10 @@ export default function Privacy() {
 
       <h2>What bower keeps</h2>
       <p>
-        No photos. No listings. No history. The only things that persist are your account and your
-        preferences, and they exist so you do not have to sign in and set up every time.
+        <strong>No photos, ever.</strong> Your images are read once and discarded. What bower keeps is
+        your account, your preferences, and a <strong>text history</strong> of the items you have run
+        and their prices &mdash; so you can look back at what you listed. All of it is kept until you
+        delete your account.
       </p>
 
       <h2>Deleting your account</h2>

@@ -65,7 +65,7 @@ struct SettingsScreen: View {
                 Task { await state.signOut(); signingOut = false }
             }
 
-            Text("Photos are read and discarded. Bower keeps no listings, no history and no images.")
+            Text("Photos are read and discarded — bower keeps no images. It does keep a text history of your items and their prices, cleared when you delete your account.")
                 .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
@@ -95,7 +95,7 @@ struct SettingsScreen: View {
             }
             Button("Keep it", role: .cancel) {}
         } message: {
-            Text("This removes your sign-in and your remaining allowance. There is nothing else to remove — bower keeps no photos or listings.")
+            Text("This removes your sign-in, your remaining allowance and your whole item history. Bower keeps no photos.")
         }
         .padding(.horizontal, 22)
         .padding(.top, 4)

@@ -161,7 +161,9 @@ the headers have gone. A read costs one, a search costs one, 40 a month.
   which App Store Connect requires at a public URL
   ([ADR-0001](./docs/adr/0001-ios-only-web-ui-removed.md),
   [ADR-0002](./docs/adr/0002-headless-nextjs-api-on-vercel.md)).
-- **No image storage.** Photos are sent in the request and not persisted.
+- **No image storage.** Photos are sent in the request and not persisted. (A
+  *text-only* item history — listings and price results, no photos — is stored
+  per user; see [ADR-0008](./docs/adr/0008-text-only-item-history.md).)
 
 ## The client
 
