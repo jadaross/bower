@@ -1,6 +1,7 @@
 import { withAuth } from "@/lib/auth";
 import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
 import { analyseListingStream } from "@/lib/llm/analyse";
+import { recordItem } from "@/lib/history";
 import { toStringStreamResponse } from "@/lib/streaming-text";
 import type { Platform, Tone } from "@/lib/types";
 
@@ -70,9 +71,19 @@ export const POST = withAuth(async (request, user) => {
   }
   if (!spend.allowed) return allowanceExhausted(spend);
 
+  const sessionId = request.headers.get("x-bower-session") ?? undefined;
   let stream: ReadableStream<string>;
   try {
-    stream = analyseListingStream({ photos: images, tone, platform, trace: { userId: user.id, route: "/api/analyse", sessionId: request.headers.get("x-bower-session") ?? undefined } });
+    stream = analyseListingStream({
+      photos: images,
+      tone,
+      platform,
+      trace: { userId: user.id, route: "/api/analyse", sessionId },
+      // Best-effort: record the analysed item for the user's history (#41).
+      onResult: (result) => {
+        void recordItem(user.token, { sessionId, listing: result.listing, preferredPlatform: platform });
+      },
+    });
   } catch (err) {
     await refundAllowance(user.id);
     const message = err instanceof Error ? err.message : "Unknown error";

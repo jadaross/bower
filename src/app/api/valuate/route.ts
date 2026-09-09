@@ -2,6 +2,7 @@ import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allow
 import { withAuth } from "@/lib/auth";
 import { getEnabledPlatforms } from "@/lib/profile";
 import { recommend, valuate } from "@/lib/valuation";
+import { recordValuation } from "@/lib/history";
 import type { ValuationItem } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -61,11 +62,19 @@ export const POST = withAuth(async (request, user) => {
 
   try {
     const valuation = await valuate(item, platforms);
-    // Null with a single Enabled Platform — there is nothing to choose
-    // between, and no comparison work runs. See ADR-0004.
+    const recommendation = recommend(valuation);
+    // Best-effort: attach the valuation to the item's history row (#41).
+    const sessionId = request.headers.get("x-bower-session") ?? undefined;
+    void recordValuation(user.token, sessionId, {
+      perPlatform: valuation.perPlatform,
+      query: valuation.query,
+      recommendation,
+    });
+    // Null recommendation with a single Enabled Platform — there is nothing to
+    // choose between, and no comparison work runs. See ADR-0004.
     return Response.json({
       ...valuation,
-      recommendation: recommend(valuation),
+      recommendation,
       allowance: { used: spend.used, limit: spend.limit, resets_at: spend.resetsAt },
     });
   } catch (err) {

@@ -15,6 +15,8 @@ export interface AnalyseInput {
   platform?: Platform;
   /** Observability (#37): caller + route for the Langfuse trace. Optional. */
   trace?: TraceContext;
+  /** History (#41): called with the parsed result so the route can persist it. */
+  onResult?: (result: AnalysisResult) => void;
 }
 
 const TONE_HINT: Record<Tone, string> = {
@@ -193,7 +195,9 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
     })
   );
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  return parseAnalysisResult(text);
+  const parsed = parseAnalysisResult(text);
+  input.onResult?.(parsed);
+  return parsed;
 }
 
 /**
@@ -245,7 +249,9 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             outputTokens = chunk.usage?.output_tokens ?? outputTokens;
           }
         }
-        const doc = JSON.stringify(parseAnalysisResult(buffer));
+        const parsed = parseAnalysisResult(buffer);
+        const doc = JSON.stringify(parsed);
+        input.onResult?.(parsed);
         generation?.finish({ output: doc, usage: { input: inputTokens, output: outputTokens } });
         controller.enqueue(doc);
         controller.close();
