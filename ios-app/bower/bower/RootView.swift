@@ -89,11 +89,40 @@ struct RootView: View {
                     ScrollView { body(for: state.screen) }
                         .scrollBounceBehavior(.basedOnSize)
                 }
+                .safeAreaInset(edge: .bottom) {
+                    if showsTabBar {
+                        BowerTabBar(active: activeTab) { selectTab($0) }
+                    }
+                }
             }
         }
         .environment(\.bower, theme)
         .animation(.snappy(duration: 0.22), value: state.screen)
         .task { await state.loadProfileIfSignedIn() }
+    }
+
+    private var showsTabBar: Bool {
+        switch state.screen {
+        case .capture, .listing, .history, .settings: return true
+        default: return false
+        }
+    }
+
+    private var activeTab: BowerTab? {
+        switch state.screen {
+        case .capture, .listing: return .home
+        case .history: return .history
+        case .settings: return .profile
+        default: return nil
+        }
+    }
+
+    private func selectTab(_ tab: BowerTab) {
+        switch tab {
+        case .home: state.screen = .capture
+        case .history: state.screen = .history
+        case .profile: state.screen = .settings
+        }
     }
 
     @ViewBuilder private var nav: some View {
@@ -110,22 +139,7 @@ struct RootView: View {
             BowerNav(title: "bower", large: true, wordmark: true) {
                 EmptyView()
             } trailing: {
-                HStack(spacing: 18) {
-                    Button { state.screen = .history } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 19))
-                            .foregroundStyle(theme.text)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("History")
-                    Button { state.screen = .settings } label: {
-                        Image(systemName: "gearshape")
-                            .font(.system(size: 20))
-                            .foregroundStyle(theme.text)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Settings")
-                }
+                EmptyView()
             }
         case .listing:
             BowerNav(title: "Price and listing") {
@@ -134,17 +148,9 @@ struct RootView: View {
                 NewItemButton { state.newItem() }
             }
         case .history:
-            BowerNav(title: "History", large: true) {
-                BackButton { state.screen = .capture }
-            } trailing: {
-                EmptyView()
-            }
+            BowerNav(title: "History", large: true)
         case .settings:
-            BowerNav(title: "Settings", large: true) {
-                BackButton { state.screen = .capture }
-            } trailing: {
-                EmptyView()
-            }
+            BowerNav(title: "Profile", large: true)
         }
     }
 
@@ -158,5 +164,46 @@ struct RootView: View {
         case .history:   HistoryScreen()
         case .settings:  SettingsScreen()
         }
+    }
+}
+
+// MARK: - Bottom tab bar
+
+enum BowerTab { case home, history, profile }
+
+/// Persistent bottom navigation. Home is the capture → listing flow, History
+/// the saved items, Profile the platforms/allowance/account settings.
+struct BowerTabBar: View {
+    let active: BowerTab?
+    let onSelect: (BowerTab) -> Void
+    @Environment(\.bower) private var theme
+
+    var body: some View {
+        HStack(spacing: 0) {
+            tab(.home, "house", "Home")
+            tab(.history, "clock.arrow.circlepath", "History")
+            tab(.profile, "person.crop.circle", "Profile")
+        }
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+        .background(theme.chrome)
+        .overlay(alignment: .top) { Hairline() }
+    }
+
+    private func tab(_ t: BowerTab, _ icon: String, _ label: String, soon: Bool = false) -> some View {
+        let on = active == t
+        return Button { if !soon { onSelect(t) } } label: {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 19))
+                Text(soon ? "Soon" : label).font(BowerFont.ui(10, weight: .medium))
+            }
+            .foregroundStyle(soon ? theme.muted.opacity(0.4) : (on ? theme.satin : theme.muted))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 2)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(soon)
+        .accessibilityLabel(soon ? "Scout, coming soon" : label)
     }
 }
