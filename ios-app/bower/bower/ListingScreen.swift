@@ -65,21 +65,21 @@ final class ListingModel {
     /// What to ask, and where. The server's Recommendation when there is one
     /// (more than one platform enabled); otherwise the midpoint of the single
     /// band, which is not a recommendation — there was nothing to choose
-    /// between — and wears no tag.
+    /// between — and wears no tag. Just the number and the place: the
+    /// reasoning is not shown.
     struct Ask: Equatable {
         let platform: Platform
         let listAt: Int
-        let reasoning: String
         let recommended: Bool
     }
 
     var ask: Ask? {
         if let r = recommendation {
-            return Ask(platform: r.platform, listAt: Int(r.listAt.rounded()), reasoning: r.reasoning, recommended: true)
+            return Ask(platform: r.platform, listAt: Int(r.listAt.rounded()), recommended: true)
         }
         let usable = bands.filter { !$0.value.comparables.isEmpty }
         guard usable.count == 1, let (p, b) = usable.first else { return nil }
-        return Ask(platform: p, listAt: Int(((b.low + b.high) / 2).rounded()), reasoning: "", recommended: false)
+        return Ask(platform: p, listAt: Int(((b.low + b.high) / 2).rounded()), recommended: false)
     }
 
     var current: PlatformListing? { edits[platform] ?? formatted[platform] }
@@ -351,11 +351,6 @@ private struct PriceSection: View {
                     .font(BowerFont.ui(16)).foregroundStyle(theme.text)
                 }
                 .padding(.top, 4)
-                if !ask.reasoning.isEmpty {
-                    Text(ask.reasoning)
-                        .font(BowerFont.ui(13.5)).foregroundStyle(theme.muted).lineSpacing(3)
-                        .padding(.top, 8)
-                }
                 if model.platform != ask.platform {
                     Button { model.switchPlatform(ask.platform) } label: {
                         HStack(spacing: 6) {

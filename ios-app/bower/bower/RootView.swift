@@ -41,7 +41,6 @@ struct BowerNav<Leading: View, Trailing: View>: View {
         .padding(.horizontal, large ? 20 : 12)
         .padding(.top, 4)
         .background(theme.chrome)
-        .overlay(alignment: .bottom) { Hairline() }
     }
 }
 
