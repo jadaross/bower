@@ -68,7 +68,8 @@ export async function formatListing(input: FormatInput): Promise<PlatformListing
       max_tokens: 1536,
       messages: [{ role: "user", content: buildPrompt(input) }],
     },
-    platformListingSchema
+    platformListingSchema,
+    "format"
   );
   if (!parsed.title || !parsed.description) {
     throw new Error("PlatformListing missing title or description");

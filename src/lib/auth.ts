@@ -1,4 +1,5 @@
 import { anonClient } from "@/lib/supabase";
+import { runWithRequestContext, scheduleFlush } from "@/lib/observability";
 
 /**
  * Bearer-token authentication. See ADR-0006.
@@ -93,6 +94,13 @@ export function withAuth(handler: AuthedHandler): (request: Request) => Promise<
   return async (request: Request) => {
     const result = await authenticate(request);
     if ("failure" in result) return unauthorised(result.failure);
-    return handler(request, result.user);
+    // Observability (#37): stash the caller + route so nested LLM calls can tag
+    // their traces, and flush spans after the response. No-op without keys.
+    const route = new URL(request.url).pathname;
+    return runWithRequestContext({ userId: result.user.id, route }, async () => {
+      const response = await handler(request, result.user);
+      scheduleFlush();
+      return response;
+    });
   };
 }

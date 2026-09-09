@@ -36,7 +36,8 @@ export async function refineListing(input: RefineInput): Promise<PlatformListing
       max_tokens: 1536,
       messages: [{ role: "user", content: buildPrompt(input) }],
     },
-    platformListingSchema
+    platformListingSchema,
+    "refine"
   );
   if (!parsed.title || !parsed.description) {
     throw new Error("Refined PlatformListing missing title or description");

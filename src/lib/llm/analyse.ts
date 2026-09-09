@@ -4,6 +4,7 @@ import { MODELS, anthropicClient } from "./client";
 import { parseAnalysisResult } from "./analyse-parse";
 import { jsonSchemaFormat } from "./structured";
 import { analysisResultSchema } from "./schemas";
+import { beginGeneration, observeGeneration, type TraceContext } from "@/lib/observability";
 export { parseAnalysisResult };
 
 export interface AnalyseInput {
@@ -12,6 +13,8 @@ export interface AnalyseInput {
   tone: Tone;
   /** When set, the prompt is platform-specific; otherwise the neutral prompt is used. */
   platform?: Platform;
+  /** Observability (#37): caller + route for the Langfuse trace. Optional. */
+  trace?: TraceContext;
 }
 
 const TONE_HINT: Record<Tone, string> = {
@@ -162,17 +165,32 @@ function buildPrompt(input: AnalyseInput): string {
  */
 export async function analyseListing(input: AnalyseInput): Promise<AnalysisResult> {
   const client = anthropicClient();
-  const message = await client.messages.create({
-    model: MODELS.analyse,
-    max_tokens: 4096,
-    output_config: { format: jsonSchemaFormat(analysisResultSchema) },
-    messages: [
-      {
-        role: "user",
-        content: [...imageBlocks(input.photos), { type: "text", text: buildPrompt(input) }],
-      },
-    ],
-  });
+  const messages = [
+    {
+      role: "user" as const,
+      content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input) }],
+    },
+  ];
+  const message = await observeGeneration(
+    {
+      name: "analyse",
+      model: MODELS.analyse,
+      input: messages,
+      modelParameters: { max_tokens: 4096 },
+      trace: input.trace,
+    },
+    () =>
+      client.messages.create({
+        model: MODELS.analyse,
+        max_tokens: 4096,
+        output_config: { format: jsonSchemaFormat(analysisResultSchema) },
+        messages,
+      }),
+    (m) => ({
+      output: m.content[0].type === "text" ? m.content[0].text : "",
+      usage: { input: m.usage?.input_tokens, output: m.usage?.output_tokens },
+    })
+  );
   const text = message.content[0].type === "text" ? message.content[0].text : "";
   return parseAnalysisResult(text);
 }
@@ -184,19 +202,28 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
 export function analyseListingStream(input: AnalyseInput): ReadableStream<string> {
   return new ReadableStream({
     async start(controller) {
+      let generation: ReturnType<typeof beginGeneration> = null;
       try {
         const client = anthropicClient();
+        const messages = [
+          {
+            role: "user" as const,
+            content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input) }],
+          },
+        ];
+        generation = beginGeneration({
+          name: "analyse",
+          model: MODELS.analyse,
+          input: messages,
+          modelParameters: { max_tokens: 4096 },
+          trace: input.trace,
+        });
         const stream = await client.messages.create({
           model: MODELS.analyse,
           max_tokens: 4096,
           stream: true,
           output_config: { format: jsonSchemaFormat(analysisResultSchema) },
-          messages: [
-            {
-              role: "user",
-              content: [...imageBlocks(input.photos), { type: "text", text: buildPrompt(input) }],
-            },
-          ],
+          messages,
         });
         // Buffer the model's text, then emit one normalized JSON document. The
         // model's template only produces `listing` and `tag_data`, so the raw
@@ -205,14 +232,23 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
         // the whole normalized document rather than token-by-token costs it
         // nothing and guarantees a complete contract.
         let buffer = "";
+        let inputTokens: number | undefined;
+        let outputTokens: number | undefined;
         for await (const chunk of stream) {
-          if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+          if (chunk.type === "message_start") {
+            inputTokens = chunk.message?.usage?.input_tokens;
+          } else if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
             buffer += chunk.delta.text;
+          } else if (chunk.type === "message_delta") {
+            outputTokens = chunk.usage?.output_tokens ?? outputTokens;
           }
         }
-        controller.enqueue(JSON.stringify(parseAnalysisResult(buffer)));
+        const doc = JSON.stringify(parseAnalysisResult(buffer));
+        generation?.finish({ output: doc, usage: { input: inputTokens, output: outputTokens } });
+        controller.enqueue(doc);
         controller.close();
       } catch (err) {
+        generation?.fail(err);
         controller.error(err);
       }
     },

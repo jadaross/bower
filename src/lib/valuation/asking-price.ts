@@ -3,6 +3,7 @@ import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
 import { platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "@/lib/llm/client";
 import { jsonSchemaFormat, parseStructuredContent } from "@/lib/llm/structured";
+import { beginGeneration } from "@/lib/observability";
 import { priceBandSchema } from "@/lib/llm/schemas";
 import type { ValuationProvider } from "./provider";
 
@@ -141,17 +142,34 @@ export const askingPriceProvider: ValuationProvider = {
       { role: "user", content: buildValuationPrompt(item, platform) },
     ];
 
-    let response = await client.messages.create({ ...REQUEST, messages });
+    const generation = beginGeneration({
+      name: "valuate",
+      model: MODELS.valuation,
+      input: messages,
+      modelParameters: { max_tokens: 4000 },
+    });
 
-    for (let i = 0; response.stop_reason === "pause_turn" && i < MAX_RESUMES; i++) {
-      messages.push({ role: "assistant", content: response.content });
-      response = await client.messages.create({ ...REQUEST, messages });
+    try {
+      let response = await client.messages.create({ ...REQUEST, messages });
+
+      for (let i = 0; response.stop_reason === "pause_turn" && i < MAX_RESUMES; i++) {
+        messages.push({ role: "assistant", content: response.content });
+        response = await client.messages.create({ ...REQUEST, messages });
+      }
+
+      if (response.stop_reason === "refusal") {
+        throw new Error("Valuation request was declined by the model");
+      }
+
+      const band = coerceBand(parseStructuredContent<RawBand>(response.content));
+      generation?.finish({
+        output: band,
+        usage: { input: response.usage?.input_tokens, output: response.usage?.output_tokens },
+      });
+      return band;
+    } catch (err) {
+      generation?.fail(err);
+      throw err;
     }
-
-    if (response.stop_reason === "refusal") {
-      throw new Error("Valuation request was declined by the model");
-    }
-
-    return coerceBand(parseStructuredContent<RawBand>(response.content));
   },
 };

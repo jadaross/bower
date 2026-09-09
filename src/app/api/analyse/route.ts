@@ -72,7 +72,7 @@ export const POST = withAuth(async (request, user) => {
 
   let stream: ReadableStream<string>;
   try {
-    stream = analyseListingStream({ photos: images, tone, platform });
+    stream = analyseListingStream({ photos: images, tone, platform, trace: { userId: user.id, route: "/api/analyse" } });
   } catch (err) {
     await refundAllowance(user.id);
     const message = err instanceof Error ? err.message : "Unknown error";

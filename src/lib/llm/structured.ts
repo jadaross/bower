@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { anthropicClient } from "./client";
+import { observeGeneration } from "@/lib/observability";
 
 /**
  * The structured-output boundary. Passing `output_config.format` constrains the
@@ -45,12 +46,33 @@ export async function createStructured<T>(
     "output_config" | "stream"
   > & { output_config?: Anthropic.Messages.OutputConfig },
   schema: Record<string, unknown>,
+  observationName?: string,
 ): Promise<T> {
   const client = anthropicClient();
-  const message = await client.messages.create({
-    ...params,
-    output_config: { ...params.output_config, format: jsonSchemaFormat(schema) },
-  });
+  const doCreate = () =>
+    client.messages.create({
+      ...params,
+      output_config: { ...params.output_config, format: jsonSchemaFormat(schema) },
+    });
+
+  // Trace the call as a Langfuse generation when an operation name is given
+  // (and keys are set); otherwise it is a plain create.
+  const message = observationName
+    ? await observeGeneration(
+        {
+          name: observationName,
+          model: String(params.model),
+          input: params.messages,
+          modelParameters: { max_tokens: params.max_tokens },
+        },
+        doCreate,
+        (m) => ({
+          output: textOfContent(m.content),
+          usage: { input: m.usage?.input_tokens, output: m.usage?.output_tokens },
+        })
+      )
+    : await doCreate();
+
   if (message.stop_reason === "refusal") {
     throw new Error("Model declined the request");
   }
@@ -58,4 +80,12 @@ export async function createStructured<T>(
     throw new Error("Structured response hit max_tokens before completing");
   }
   return parseStructuredContent<T>(message.content);
+}
+
+/** Concatenate the text blocks of a message — used for the traced output. */
+function textOfContent(content: Anthropic.Messages.ContentBlock[]): string {
+  return content
+    .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
 }
