@@ -27,6 +27,8 @@ import { langfuseSpanProcessor } from "@/instrumentation";
 export interface TraceContext {
   userId: string;
   route: string;
+  /** Groups one item's journey (analyse → format → refine → valuate) in Langfuse. */
+  sessionId?: string;
 }
 
 export function observabilityEnabled(): boolean {
@@ -46,7 +48,12 @@ function featureOf(route: string): string {
 export function withTrace<T>(trace: TraceContext | undefined, fn: () => T): T {
   if (!observabilityEnabled() || !trace) return fn();
   return propagateAttributes(
-    { userId: trace.userId, tags: [featureOf(trace.route)], metadata: { route: trace.route } },
+    {
+      userId: trace.userId,
+      tags: [featureOf(trace.route)],
+      metadata: { route: trace.route },
+      ...(trace.sessionId ? { sessionId: trace.sessionId } : {}),
+    },
     fn
   );
 }

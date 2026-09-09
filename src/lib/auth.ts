@@ -97,7 +97,8 @@ export function withAuth(handler: AuthedHandler): (request: Request) => Promise<
     // Observability (#37): stash the caller + route so nested LLM calls can tag
     // their traces, and flush spans after the response. No-op without keys.
     const route = new URL(request.url).pathname;
-    return runWithRequestContext({ userId: result.user.id, route }, async () => {
+    const sessionId = request.headers.get("x-bower-session") ?? undefined;
+    return runWithRequestContext({ userId: result.user.id, route, sessionId }, async () => {
       const response = await handler(request, result.user);
       scheduleFlush();
       return response;

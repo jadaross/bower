@@ -37,10 +37,24 @@ protocol BowerAPIClient: Sendable {
 
 // MARK: - Live
 
+/// Holds the current item's session id so analyse/format/refine/valuate on the
+/// same item share one id (sent as `x-bower-session`, used to group the item's
+/// journey in Langfuse). A reference box so every copy of the `BowerAPI` struct
+/// shares it; lock-guarded to stay `Sendable`.
+private final class SessionBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _value: String?
+    var value: String? {
+        get { lock.lock(); defer { lock.unlock() }; return _value }
+        set { lock.lock(); defer { lock.unlock() }; _value = newValue }
+    }
+}
+
 struct BowerAPI: BowerAPIClient {
     let baseURL: URL
     let session: any SessionProviding
     private let urlSession: URLSession
+    private let sessionBox = SessionBox()
 
     init(baseURL: URL = APIConfig.baseURL, session: any SessionProviding, urlSession: URLSession = .shared) {
         self.baseURL = baseURL
@@ -68,6 +82,9 @@ struct BowerAPI: BowerAPIClient {
         r.httpMethod = method
         r.timeoutInterval = timeout
         r.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let sid = sessionBox.value {
+            r.setValue(sid, forHTTPHeaderField: "x-bower-session")
+        }
         if let body {
             r.setValue("application/json", forHTTPHeaderField: "Content-Type")
             r.httpBody = try Self.encoder.encode(body)
@@ -179,6 +196,8 @@ struct BowerAPI: BowerAPIClient {
                  onTitle: @escaping @Sendable (String) -> Void) async throws -> AnalysisResult {
         struct Body: Encodable { let images: [String]; let tone: Tone; let platform: Platform? }
         let body = Body(images: images.map { $0.base64EncodedString() }, tone: tone, platform: platform)
+        // A new analyse starts a new item; format/refine/valuate reuse this id.
+        sessionBox.value = UUID().uuidString
 
         var req = try await request("/api/analyse", method: "POST", body: body)
         req.setValue("text/event-stream", forHTTPHeaderField: "Accept")
