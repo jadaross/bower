@@ -234,13 +234,13 @@ struct LaunchSplash: View {
     var body: some View {
         ZStack {
             Color(hex: 0x171A2E).ignoresSafeArea() // avenue
-            VStack(spacing: 20) {
-                Arch(size: 66, stroke: Color(hex: 0x7BA9E8), dot: Color(hex: 0xE8B547))
+            VStack(spacing: 24) {
+                Arch(size: 88, stroke: Color(hex: 0x7BA9E8), dot: Color(hex: 0xE8B547))
                 HStack(spacing: 0) {
                     Text("bower").foregroundStyle(Color(hex: 0xF2EEE6))
                     Text(".").foregroundStyle(Color(hex: 0xE1563C))
                 }
-                .font(BowerFont.serif(46))
+                .font(BowerFont.serif(62))
             }
         }
     }
