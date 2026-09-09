@@ -3,11 +3,14 @@ import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS } from "./client";
 import { createStructured } from "./structured";
 import { platformListingSchema } from "./schemas";
+import { recordScore } from "@/lib/observability";
 
 export interface RefineInput {
   platform: Platform;
   listing: PlatformListing;
   instructions: string[];
+  /** Receives the Langfuse trace id so the client can attach feedback (#42). */
+  onTraceId?: (traceId: string) => void;
 }
 
 function buildPrompt({ platform, listing, instructions }: RefineInput): string {
@@ -30,6 +33,7 @@ Rules:
 }
 
 export async function refineListing(input: RefineInput): Promise<PlatformListing> {
+  let traceId: string | undefined;
   const parsed = await createStructured<PlatformListing>(
     {
       model: MODELS.refine,
@@ -37,11 +41,20 @@ export async function refineListing(input: RefineInput): Promise<PlatformListing
       messages: [{ role: "user", content: buildPrompt(input) }],
     },
     platformListingSchema,
-    "refine"
+    "refine",
+    (id) => {
+      traceId = id;
+      input.onTraceId?.(id);
+    }
   );
   if (!parsed.title || !parsed.description) {
     throw new Error("Refined PlatformListing missing title or description");
   }
   parsed.hashtags = parsed.hashtags ?? [];
+  // Implicit negative signal: the listing needed rework. Value = how many
+  // nudge chips were applied this round. Named by source, not meaning.
+  if (traceId) {
+    recordScore({ traceId, name: "refine-requested", value: input.instructions.length, dataType: "NUMERIC" });
+  }
   return parsed;
 }

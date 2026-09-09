@@ -4,6 +4,7 @@ import {
   startActiveObservation,
   startObservation,
 } from "@langfuse/tracing";
+import { LangfuseClient } from "@langfuse/client";
 import { langfuseSpanProcessor } from "@/instrumentation";
 
 /**
@@ -33,6 +34,51 @@ export interface TraceContext {
 
 export function observabilityEnabled(): boolean {
   return !!(process.env.LANGFUSE_PUBLIC_KEY && process.env.LANGFUSE_SECRET_KEY);
+}
+
+let _scoreClient: LangfuseClient | null = null;
+function scoreClient(): LangfuseClient | null {
+  if (!observabilityEnabled()) return null;
+  if (!_scoreClient) {
+    try {
+      _scoreClient = new LangfuseClient();
+    } catch {
+      return null;
+    }
+  }
+  return _scoreClient;
+}
+
+export type ScoreDataType = "NUMERIC" | "BOOLEAN" | "CATEGORICAL";
+
+export interface ScoreInput {
+  traceId: string;
+  /** Named by source, not meaning, e.g. `copied` / `manual-edit` / `thumbs`. */
+  name: string;
+  value: number;
+  dataType?: ScoreDataType;
+  comment?: string;
+}
+
+/**
+ * Queue a Langfuse score on a trace. Fail-safe and a no-op without keys; the
+ * queued score is sent by the request-end flush (`scheduleFlush`), so a scoring
+ * failure can never affect the request.
+ */
+export function recordScore(input: ScoreInput): void {
+  const client = scoreClient();
+  if (!client) return;
+  try {
+    client.score.create({
+      traceId: input.traceId,
+      name: input.name,
+      value: input.value,
+      ...(input.dataType ? { dataType: input.dataType } : {}),
+      ...(input.comment ? { comment: input.comment } : {}),
+    });
+  } catch {
+    // Feedback is best-effort.
+  }
 }
 
 /** The per-feature tag, derived from the route ("/api/analyse" → "analyse"). */
@@ -78,12 +124,16 @@ export function scheduleFlush(): void {
   }
 }
 
-async function flushObservability(): Promise<void> {
-  if (!langfuseSpanProcessor) return;
+export async function flushObservability(): Promise<void> {
   try {
-    await langfuseSpanProcessor.forceFlush();
+    await langfuseSpanProcessor?.forceFlush();
   } catch {
     // Losing a trace must never surface to the user.
+  }
+  try {
+    await _scoreClient?.flush();
+  } catch {
+    // Losing a score must never surface to the user.
   }
 }
 
@@ -99,6 +149,8 @@ interface GenerationMeta {
   modelParameters?: Record<string, string | number>;
   /** Context for callers outside an active `withTrace` scope (streaming analyse). */
   trace?: TraceContext;
+  /** Receives the Langfuse trace id, so a caller can later attach feedback scores. */
+  onTraceId?: (traceId: string) => void;
 }
 
 interface GenerationResult {
@@ -187,6 +239,7 @@ export async function observeGeneration<T>(
         { model: meta.model, input: meta.input, modelParameters: meta.modelParameters },
         { asType: "generation" }
       );
+      try { meta.onTraceId?.(generation.traceId); } catch { /* ignore */ }
     } catch {
       return run();
     }
@@ -236,6 +289,7 @@ export function beginGeneration(meta: GenerationMeta): GenerationHandle | null {
         { asType: "generation" }
       )
     );
+    try { meta.onTraceId?.(generation.traceId); } catch { /* ignore */ }
   } catch {
     return null;
   }

@@ -47,6 +47,7 @@ export async function createStructured<T>(
   > & { output_config?: Anthropic.Messages.OutputConfig },
   schema: Record<string, unknown>,
   observationName?: string,
+  onTraceId?: (traceId: string) => void,
 ): Promise<T> {
   const client = anthropicClient();
   const doCreate = () =>
@@ -64,6 +65,7 @@ export async function createStructured<T>(
           model: String(params.model),
           input: params.messages,
           modelParameters: { max_tokens: params.max_tokens },
+          onTraceId,
         },
         doCreate,
         (m) => ({

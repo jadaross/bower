@@ -31,8 +31,9 @@ export const POST = withAuth(async (request) => {
   }
 
   try {
-    const result = await refineListing({ platform, listing, instructions });
-    return Response.json(result);
+    let traceId: string | undefined;
+    const result = await refineListing({ platform, listing, instructions, onTraceId: (id) => { traceId = id; } });
+    return Response.json({ ...result, trace_id: traceId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Refine request failed: ${message}` }, { status: 500 });

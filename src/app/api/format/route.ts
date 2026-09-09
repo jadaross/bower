@@ -31,8 +31,9 @@ export const POST = withAuth(async (request) => {
   }
 
   try {
-    const result = await formatListing({ listing, platform, tone });
-    return Response.json(result);
+    let traceId: string | undefined;
+    const result = await formatListing({ listing, platform, tone, onTraceId: (id) => { traceId = id; } });
+    return Response.json({ ...result, trace_id: traceId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Format request failed: ${message}` }, { status: 500 });

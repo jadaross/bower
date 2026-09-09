@@ -8,6 +8,8 @@ export interface FormatInput {
   listing: Listing;
   platform: Platform;
   tone: Tone;
+  /** Receives the Langfuse trace id so the client can attach feedback (#42). */
+  onTraceId?: (traceId: string) => void;
 }
 
 // Applies to every platform. The line between "a person who writes well" and
@@ -69,7 +71,8 @@ export async function formatListing(input: FormatInput): Promise<PlatformListing
       messages: [{ role: "user", content: buildPrompt(input) }],
     },
     platformListingSchema,
-    "format"
+    "format",
+    input.onTraceId
   );
   if (!parsed.title || !parsed.description) {
     throw new Error("PlatformListing missing title or description");
