@@ -35,6 +35,67 @@ flowchart TD
     style Recommend fill:#dcfce7,stroke:#16a34a
 ```
 
+## Inputs, model calls and outputs
+
+The same four calls, drawn by what each one takes in, which model it runs, and
+the shape it returns. Every LLM call returns schema-constrained JSON
+(`output_config.format`) and is traced as a Langfuse generation.
+
+```mermaid
+flowchart TB
+    classDef sonnet fill:#e0e7ff,stroke:#2B3AA8,color:#1B1A20;
+    classDef haiku fill:#fef3c7,stroke:#E8B547,color:#1B1A20;
+    classDef pure fill:#dcfce7,stroke:#3F6B4A,color:#1B1A20;
+    classDef io fill:#FFFDF8,stroke:#E5DECE,color:#1B1A20;
+
+    %% analyse
+    subgraph ANALYSE["POST /api/analyse · spends 1 unit"]
+        direction TB
+        aIn["Inputs:<br/>• Photos (base64)<br/>• tone<br/>• Preferred Platform"]:::io
+        aLLM["Sonnet 5 · streaming<br/>structured output → AnalysisResult"]:::sonnet
+        aOut["Outputs:<br/>• tag_data (label OCR)<br/>• Neutral Listing<br/>&nbsp;&nbsp;(+ search-free price guess)<br/>• that platform's form fields"]:::io
+        aIn --> aLLM --> aOut
+    end
+
+    %% format
+    subgraph FORMAT["POST /api/format"]
+        direction TB
+        fIn["Inputs:<br/>• Neutral Listing<br/>• platform + tone"]:::io
+        fLLM["Haiku 4.5<br/>structured output → PlatformListing"]:::haiku
+        fOut["Output:<br/>PlatformListing<br/>(title, description, hashtags, fields)"]:::io
+        fIn --> fLLM --> fOut
+    end
+
+    %% refine
+    subgraph REFINE["POST /api/refine"]
+        direction TB
+        rIn["Inputs:<br/>• current PlatformListing<br/>• chip instructions"]:::io
+        rLLM["Haiku 4.5<br/>structured output → PlatformListing"]:::haiku
+        rOut["Output:<br/>rewritten PlatformListing"]:::io
+        rIn --> rLLM --> rOut
+    end
+
+    %% valuate
+    subgraph VALUATE["POST /api/valuate · spends 1 unit"]
+        direction TB
+        vIn["Inputs:<br/>• ValuationItem<br/>• Enabled Platforms (from profile,<br/>&nbsp;&nbsp;never the request body)"]:::io
+        vLLM["Sonnet 5 + web_search<br/>1 call per Enabled Platform<br/>structured output → PriceBand"]:::sonnet
+        vOut["Output:<br/>Price Band per platform<br/>(+ Comparables)"]:::io
+        vRec["recommend() · pure fn, no LLM"]:::pure
+        vFinal["Output:<br/>Recommendation + bands"]:::io
+        vIn --> vLLM --> vOut --> vRec --> vFinal
+    end
+
+    %% how the screens move between the calls
+    LIST(["Listing screen<br/>(what the user copies)"]):::io
+    aOut -->|"first listing, shown as-is"| LIST
+    aOut -->|"tap 'get a real price'"| vIn
+    LIST -->|"switch platform / tone"| fIn
+    fOut --> LIST
+    LIST -->|"tap nudge chips"| rIn
+    rOut --> LIST
+```
+
 ## API routes
 
 | Route | Purpose | LLM |
