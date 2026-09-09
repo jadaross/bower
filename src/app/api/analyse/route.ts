@@ -81,7 +81,7 @@ export const POST = withAuth(async (request, user) => {
       trace: { userId: user.id, route: "/api/analyse", sessionId },
       // Best-effort: record the analysed item for the user's history (#41).
       onResult: (result) => {
-        void recordItem(user.token, { sessionId, listing: result.listing, preferredPlatform: platform });
+        void recordItem(user.token, { userId: user.id, sessionId, listing: result.listing, preferredPlatform: platform });
       },
     });
   } catch (err) {

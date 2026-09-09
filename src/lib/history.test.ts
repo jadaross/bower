@@ -20,11 +20,12 @@ beforeEach(() => {
 
 describe("recordItem", () => {
   it("inserts the listing essentials as the caller, tagged with the session", async () => {
-    await recordItem("token-abc", { sessionId: "sess-1", listing, preferredPlatform: "vinted" });
+    await recordItem("token-abc", { userId: "u-1", sessionId: "sess-1", listing, preferredPlatform: "vinted" });
     expect(userClient).toHaveBeenCalledWith("token-abc");
     expect(from).toHaveBeenCalledWith("item_history");
     const row = insert.mock.calls.at(-1)![0];
     expect(row).toMatchObject({
+      user_id: "u-1",
       session_id: "sess-1",
       brand: listing.brand,
       title: listing.title,
@@ -36,7 +37,7 @@ describe("recordItem", () => {
   it("is best-effort — a returned error does not throw", async () => {
     insert.mockResolvedValueOnce({ error: { message: "nope" } });
     await expect(
-      recordItem("t", { sessionId: "s", listing, preferredPlatform: "depop" })
+      recordItem("t", { userId: "u", sessionId: "s", listing, preferredPlatform: "depop" })
     ).resolves.toBeUndefined();
   });
 });

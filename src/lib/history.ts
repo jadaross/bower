@@ -41,13 +41,16 @@ const TABLE = "item_history";
 /** Record an analysed item. Best-effort. */
 export async function recordItem(
   token: string,
-  params: { sessionId?: string; listing: Listing; preferredPlatform?: Platform }
+  params: { userId: string; sessionId?: string; listing: Listing; preferredPlatform?: Platform }
 ): Promise<void> {
-  const { sessionId, listing, preferredPlatform } = params;
+  const { userId, sessionId, listing, preferredPlatform } = params;
   try {
     const { error } = await userClient(token)
       .from(TABLE)
       .insert({
+        // The row's owner. RLS checks auth.uid() = user_id, and the column is
+        // NOT NULL — without this every insert failed and no history was kept.
+        user_id: userId,
         session_id: sessionId ?? null,
         brand: listing.brand,
         clothing_type: listing.clothing_type,
