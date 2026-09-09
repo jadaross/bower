@@ -75,6 +75,8 @@ struct RootView: View {
     @Environment(AppState.self) private var state
     @Environment(\.colorScheme) private var scheme
 
+    @State private var showSplash = true
+
     private var theme: BowerTheme { .of(scheme) }
 
     var body: some View {
@@ -96,9 +98,24 @@ struct RootView: View {
                 }
             }
         }
+        .overlay {
+            if showSplash {
+                LaunchSplash().transition(.opacity).zIndex(10)
+            }
+        }
         .environment(\.bower, theme)
         .animation(.snappy(duration: 0.22), value: state.screen)
-        .task { await state.loadProfileIfSignedIn() }
+        .task {
+            await state.loadProfileIfSignedIn()
+            hideSplashSoon()
+        }
+    }
+
+    private func hideSplashSoon() {
+        Task {
+            try? await Task.sleep(for: .seconds(0.9))
+            withAnimation(.easeOut(duration: 0.35)) { showSplash = false }
+        }
     }
 
     private var showsTabBar: Bool {
@@ -205,5 +222,26 @@ struct BowerTabBar: View {
         .buttonStyle(.plain)
         .disabled(soon)
         .accessibilityLabel(soon ? "Scout, coming soon" : label)
+    }
+}
+
+// MARK: - Launch splash
+
+/// The branded page shown for a beat on every open, then faded away. Mirrors
+/// the native launch screen (avenue ground, the arch, the italic wordmark) so
+/// the hand-off is seamless.
+struct LaunchSplash: View {
+    var body: some View {
+        ZStack {
+            Color(hex: 0x171A2E).ignoresSafeArea() // avenue
+            VStack(spacing: 20) {
+                Arch(size: 66, stroke: Color(hex: 0x7BA9E8), dot: Color(hex: 0xE8B547))
+                HStack(spacing: 0) {
+                    Text("bower").foregroundStyle(Color(hex: 0xF2EEE6))
+                    Text(".").foregroundStyle(Color(hex: 0xE1563C))
+                }
+                .font(BowerFont.serif(46))
+            }
+        }
     }
 }
