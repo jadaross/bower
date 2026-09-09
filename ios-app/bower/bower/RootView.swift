@@ -254,21 +254,32 @@ struct BowerTabBar: View {
 
 // MARK: - Launch splash
 
+/// The arch over the wordmark, exactly as it appears on the launch screen.
+/// The native launch image is rendered FROM this view (see
+/// `LaunchImageTests`), so the hand-off from iOS's launch screen to the
+/// SwiftUI splash is pixel for pixel: same view, same fonts, same size.
+/// Colours are literal rather than themed because the splash is always on
+/// avenue, in both appearances.
+struct LaunchMark: View {
+    var body: some View {
+        VStack(spacing: 24) {
+            Arch(size: 88, stroke: Color(hex: 0x7BA9E8), dot: Color(hex: 0xE8B547))
+            HStack(spacing: 0) {
+                Text("bower").foregroundStyle(Color(hex: 0xF2EEE6))
+                Text(".").foregroundStyle(Color(hex: 0xE1563C))
+            }
+            .font(BowerFont.serif(62))
+        }
+    }
+}
+
 /// The branded page shown for a beat on every open, then faded away. Mirrors
-/// the native launch screen (avenue ground, the arch, the italic wordmark) so
-/// the hand-off is seamless.
+/// the native launch screen so the hand-off is seamless.
 struct LaunchSplash: View {
     var body: some View {
         ZStack {
             Color(hex: 0x171A2E).ignoresSafeArea() // avenue
-            VStack(spacing: 24) {
-                Arch(size: 88, stroke: Color(hex: 0x7BA9E8), dot: Color(hex: 0xE8B547))
-                HStack(spacing: 0) {
-                    Text("bower").foregroundStyle(Color(hex: 0xF2EEE6))
-                    Text(".").foregroundStyle(Color(hex: 0xE1563C))
-                }
-                .font(BowerFont.serif(62))
-            }
+            LaunchMark()
         }
     }
 }
