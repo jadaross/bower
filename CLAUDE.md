@@ -113,6 +113,15 @@ That guess is never a Price Band; only `/api/valuate` produces those, and only w
 Comparables (ADR-0005). There is deliberately no photo-quality section: nothing
 displayed it and it delayed the title by a third of the output.
 
+The first field of the document is `subject`: `clothing`, `not_clothing`,
+`explicit` or `unsafe`. Anything but `clothing` ends the stream at once with a
+`{"rejected": reason}` frame (see `streaming-text.ts`), the unit is refunded, and
+the client shows one of two messages: "we only do clothing" or "that was
+inappropriate". A model refusal is reported the same way as `refused`. The app
+also runs Apple's on-device `SensitiveContentAnalysis` before a photo joins the
+pile, but that only works when the user has Sensitive Content Warning on in iOS
+Settings, so the server's check is the real one.
+
 The client asks `analyse` for the **Preferred Platform**, so the listing comes back
 in that voice with that platform's `fields`, and the first listing shows with no
 `format` call. `format` runs only when the user switches platform or tone. `refine`

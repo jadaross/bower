@@ -1,4 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { StreamRejectedError, type StreamRejection } from "./streaming-text";
+
+function source2(): ReadableStream<string | StreamRejection> {
+  return new ReadableStream({
+    start(c) {
+      c.enqueue({ rejected: "explicit" });
+      c.close();
+    },
+  });
+}
 import { readStringStream, toStringStreamResponse } from "./streaming-text";
 
 function streamOf(chunks: string[]): ReadableStream<string> {
@@ -37,6 +47,18 @@ describe("streaming-text", () => {
     const chunks = payload.match(/.{1,3}/g) ?? [];
     const res = toStringStreamResponse(streamOf(chunks));
     expect(JSON.parse(await readStringStream(res))).toEqual({ listing: { brand: "Carhartt" } });
+  });
+
+  it("carries a rejection frame through as a typed error", async () => {
+    const source = new ReadableStream<string | StreamRejection>({
+      start(c) {
+        c.enqueue("{\"subject\":\"not_clothing\"");
+        c.enqueue({ rejected: "not_clothing" });
+        c.close();
+      },
+    });
+    await expect(readStringStream(toStringStreamResponse(source))).rejects.toThrow(StreamRejectedError);
+    await expect(readStringStream(toStringStreamResponse(source2()))).rejects.toMatchObject({ reason: "explicit" });
   });
 
   it("propagates an error thrown inside the source stream", async () => {

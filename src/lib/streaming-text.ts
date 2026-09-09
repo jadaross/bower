@@ -17,11 +17,27 @@ const DONE = "[DONE]";
 const DATA_PREFIX = "data: ";
 
 /**
+ * The one non-text frame: the server stopped the read on purpose and says
+ * why. Sent as a JSON object where every other frame is a JSON string, so a
+ * consumer can tell them apart by shape. The stream ends after it.
+ */
+export interface StreamRejection {
+  rejected: string;
+}
+
+export class StreamRejectedError extends Error {
+  constructor(readonly reason: string) {
+    super(`Stream rejected: ${reason}`);
+    this.name = "StreamRejectedError";
+  }
+}
+
+/**
  * Wrap a stream of text fragments as an SSE `Response`. The returned Response
  * carries `Content-Type: text/event-stream` and `Cache-Control: no-cache` —
  * callers should return it directly.
  */
-export function toStringStreamResponse(input: ReadableStream<string>): Response {
+export function toStringStreamResponse(input: ReadableStream<string | StreamRejection>): Response {
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -30,6 +46,8 @@ export function toStringStreamResponse(input: ReadableStream<string>): Response 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          // A string fragment and a rejection object serialise the same way;
+          // the consumer tells them apart by which one parses.
           controller.enqueue(encoder.encode(`${DATA_PREFIX}${JSON.stringify(value)}\n\n`));
         }
         controller.enqueue(encoder.encode(`${DATA_PREFIX}${DONE}\n\n`));
@@ -72,12 +90,19 @@ export async function readStringStream(res: Response): Promise<string> {
       if (!line.startsWith(DATA_PREFIX)) continue;
       const payload = line.slice(DATA_PREFIX.length);
       if (payload === DONE) return buffer;
+      let parsed: unknown;
       try {
-        buffer += JSON.parse(payload) as string;
+        parsed = JSON.parse(payload);
       } catch {
-        // malformed frame — skip
+        continue; // malformed frame — skip
       }
+      if (typeof parsed === "string") buffer += parsed;
+      else if (isRejection(parsed)) throw new StreamRejectedError(parsed.rejected);
     }
   }
   return buffer;
+}
+
+function isRejection(value: unknown): value is StreamRejection {
+  return typeof value === "object" && value !== null && typeof (value as StreamRejection).rejected === "string";
 }

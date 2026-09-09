@@ -2,10 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/auth", async () => (await import("@/test/auth-mock")).authMock());
 import { analysisResult } from "@/test/fixtures";
-import { readStringStream } from "@/lib/streaming-text";
+import { readStringStream, StreamRejectedError } from "@/lib/streaming-text";
 
 const analyseListingStream = vi.fn();
-vi.mock("@/lib/llm/analyse", () => ({ analyseListingStream }));
+vi.mock("@/lib/llm/analyse", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/llm/analyse")>()),
+  analyseListingStream,
+}));
+const { AnalyseRejected } = await import("@/lib/llm/analyse");
 
 const spendAllowance = vi.fn();
 const refundAllowance = vi.fn();
@@ -83,6 +87,21 @@ describe("POST /api/analyse — the meter", () => {
     analyseListingStream.mockReturnValue(failingStream());
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     await expect(readStringStream(res)).rejects.toThrow();
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id");
+  });
+
+  it("refunds a rejected read and tells the client why", async () => {
+    analyseListingStream.mockReturnValue(
+      new ReadableStream<string>({
+        start(controller) {
+          controller.enqueue('{"subject": "explicit"');
+          controller.error(new AnalyseRejected("explicit"));
+        },
+      })
+    );
+    const res = await POST(post({ images: [PHOTO], tone: "casual" }));
+    expect(res.status).toBe(200);
+    await expect(readStringStream(res)).rejects.toThrow(StreamRejectedError);
     expect(refundAllowance).toHaveBeenCalledWith("test-user-id");
   });
 

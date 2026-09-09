@@ -254,10 +254,13 @@ struct BowerAPI: BowerAPIClient {
     /// The wire format is defined once, in `src/lib/streaming-text.ts`: each
     /// frame is `data: ` followed by a JSON-encoded *string* fragment, and a
     /// `[DONE]` sentinel closes the stream. Fragments are concatenated into one
-    /// document — there are no structured events. Two things are read early by
-    /// pattern in the growing buffer: the listing title, as soon as its closing
-    /// quote has arrived, and the `tag_data` key, which means the listing has
-    /// closed. Malformed frames are skipped, matching the reference consumer.
+    /// document — there are no structured events, with one exception: a frame
+    /// whose payload is an object `{"rejected": reason}` means the server
+    /// stopped the read on purpose, and the stream ends there. Two things are
+    /// read early by pattern in the growing buffer: the listing title, as soon
+    /// as its closing quote has arrived, and the `tag_data` key, which means
+    /// the listing has closed. Malformed frames are skipped, matching the
+    /// reference consumer.
     private func readStringStream(_ req: URLRequest,
                                   onProgress: (@Sendable (AnalyseProgress) -> Void)? = nil) async throws -> String {
         let (bytes, response): (URLSession.AsyncBytes, URLResponse)
@@ -283,7 +286,11 @@ struct BowerAPI: BowerAPIClient {
                 guard line.hasPrefix("data: ") else { continue }
                 let payload = String(line.dropFirst(6))
                 if payload == "[DONE]" { return assembled }
-                guard let fragment = try? Self.decoder.decode(String.self, from: Data(payload.utf8)) else { continue }
+                let bytes = Data(payload.utf8)
+                if let rejection = try? Self.decoder.decode(RejectionFrame.self, from: bytes) {
+                    throw APIError.rejected(AnalyseRejection(wire: rejection.rejected))
+                }
+                guard let fragment = try? Self.decoder.decode(String.self, from: bytes) else { continue }
                 assembled += fragment
                 if !titleSeen, let title = Self.earlyTitle(in: assembled) {
                     titleSeen = true
@@ -294,11 +301,15 @@ struct BowerAPI: BowerAPIClient {
                     onProgress?(.finishing)
                 }
             }
+        } catch let error as APIError {
+            throw error
         } catch {
             throw APIError.transport(error)
         }
         return assembled
     }
+
+    private struct RejectionFrame: Decodable { let rejected: String }
 
     /// The first complete `"title": "…"` in a partial JSON document, unescaped.
     /// Nil until the closing quote has streamed in.

@@ -1,4 +1,4 @@
-import type { AnalysisResult, Platform, Tone } from "@/lib/types";
+import { ANALYSIS_SUBJECTS, type AnalysisSubject, type AnalysisResult, Platform, Tone } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "./client";
 import { parseAnalysisResult } from "./analyse-parse";
@@ -41,6 +41,7 @@ function jsonShape(platform?: Platform): string {
     ]`
     : "";
   return `{
+  "subject": "clothing",
   "listing": {
     "title": "",
     "brand": "",
@@ -74,6 +75,13 @@ function jsonShape(platform?: Platform): string {
 }
 
 const COMMON_RULES = `Rules:
+
+SUBJECT (write this field first, before anything else):
+- "clothing": at least one photo shows a garment, shoes, a bag or an accessory that could be sold secondhand. This is the normal case; a tag, label or detail shot on its own still counts.
+- "not_clothing": none of the photos show such an item (a room, a pet, a car, a document, a screenshot, food).
+- "explicit": any photo contains nudity or sexual content, whatever else is in frame.
+- "unsafe": any photo contains graphic violence, gore, or other content that should not be described.
+When the subject is anything but "clothing", fill the rest of the document with empty strings, nulls, zeros and empty arrays. Do not describe the photo.
 
 STYLE:
 - Never use an em dash (—) anywhere in the title or description. Use a comma, a full stop, or a hyphen instead.
@@ -204,8 +212,32 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
 }
 
 /**
+ * The read was stopped on purpose: the photos are not of clothing, or the
+ * model declined them. `subject` is one of `AnalysisSubject` minus "clothing",
+ * or "refused" when the model returned no document at all.
+ */
+export class AnalyseRejected extends Error {
+  constructor(readonly subject: Exclude<AnalysisSubject, "clothing"> | "refused") {
+    super(`Analyse rejected: ${subject}`);
+    this.name = "AnalyseRejected";
+  }
+}
+
+/** The subject, once its closing quote has streamed in. */
+export function earlySubject(buffer: string): AnalysisSubject | undefined {
+  const m = buffer.match(/"subject"\s*:\s*"([a-z_]+)"/);
+  if (!m) return undefined;
+  return (ANALYSIS_SUBJECTS as readonly string[]).includes(m[1]) ? (m[1] as AnalysisSubject) : undefined;
+}
+
+/**
  * Streams raw text deltas from the model. The full concatenated text is the JSON
  * payload — consumers buffer until done, then call parseAnalysisResult.
+ *
+ * The first field is the subject. Anything but "clothing" ends the stream with
+ * an `AnalyseRejected` before a listing is written, and a model refusal (no
+ * document at all) is reported the same way — so the route can hand the unit
+ * back and tell the client why, instead of a decode failure downstream.
  */
 export function analyseListingStream(input: AnalyseInput): ReadableStream<string> {
   return new ReadableStream({
@@ -246,6 +278,8 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
         controller.enqueue(analyseTraceId ? `{"trace_id":${JSON.stringify(analyseTraceId)},` : "{");
         let buffer = "";
         let strippedOpen = false;
+        let subjectSeen = false;
+        let stopReason: string | null | undefined;
         let inputTokens: number | undefined;
         let outputTokens: number | undefined;
         for await (const chunk of stream) {
@@ -253,6 +287,19 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             inputTokens = chunk.message?.usage?.input_tokens;
           } else if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
             buffer += chunk.delta.text;
+            if (!subjectSeen) {
+              const subject = earlySubject(buffer);
+              if (subject) {
+                subjectSeen = true;
+                if (subject !== "clothing") {
+                  // Stop the model here: nothing after this field is wanted.
+                  stream.controller.abort();
+                  generation?.finish({ output: JSON.stringify({ rejected: subject }), usage: { input: inputTokens } });
+                  generation = null;
+                  throw new AnalyseRejected(subject);
+                }
+              }
+            }
             let out = chunk.delta.text;
             if (!strippedOpen) {
               const idx = out.indexOf("{");
@@ -263,7 +310,13 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             if (out) controller.enqueue(out);
           } else if (chunk.type === "message_delta") {
             outputTokens = chunk.usage?.output_tokens ?? outputTokens;
+            stopReason = chunk.delta?.stop_reason ?? stopReason;
           }
+        }
+        if (stopReason === "refusal") {
+          generation?.finish({ output: JSON.stringify({ rejected: "refused" }), usage: { input: inputTokens, output: outputTokens } });
+          generation = null;
+          throw new AnalyseRejected("refused");
         }
         const parsed = parseAnalysisResult(buffer);
         input.onResult?.(parsed);

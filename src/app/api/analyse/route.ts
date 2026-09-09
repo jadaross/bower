@@ -1,8 +1,8 @@
 import { withAuth } from "@/lib/auth";
 import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
-import { analyseListingStream } from "@/lib/llm/analyse";
+import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
-import { toStringStreamResponse } from "@/lib/streaming-text";
+import { toStringStreamResponse, type StreamRejection } from "@/lib/streaming-text";
 import type { Platform, Tone } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -19,10 +19,14 @@ interface RequestBody {
  * Wraps the model's stream so a failure part-way through hands the unit back.
  * A read the user never received must not cost them anything — the same rule
  * valuate applies, but the failure here can surface after headers have gone.
+ *
+ * A deliberate stop (`AnalyseRejected`: not clothing, or declined) is not a
+ * failure. The unit still goes back, but the stream ends cleanly with a
+ * rejection frame naming the reason, so the client can say the right thing.
  */
-function refundOnError(input: ReadableStream<string>, userId: string): ReadableStream<string> {
+function refundOnError(input: ReadableStream<string>, userId: string): ReadableStream<string | StreamRejection> {
   const reader = input.getReader();
-  return new ReadableStream<string>({
+  return new ReadableStream<string | StreamRejection>({
     async pull(controller) {
       try {
         const { done, value } = await reader.read();
@@ -30,7 +34,12 @@ function refundOnError(input: ReadableStream<string>, userId: string): ReadableS
         else controller.enqueue(value);
       } catch (err) {
         await refundAllowance(userId);
-        controller.error(err);
+        if (err instanceof AnalyseRejected) {
+          controller.enqueue({ rejected: err.subject });
+          controller.close();
+        } else {
+          controller.error(err);
+        }
       }
     },
     cancel(reason) {

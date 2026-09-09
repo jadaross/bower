@@ -10,7 +10,7 @@ struct AnalysingScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
 
-    enum Phase: Equatable { case reading, failed, allowance(AllowanceState) }
+    enum Phase: Equatable { case reading, failed, allowance(AllowanceState), rejected(AnalyseRejection) }
 
     /// Left to right. `sent` is true the moment the request is built; the rest
     /// arrive from the stream.
@@ -28,6 +28,7 @@ struct AnalysingScreen: View {
             case .reading:   reading
             case .failed:    failed
             case .allowance(let a): allowance(a)
+            case .rejected(let r): rejected(r)
             }
         }
         .onAppear(perform: start)
@@ -105,6 +106,8 @@ struct AnalysingScreen: View {
                 phase = .allowance(a)
             } catch APIError.notSignedIn, APIError.sessionInvalid {
                 await state.signOut()
+            } catch APIError.rejected(let reason) {
+                phase = .rejected(reason)
             } catch {
                 phase = .failed
             }
@@ -131,6 +134,19 @@ struct AnalysingScreen: View {
         ) {
             Button { start() } label: { primaryLabel("Try again", fg: theme.avenue, bg: .white) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white, bg: .white.opacity(0.12)) }
+        }
+    }
+
+    // MARK: Rejected
+
+    /// The server looked and said no: not clothes, or not something it will
+    /// describe. Nothing was charged. The photos are cleared on the way back,
+    /// because there is nothing to price in them.
+    private func rejected(_ r: AnalyseRejection) -> some View {
+        fullBleed(badge: "!", badgeColor: theme.coral, title: r.title, body: r.body) {
+            Button { state.photos = []; state.screen = .capture } label: {
+                primaryLabel("Back to photos", fg: theme.avenue, bg: .white)
+            }
         }
     }
 

@@ -68,7 +68,16 @@ export interface PlatformListing {
  * OCR follows. There is no photo quality section: nothing displayed it, and it
  * cost a third of the output.
  */
+/**
+ * What the photos are of, judged before anything else is written. Only
+ * "clothing" earns a listing; the rest stop the read before it costs anything.
+ * Streamed as the very first field so the server can cut the stream at once.
+ */
+export type AnalysisSubject = "clothing" | "not_clothing" | "explicit" | "unsafe";
+export const ANALYSIS_SUBJECTS: readonly AnalysisSubject[] = ["clothing", "not_clothing", "explicit", "unsafe"];
+
 export interface AnalysisResult {
+  subject?: AnalysisSubject;
   tag_data: TagData;
   listing: Listing;
 }

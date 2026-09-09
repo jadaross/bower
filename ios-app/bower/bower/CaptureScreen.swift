@@ -18,6 +18,8 @@ struct CaptureScreen: View {
     @State private var importing = false
     @State private var showTips = false
     @State private var showHelp = false
+    /// Set when the on-device check turned a photo away. Cleared on the next add.
+    @State private var turnedAway = false
 
     private var empty: Bool { state.photos.isEmpty }
     private var covered: [SuggestedShot] { SuggestedShot.allCases.filter { shot in state.photos.contains { $0.shot == shot } } }
@@ -62,8 +64,9 @@ struct CaptureScreen: View {
             CameraPicker(
                 onCapture: { image in
                     showCamera = false
-                    add([image], shot: pendingShot)
+                    let shot = pendingShot
                     pendingShot = nil
+                    Task { await add([image], shot: shot) }
                 },
                 onCancel: { showCamera = false; pendingShot = nil }
             )
@@ -142,6 +145,7 @@ struct CaptureScreen: View {
             captureZone
             BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
             if importing { preparing }
+            if turnedAway { turnedAwayNote }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 22)
@@ -185,6 +189,7 @@ struct CaptureScreen: View {
             pile
             checklist
             if importing { preparing }
+            if turnedAway { turnedAwayNote }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 16)
@@ -276,6 +281,24 @@ struct CaptureScreen: View {
         .overlay(alignment: .top) { Hairline() }
     }
 
+    private var turnedAwayNote: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("!")
+                .font(BowerFont.ui(11, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 16, height: 16)
+                .background(theme.coral)
+                .clipShape(Circle())
+            Text("Sorry, that was inappropriate. It wasn't added.")
+                .font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(theme.coral.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
     private var preparing: some View {
         HStack(spacing: 8) {
             ProgressView().tint(theme.satin)
@@ -361,11 +384,17 @@ struct CaptureScreen: View {
         }
     }
 
-    private func add(_ images: [UIImage], shot: SuggestedShot?) {
+    /// Runs the on-device check on each photo before it joins the pile. A
+    /// flagged photo is dropped and said so, once; the rest go in as normal.
+    private func add(_ images: [UIImage], shot: SuggestedShot?) async {
+        turnedAway = false
         var batch: [CapturedPhoto] = []
-        for image in images { if let p = PhotoPrep.prepare(image) { batch.append(p) } }
+        for image in images {
+            if await SensitiveContent.isSensitive(image) { turnedAway = true; continue }
+            if let p = PhotoPrep.prepare(image) { batch.append(p) }
+        }
         guard !batch.isEmpty else { return }
-        if let shot, !batch.isEmpty { batch[0].shot = shot }
+        if let shot { batch[0].shot = shot }
         state.photos.append(contentsOf: batch)
     }
 
@@ -378,7 +407,7 @@ struct CaptureScreen: View {
                 images.append(image)
             }
         }
-        add(images, shot: pendingShot)
+        await add(images, shot: pendingShot)
         pendingShot = nil
     }
 }

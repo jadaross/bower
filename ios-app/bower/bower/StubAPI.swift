@@ -44,6 +44,13 @@ struct StubAPI: BowerAPIClient {
         // around the image-reading floor, the tail is short.
         try await Task.sleep(for: .milliseconds(600))
         onProgress(.reading)
+        // `-bowerReject not_clothing` (or explicit / unsafe / refused) plays
+        // the server turning the photos away, for looking at that screen.
+        let args = CommandLine.arguments
+        if let i = args.firstIndex(of: "-bowerReject"), i + 1 < args.count {
+            try await Task.sleep(for: .milliseconds(700))
+            throw APIError.rejected(AnalyseRejection(wire: args[i + 1]))
+        }
         try await Task.sleep(for: .milliseconds(1500))
         onProgress(.title("Carhartt Detroit Jacket, Hamilton Brown, Size M"))
         try await Task.sleep(for: .milliseconds(1500))

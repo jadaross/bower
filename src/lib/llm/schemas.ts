@@ -13,6 +13,7 @@
 type Schema = Record<string, unknown>;
 
 const CONDITION_VALUES = ["New with tags", "Excellent", "Good", "Fair"] as const;
+const ANALYSIS_SUBJECTS = ["clothing", "not_clothing", "explicit", "unsafe"] as const;
 const CONFIDENCE_VALUES = ["low", "medium", "high"] as const;
 
 /** A required string that the model may legitimately return as null. */
@@ -112,12 +113,17 @@ const listingSchema: Schema = {
   },
 };
 
-/** AnalysisResult — tag OCR first, then the Neutral Listing. */
+/**
+ * AnalysisResult — the subject gate first, then the Neutral Listing, then the
+ * tag OCR. `subject` leads so a photo that is not clothing is known within
+ * the first few tokens and the stream can be cut before a listing is written.
+ */
 export const analysisResultSchema: Schema = {
   type: "object",
   additionalProperties: false,
-  required: ["listing", "tag_data"],
+  required: ["subject", "listing", "tag_data"],
   properties: {
+    subject: { type: "string", enum: [...ANALYSIS_SUBJECTS] },
     listing: listingSchema,
     tag_data: tagDataSchema,
   },
