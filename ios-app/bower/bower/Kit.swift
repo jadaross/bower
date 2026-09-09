@@ -309,11 +309,12 @@ struct NewItemButton: View {
                 Text("New item")
             }
             .font(BowerFont.ui(14, weight: .semibold))
-            .foregroundStyle(.white)
+            .foregroundStyle(theme.text)
             .padding(.vertical, 9)
             .padding(.horizontal, 16)
-            .background(theme.satin)
+            .background(theme.subtle)
             .clipShape(Capsule())
+            .overlay(Capsule().stroke(theme.line, lineWidth: 1))
         }
         .buttonStyle(.plain)
     }

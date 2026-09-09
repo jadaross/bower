@@ -658,12 +658,12 @@ struct CopyButton: View {
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: done ? "checkmark" : "doc.on.doc").font(.system(size: 10, weight: .semibold))
-                Text(done ? "In the bower" : label)
+                Text(label)
             }
             .font(BowerFont.ui(big ? 12 : 11, weight: .semibold))
-            .foregroundStyle(done ? .white : theme.muted)
+            .foregroundStyle(theme.muted)
             .padding(.vertical, big ? 7 : 4).padding(.horizontal, big ? 12 : 6)
-            .background(done ? theme.moss : (big ? theme.subtle : .clear))
+            .background(big ? theme.subtle : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
