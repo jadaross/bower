@@ -216,6 +216,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input) }],
           },
         ];
+        let analyseTraceId: string | undefined;
         generation = beginGeneration({
           name: "analyse",
           model: MODELS.analyse,
@@ -223,6 +224,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
           input: { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length },
           modelParameters: { max_tokens: 4096 },
           trace: input.trace,
+          onTraceId: (id) => { analyseTraceId = id; },
         });
         const stream = await client.messages.create({
           model: MODELS.analyse,
@@ -249,7 +251,8 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
             outputTokens = chunk.usage?.output_tokens ?? outputTokens;
           }
         }
-        const parsed = parseAnalysisResult(buffer);
+        const parsed = parseAnalysisResult(buffer) as ReturnType<typeof parseAnalysisResult> & { trace_id?: string };
+        if (analyseTraceId) parsed.trace_id = analyseTraceId;
         const doc = JSON.stringify(parsed);
         input.onResult?.(parsed);
         generation?.finish({ output: doc, usage: { input: inputTokens, output: outputTokens } });

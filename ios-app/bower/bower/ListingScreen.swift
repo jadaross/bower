@@ -51,6 +51,10 @@ final class ListingModel {
     var chips: Set<RefinementChip> = []
     var formatted: [Platform: PlatformListing] = [:]
     var edits: [Platform: PlatformListing] = [:]
+    /// The Langfuse trace behind the listing shown for each platform (#45).
+    var traces: [Platform: String] = [:]
+    /// Thumbs the user gave per platform: 1 up, 0 down.
+    var thumbed: [Platform: Int] = [:]
     var rewriting = false
     var formatError = false
 
@@ -80,6 +84,7 @@ final class ListingModel {
         // that voice. Show it as it is — a second call would only rewrite it.
         if a.listing.fields != nil {
             formatted[platform] = a.listing.asPlatformListing
+            traces[platform] = a.traceId
             return
         }
         await format()
@@ -126,7 +131,9 @@ final class ListingModel {
         rewriting = true
         defer { rewriting = false }
         do {
-            formatted[platform] = try await state.api.format(listing: listing, platform: platform, tone: tone)
+            let out = try await state.api.format(listing: listing, platform: platform, tone: tone)
+            formatted[platform] = out
+            traces[platform] = out.traceId
             formatError = false
         } catch {
             formatError = true
@@ -143,7 +150,7 @@ final class ListingModel {
     func setTone(_ t: Tone) {
         guard t != tone else { return }
         tone = t
-        formatted = [:]; edits = [:]; chips = []
+        formatted = [:]; edits = [:]; chips = []; traces = [:]; thumbed = [:]
         formatTask?.cancel()
         formatTask = Task { await format() }
     }
@@ -170,12 +177,25 @@ final class ListingModel {
             let instructions = RefinementChip.allCases.filter { chips.contains($0) }.map(\.instruction)
             if let out = try? await state.api.refine(listing: base, platform: platform, instructions: instructions) {
                 edits[platform] = out
+                traces[platform] = out.traceId
             }
         }
     }
 
-    func setTitle(_ t: String) { var l = current ?? PlatformListing(title: "", description: "", hashtags: [], fields: nil); l.title = t; edits[platform] = l }
-    func setBody(_ b: String) { var l = current ?? PlatformListing(title: "", description: "", hashtags: [], fields: nil); l.description = b; edits[platform] = l }
+    func setTitle(_ t: String) { var l = current ?? PlatformListing(title: "", description: "", hashtags: [], fields: nil); l.title = t; edits[platform] = l; recordFeedback("manual-edit") }
+    func setBody(_ b: String) { var l = current ?? PlatformListing(title: "", description: "", hashtags: [], fields: nil); l.description = b; edits[platform] = l; recordFeedback("manual-edit") }
+
+    /// Best-effort feedback score against the shown listing's trace. Never blocks.
+    func recordFeedback(_ name: String, value: Int? = nil) {
+        guard let state, let traceId = traces[platform] else { return }
+        Task { try? await state.api.feedback(traceId: traceId, name: name, value: value) }
+    }
+
+    func thumb(up: Bool) {
+        let v = up ? 1 : 0
+        thumbed[platform] = v
+        recordFeedback("thumbs", value: v)
+    }
 
     var fullText: String {
         guard let c = current else { return "" }
@@ -450,6 +470,26 @@ private struct ListingSection: View {
                     .buttonStyle(.plain)
                 }
             }
+
+            if model.current != nil {
+                HStack(spacing: 12) {
+                    Text("Was this right?").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    Spacer(minLength: 0)
+                    Button { model.thumb(up: true) } label: {
+                        Image(systemName: model.thumbed[model.platform] == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
+                            .font(.system(size: 15))
+                            .foregroundStyle(model.thumbed[model.platform] == 1 ? theme.moss : theme.muted)
+                    }
+                    .buttonStyle(.plain).accessibilityLabel("Good listing")
+                    Button { model.thumb(up: false) } label: {
+                        Image(systemName: model.thumbed[model.platform] == 0 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
+                            .font(.system(size: 15))
+                            .foregroundStyle(model.thumbed[model.platform] == 0 ? theme.coral : theme.muted)
+                    }
+                    .buttonStyle(.plain).accessibilityLabel("Bad listing")
+                }
+                .padding(.top, 2)
+            }
         }
         .padding(.horizontal, 22)
     }
@@ -467,7 +507,7 @@ private struct ListingSection: View {
                             HStack {
                                 Kicker(model.platform == .depop ? "Hashtags" : "Keywords")
                                 Spacer()
-                                CopyButton(text: c.displayHashtags.joined(separator: " "))
+                                CopyButton(text: c.displayHashtags.joined(separator: " "), onCopy: { model.recordFeedback("copied") })
                             }
                             FlowLayout(spacing: 6) {
                                 ForEach(c.displayHashtags, id: \.self) { t in
@@ -489,7 +529,7 @@ private struct ListingSection: View {
                                     Text(f.label).font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                                     Spacer()
                                     Text(f.value).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.trailing)
-                                    CopyButton(text: f.value)
+                                    CopyButton(text: f.value, onCopy: { model.recordFeedback("copied") })
                                 }
                                 .padding(.vertical, 6)
                                 Hairline()
@@ -541,7 +581,7 @@ private struct ListingSection: View {
                     }
                     .buttonStyle(.plain)
                 }
-                CopyButton(text: text)
+                CopyButton(text: text, onCopy: { model.recordFeedback("copied") })
             }
             if editing == key {
                 EditBox(value: text, multiline: !bold, bold: bold) { save($0); editing = nil } onCancel: { editing = nil }
@@ -605,12 +645,14 @@ struct CopyButton: View {
     let text: String
     var label: String = "Copy"
     var big: Bool = false
+    var onCopy: (() -> Void)? = nil
     @Environment(\.bower) private var theme
     @State private var done = false
 
     var body: some View {
         Button {
             UIPasteboard.general.string = text
+            onCopy?()
             done = true
             Task { try? await Task.sleep(for: .seconds(1.5)); done = false }
         } label: {

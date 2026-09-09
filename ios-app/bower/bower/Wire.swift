@@ -85,6 +85,8 @@ struct NeutralListing: Codable, Sendable {
 struct AnalysisResult: Codable, Sendable {
     let tagData: TagData
     let listing: NeutralListing
+    /// The Langfuse trace of the read, so feedback on the first listing attaches to it (#45).
+    var traceId: String? = nil
 }
 
 // MARK: - format / refine
@@ -102,6 +104,8 @@ struct PlatformListing: Codable, Sendable {
     var description: String
     var hashtags: [String]
     var fields: [ListingField]?
+    /// The Langfuse trace this listing came from, so feedback can attach to it (#45).
+    var traceId: String? = nil
 
     /// Hashtags with exactly one leading `#`. Depop's come from the model
     /// already prefixed; the neutral ones do not. Display and copy from here.

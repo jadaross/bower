@@ -75,6 +75,8 @@ struct StubAPI: BowerAPIClient {
 
     func deleteAccount() async throws { await wait() }
 
+    func feedback(traceId: String, name: String, value: Int?) async throws {}
+
     func history() async throws -> [HistoryItem] {
         await wait()
         func band(_ lo: Double, _ hi: Double, _ p: Platform) -> PriceBand {

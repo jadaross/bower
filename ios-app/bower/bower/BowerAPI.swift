@@ -35,6 +35,8 @@ protocol BowerAPIClient: Sendable {
     func deleteAccount() async throws
     /// The caller's past items, newest first. Text only — no photos.
     func history() async throws -> [HistoryItem]
+    /// Records a feedback signal against a listing's Langfuse trace. Best-effort.
+    func feedback(traceId: String, name: String, value: Int?) async throws
 }
 
 // MARK: - Live
@@ -167,6 +169,13 @@ struct BowerAPI: BowerAPIClient {
 
     func history() async throws -> [HistoryItem] {
         try await send("/api/history", as: HistoryResponse.self).items
+    }
+
+    func feedback(traceId: String, name: String, value: Int?) async throws {
+        struct Body: Encodable { let traceId: String; let name: String; let value: Int? }
+        struct Ack: Decodable {}
+        _ = try await send("/api/feedback", method: "POST",
+                           body: Body(traceId: traceId, name: name, value: value), as: Ack.self)
     }
 
     func deleteAccount() async throws {
