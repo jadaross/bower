@@ -174,8 +174,15 @@ describe("recommend — output", () => {
 
   it("explains itself in terms of asking prices", () => {
     const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }));
-    expect(result!.reasoning).toMatch(/listed around/i);
+    expect(result!.reasoning).toMatch(/listed/i);
     expect(result!.reasoning).not.toMatch(/sells for/i);
+  });
+
+  // The client shows "£50 on Depop" in large type directly above this line.
+  it("does not restate the price or the winner", () => {
+    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }));
+    expect(result!.reasoning).not.toContain("£70");
+    expect(result!.reasoning).not.toContain("Vinted");
   });
 
   it("names the runner-up in its reasoning", () => {

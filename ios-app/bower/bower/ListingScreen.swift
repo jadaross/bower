@@ -62,11 +62,24 @@ final class ListingModel {
     private var searchTask: Task<Void, Never>?
     private var formatTask: Task<Void, Never>?
 
-    /// Uncertain when the found listings disagree — the backend's confidence
-    /// says so, or the spread is wider than the low end itself.
-    var uncertain: Bool {
-        bands.values.contains { $0.confidence == .low && !$0.comparables.isEmpty }
-            || bands.values.contains { !$0.comparables.isEmpty && ($0.high - $0.low) > $0.low }
+    /// What to ask, and where. The server's Recommendation when there is one
+    /// (more than one platform enabled); otherwise the midpoint of the single
+    /// band, which is not a recommendation — there was nothing to choose
+    /// between — and wears no tag.
+    struct Ask: Equatable {
+        let platform: Platform
+        let listAt: Int
+        let reasoning: String
+        let recommended: Bool
+    }
+
+    var ask: Ask? {
+        if let r = recommendation {
+            return Ask(platform: r.platform, listAt: Int(r.listAt.rounded()), reasoning: r.reasoning, recommended: true)
+        }
+        let usable = bands.filter { !$0.value.comparables.isEmpty }
+        guard usable.count == 1, let (p, b) = usable.first else { return nil }
+        return Ask(platform: p, listAt: Int(((b.low + b.high) / 2).rounded()), reasoning: "", recommended: false)
     }
 
     var current: PlatformListing? { edits[platform] ?? formatted[platform] }
@@ -237,150 +250,163 @@ private struct PriceSection: View {
         }
     }
 
-    // The guess. Openly a guess — dashed border, a badge, and copy that says
-    // it has not looked at a single real listing.
+    // The guess. Openly a guess — dashed border, a badge that says where it
+    // came from, and the one action that would replace it.
     private var estimated: some View {
         VStack(alignment: .leading, spacing: 10) {
             BowerCard(padding: 16, dashed: true, fill: theme.subtle) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(alignment: .center, spacing: 12) {
-                        if let l = model.listing {
-                            PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
-                        }
-                        Spacer(minLength: 8)
-                        Button { model.search() } label: {
-                            Text(state.remaining > 0 ? "Get a real price" : "No searches left")
-                                .font(BowerFont.ui(13, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .padding(.vertical, 10).padding(.horizontal, 14)
-                                .background(state.remaining > 0 ? theme.satin : theme.muted)
-                                .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(state.remaining == 0)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("GUESS FROM THE PHOTOS")
+                        .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
+                        .foregroundStyle(theme.text)
+                        .padding(.vertical, 3).padding(.horizontal, 7)
+                        .background(theme.pollen.opacity(0.28))
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                    if let l = model.listing {
+                        PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
+                            .padding(.top, 8)
                     }
-                    HStack {
-                        Text("ESTIMATE")
-                            .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.6)
-                            .foregroundStyle(theme.text)
-                            .padding(.vertical, 3).padding(.horizontal, 7)
-                            .background(theme.pollen.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                        Spacer()
-                    }
+                    BowerButton(title: state.remaining > 0 ? "Get a real price" : "No searches left",
+                                disabled: state.remaining == 0) { model.search() }
+                        .padding(.top, 14)
+                    Text(state.remaining > 0 ? "Searches live listings. Costs 1 of \(state.remaining)." : "Searches live listings.")
+                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 9)
                 }
             }
 
             if let e = model.searchError {
                 Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
             }
-            Text(state.remaining > 0 ? "Searches live listings. Costs 1 of \(state.remaining)." : "Searches live listings.")
-                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
         }
     }
 
+    // One row per platform being read. The valuation comes back all at once,
+    // so every row pulses until the whole answer lands — no row claims to be
+    // done before it is.
     private var searching: some View {
         BowerCard(padding: 18) {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Kicker("Searching", color: theme.satin)
+                    Kicker("Reading live listings", color: theme.satin)
                     Spacer()
                     Text(String(format: "%02d:%02d", model.elapsed / 60, model.elapsed % 60))
                         .font(BowerFont.mono(11)).foregroundStyle(theme.muted).monospacedDigit()
                 }
-                CourtDots(width: 150)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Reading live listings").font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
-                    Text("Anywhere from 40 seconds to a few minutes. Keep the app open — the result lands here when it's done.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
-                }
-                VStack(alignment: .leading, spacing: 7) {
-                    ForEach(model.enabled) { p in
-                        HStack(spacing: 9) {
-                            ProgressView().controlSize(.mini).tint(theme.satin)
-                            Text("\(p.name)…").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                VStack(spacing: 0) {
+                    ForEach(Array(model.enabled.enumerated()), id: \.element) { i, p in
+                        HStack(spacing: 10) {
+                            PulsingDot(color: p.tint, delay: Double(i) * 0.2)
+                                .frame(width: 16)
+                            Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
+                            Spacer()
+                            Text("searching").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                         }
+                        .padding(.vertical, 9)
+                        .overlay(alignment: .bottom) { if i < model.enabled.count - 1 { Hairline() } }
                     }
                 }
+                .padding(.top, 14)
+                Text("Up to a few minutes. Keep the app open.")
+                    .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    .padding(.top, 12)
             }
         }
     }
 
+    // One answer, then the evidence. The listing is already written for the
+    // Preferred Platform, so the only action worth offering is rewriting it
+    // for a different one — shown only when the best platform isn't the one
+    // being shown, and the switch below moves with it.
     private var searched: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
+        VStack(alignment: .leading, spacing: 16) {
+            if let ask = model.ask { askCard(ask) }
+
+            VStack(alignment: .leading, spacing: 11) {
                 Kicker("Listed at right now")
-                Spacer()
-                Text("just now").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
-            }
-
-            if model.uncertain { uncertainNote }
-
-            VStack(spacing: 9) {
-                ForEach(model.enabled) { p in
-                    if let band = model.bands[p] { bandCard(p, band) }
-                }
-            }
-
-            if let r = model.recommendation { recommendationCard(r) }
-
-            Text("These are what people are *asking* today, not what anything sold for.")
-                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-        }
-    }
-
-    private var uncertainNote: some View {
-        let all = model.bands.values.filter { !$0.comparables.isEmpty }
-        let lo = all.map(\.low).min() ?? 0, hi = all.map(\.high).max() ?? 0
-        return HStack(alignment: .top, spacing: 10) {
-            Text("?")
-                .font(BowerFont.ui(12, weight: .bold)).foregroundStyle(theme.ink)
-                .frame(width: 18, height: 18).background(theme.pollen).clipShape(Circle())
-            Text(uncertainText(lo: Int(lo), hi: Int(hi)))
-                .font(BowerFont.ui(12.5))
-        }
-        .padding(13)
-        .background(theme.pollen.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.pollen.opacity(0.4), lineWidth: 0.5))
-    }
-
-    private func uncertainText(lo: Int, hi: Int) -> AttributedString {
-        var a = AttributedString("The listings don't agree. "); a.font = BowerFont.ui(12.5, weight: .semibold); a.foregroundColor = theme.text
-        var b = AttributedString("Prices are spread from £\(lo) to £\(hi) — some of these may be a different item. Treat the low end as the safe number, or check the listings yourself."); b.foregroundColor = theme.muted
-        return a + b
-    }
-
-    private func bandCard(_ p: Platform, _ band: PriceBand) -> some View {
-        let winner = model.recommendation?.platform == p
-        let empty = band.comparables.isEmpty
-        return BowerCard(padding: 14, borderColor: winner ? p.tint.opacity(0.5) : nil) {
-            HStack(spacing: 12) {
-                RoundedRectangle(cornerRadius: 3).fill(empty ? theme.line : p.tint).frame(width: 6, height: 40)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
-                    if empty {
-                        Text("Nothing comparable listed today").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
-                    } else {
-                        PriceRange(low: Int(band.low), high: Int(band.high), size: 26)
+                VStack(spacing: 10) {
+                    ForEach(model.enabled) { p in
+                        if let band = model.bands[p] { bandRow(p, band) }
                     }
                 }
-                Spacer()
-                if !empty {
-                    Button { model.compsFor = p } label: {
-                        HStack(spacing: 5) {
-                            Text("\(band.comparables.count) listings")
-                            Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold))
+                Text("Asking prices today. Nothing here has necessarily sold.")
+                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    private func askCard(_ ask: ListingModel.Ask) -> some View {
+        BowerCard(padding: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                Kicker("Ask")
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("£\(ask.listAt)").font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
+                    HStack(spacing: 6) {
+                        Text("on")
+                        Circle().fill(ask.platform.tint).frame(width: 7, height: 7)
+                        Text(ask.platform.name)
+                    }
+                    .font(BowerFont.ui(16)).foregroundStyle(theme.text)
+                }
+                .padding(.top, 4)
+                if !ask.reasoning.isEmpty {
+                    Text(ask.reasoning)
+                        .font(BowerFont.ui(13.5)).foregroundStyle(theme.muted).lineSpacing(3)
+                        .padding(.top, 8)
+                }
+                if model.platform != ask.platform {
+                    Button { model.switchPlatform(ask.platform) } label: {
+                        HStack(spacing: 6) {
+                            Circle().fill(ask.platform.tint).frame(width: 6, height: 6)
+                            Text("Rewrite it for \(ask.platform.name)")
                         }
-                        .font(BowerFont.ui(11.5, weight: .semibold)).foregroundStyle(theme.text)
-                        .padding(.vertical, 8).padding(.horizontal, 11)
-                        .background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 9))
+                        .font(BowerFont.ui(12.5, weight: .semibold))
+                        .foregroundStyle(ask.platform.tint)
+                        .padding(.vertical, 7).padding(.horizontal, 12)
+                        .overlay(RoundedRectangle(cornerRadius: 9).stroke(ask.platform.tint, lineWidth: 1))
                     }
                     .buttonStyle(.plain)
+                    .padding(.top, 12)
                 }
             }
+            .padding(.vertical, 16).padding(.horizontal, 18)
         }
-        .opacity(empty ? 0.7 : 1)
+        .animation(.easeOut(duration: 0.2), value: model.platform)
+    }
+
+    private func bandRow(_ p: Platform, _ band: PriceBand) -> some View {
+        let winner = model.ask?.platform == p && model.ask?.recommended == true
+        let empty = band.comparables.isEmpty
+        return Button { if !empty { model.compsFor = p } } label: {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 3).fill(empty ? theme.line : p.tint).frame(width: 6, height: 34)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
+                    if empty {
+                        Text("Nothing comparable today").font(BowerFont.serifUpright(22)).foregroundStyle(theme.muted)
+                    } else {
+                        PriceRange(low: Int(band.low), high: Int(band.high), size: 22)
+                    }
+                }
+                Spacer(minLength: 0)
+                if !empty {
+                    HStack(spacing: 4) {
+                        Text("\(band.comparables.count) listing\(band.comparables.count == 1 ? "" : "s")")
+                        Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold))
+                    }
+                    .font(BowerFont.ui(11.5, weight: .semibold)).foregroundStyle(theme.muted)
+                }
+            }
+            .padding(.vertical, 13).padding(.horizontal, 14)
+            .background(theme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(winner ? p.tint.opacity(0.4) : theme.line, lineWidth: 0.5))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+        .disabled(empty)
         .overlay(alignment: .topLeading) {
             if winner {
                 Text("POST HERE FIRST")
@@ -391,26 +417,21 @@ private struct PriceSection: View {
             }
         }
     }
+}
 
-    private func recommendationCard(_ r: Recommendation) -> some View {
-        BowerCard(padding: 14, fill: theme.satin, borderColor: theme.satin) {
-            HStack(alignment: .top, spacing: 11) {
-                Arch(size: 30, stroke: .white)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Put it on \(r.platform.name)").font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(.white)
-                    Text(r.reasoning + " Ask £\(Int(r.listAt)) to sell in a week.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(.white.opacity(0.75))
-                    Button { model.switchPlatform(r.platform) } label: {
-                        Text("Write it for \(r.platform.name)")
-                            .font(BowerFont.ui(12.5, weight: .semibold)).foregroundStyle(.white)
-                            .padding(.vertical, 8).padding(.horizontal, 12)
-                            .background(.white.opacity(0.16)).clipShape(RoundedRectangle(cornerRadius: 9))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.top, 7)
-                }
-            }
-        }
+/// A small dot breathing on a delay — one per platform while the search runs.
+private struct PulsingDot: View {
+    let color: Color
+    var delay: Double = 0
+    @State private var on = false
+
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 7, height: 7)
+            .opacity(on ? 1 : 0.35)
+            .animation(.easeInOut(duration: 0.55).repeatForever(autoreverses: true).delay(delay), value: on)
+            .onAppear { on = true }
     }
 }
 

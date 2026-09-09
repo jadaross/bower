@@ -84,7 +84,9 @@ work it had not enabled.
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
 the Valuation, account deletion, 222 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
-history, profile — plus the How-it-works sheet behind the `?` on home. Real camera,
+history, profile — plus two sheets on home: Tips (what photographs well) and `?`
+(how bower works). With photos in, home shows a checklist of the angles not yet
+covered and pins "Price it" to the foot. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
 

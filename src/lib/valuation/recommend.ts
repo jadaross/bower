@@ -87,22 +87,23 @@ function explain(
   winner: PriceBand,
   rest: Array<[Platform, PriceBand]>
 ): string {
-  const name = platformMetadata[winnerId].name;
+  // The headline already says the price and the platform ("£50 on Depop"),
+  // so this only says why — never restating either.
   const listAt = midpoint(winner);
   const fee = platformMetadata[winnerId].feePct;
   const feeNote = fee === 0 ? "and takes no seller fee" : `less its ${platformMetadata[winnerId].feeLabel} fee`;
 
-  if (rest.length === 0) return `${name} is the only platform with a usable valuation.`;
+  if (rest.length === 0) return "The only platform with listings to go on.";
 
   const [runnerUpId, runnerUp] = rest[0];
   const runnerUpName = platformMetadata[runnerUpId].name;
   const diff = listAt - midpoint(runnerUp);
 
   if (diff > 0) {
-    return `Similar items are listed around £${listAt} on ${name} — about £${diff} above ${runnerUpName} — ${feeNote}.`;
+    return `Listed about £${diff} above ${runnerUpName}, ${feeNote}.`;
   }
   if (winner.sell_likelihood !== runnerUp.sell_likelihood) {
-    return `${name} lists around £${listAt}, and this kind of item moves more readily there than on ${runnerUpName} — ${feeNote}.`;
+    return `Listed on par with ${runnerUpName}, but this kind of item moves more readily here — ${feeNote}.`;
   }
-  return `${name} lists around £${listAt}, on par with ${runnerUpName}, ${feeNote}.`;
+  return `Listed on par with ${runnerUpName}, ${feeNote}.`;
 }

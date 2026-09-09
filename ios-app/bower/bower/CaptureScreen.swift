@@ -1,8 +1,10 @@
 import SwiftUI
 import PhotosUI
 
-/// Suggestions, never slots. The user may ignore every chip and upload
-/// whatever they have — the chips only tick as coverage happens.
+/// Home. Empty, it is one big place to tap. With photos in, the blank space
+/// becomes the next shot: a checklist of the angles not yet covered, each a
+/// suggestion rather than a slot — the user may ignore every one and upload
+/// whatever they have. Owns its nav, its scroll and its pinned footer.
 struct CaptureScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -14,16 +16,47 @@ struct CaptureScreen: View {
     @State private var libraryItems: [PhotosPickerItem] = []
     @State private var showLibrary = false
     @State private var importing = false
+    @State private var showTips = false
+    @State private var showHelp = false
 
     private var empty: Bool { state.photos.isEmpty }
+    private var covered: [SuggestedShot] { SuggestedShot.allCases.filter { shot in state.photos.contains { $0.shot == shot } } }
+    private var missing: [SuggestedShot] { SuggestedShot.allCases.filter { shot in !state.photos.contains { $0.shot == shot } } }
 
     var body: some View {
-        Group {
-            if cameraState == .denied && empty {
-                denied
-            } else {
-                content
+        VStack(spacing: 0) {
+            nav
+            GeometryReader { geo in
+                ScrollView {
+                    Group {
+                        if cameraState == .denied && empty {
+                            denied
+                        } else if empty {
+                            emptyContent
+                        } else {
+                            filledContent
+                        }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: empty ? geo.size.height : 0, alignment: .top)
+                }
+                .scrollBounceBehavior(.basedOnSize)
             }
+        }
+        .safeAreaInset(edge: .bottom) { if !empty { footer } }
+        .animation(.snappy(duration: 0.22), value: empty)
+        .sheet(isPresented: $showTips) {
+            TipsSheet()
+                .environment(\.bower, theme)
+                .presentationDetents([.fraction(0.82)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
+        .sheet(isPresented: $showHelp) {
+            HelpSheet()
+                .environment(\.bower, theme)
+                .presentationDetents([.fraction(0.78)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
         }
         .fullScreenCover(isPresented: $showCamera) {
             CameraPicker(
@@ -50,43 +83,68 @@ struct CaptureScreen: View {
         }
     }
 
-    // MARK: - Content
+    // MARK: - Nav
 
-    /// One headline, and the action fills the page. What to shoot and why
-    /// lives behind the ? in the nav, read once, not on the screen every time.
-    private var content: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if empty { captureZone } else { pile }
-
-            suggestions
-
-            VStack(spacing: 9) {
-                if empty {
-                    BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
-                } else {
-                    BowerButton(title: "Price it") { state.screen = .analysing }
-                    HStack(spacing: 9) {
-                        BowerButton(title: "Upload more", kind: .secondary) { showLibrary = true }
-                        Button("Clear") { state.photos = [] }
-                            .buttonStyle(.plain)
-                            .font(BowerFont.ui(12.5, weight: .medium))
-                            .foregroundStyle(theme.muted)
-                            .padding(.horizontal, 8)
+    /// The mark and the wordmark on the left; Tips (what photographs well)
+    /// and ? (how bower works) on the right. Home has no serif headline under
+    /// it any more, so the wordmark carries the page.
+    private var nav: some View {
+        HStack {
+            HStack(spacing: 9) {
+                Arch(size: 30)
+                HStack(spacing: 0) {
+                    Text("bower").foregroundStyle(theme.text)
+                    Text(".").foregroundStyle(theme.coral)
+                }
+                .font(BowerFont.serif(36))
+            }
+            Spacer()
+            HStack(spacing: 8) {
+                Button { showTips = true } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "lightbulb").font(.system(size: 12, weight: .semibold))
+                        Text("Tips")
                     }
+                    .font(BowerFont.ui(13, weight: .semibold))
+                    .foregroundStyle(theme.satin)
+                    .padding(.horizontal, 14)
+                    .frame(height: 34)
+                    .background(theme.card)
+                    .clipShape(Capsule())
+                    .overlay(Capsule().stroke(theme.line, lineWidth: 0.5))
                 }
-            }
+                .buttonStyle(.plain)
+                .accessibilityLabel("What photographs well")
 
-            if importing {
-                HStack(spacing: 8) {
-                    ProgressView().tint(theme.satin)
-                    Text("Preparing photos…").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                Button { showHelp = true } label: {
+                    Text("?")
+                        .font(BowerFont.ui(15, weight: .semibold))
+                        .foregroundStyle(theme.satin)
+                        .frame(width: 34, height: 34)
+                        .background(theme.card)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(theme.line, lineWidth: 0.5))
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.plain)
+                .accessibilityLabel("How bower works")
             }
+        }
+        .padding(.leading, 20)
+        .padding(.trailing, 18)
+        .padding(.top, 6)
+        .padding(.bottom, 10)
+    }
+
+    // MARK: - Empty
+
+    private var emptyContent: some View {
+        VStack(spacing: 12) {
+            captureZone
+            BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
+            if importing { preparing }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 22)
-        .animation(.snappy(duration: 0.22), value: empty)
     }
 
     /// The empty state: a big, obvious place to tap. Opens the camera.
@@ -109,7 +167,7 @@ struct CaptureScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .frame(minHeight: 300)
+            .frame(minHeight: 260)
             .background(
                 LinearGradient(colors: [theme.shell.opacity(0.5), theme.card.opacity(0.7)],
                                startPoint: .top, endPoint: .bottom)
@@ -125,38 +183,110 @@ struct CaptureScreen: View {
         .accessibilityLabel("Photograph the piece")
     }
 
-    /// One row of chips, scrolling sideways. Each is a suggestion, not a slot —
-    /// tapping one opens the camera with a hint, and it ticks once covered.
-    private var suggestions: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 7) {
+    // MARK: - With photos
+
+    private var filledContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            pile
+            checklist
+            if importing { preparing }
+        }
+        .padding(.horizontal, 22)
+        .padding(.bottom, 16)
+    }
+
+    /// The gap becomes the next shot. Six thin bars, one per angle, and the
+    /// first three angles not yet covered as rows to tap.
+    private var checklist: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Kicker("\(covered.count) of \(SuggestedShot.allCases.count) angles in")
+                Spacer()
+                Button("Tips") { showTips = true }
+                    .buttonStyle(.plain)
+                    .font(BowerFont.ui(12, weight: .semibold))
+                    .foregroundStyle(theme.satin)
+            }
+
+            HStack(spacing: 3) {
                 ForEach(SuggestedShot.allCases) { shot in
-                    let covered = state.photos.contains { $0.shot == shot }
+                    Capsule()
+                        .fill(covered.contains(shot) ? theme.moss : theme.line)
+                        .frame(height: 3)
+                }
+            }
+            .padding(.top, 10)
+            .padding(.bottom, 8)
+            .animation(.easeOut(duration: 0.25), value: covered)
+
+            if missing.isEmpty {
+                HStack(spacing: 9) {
+                    Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.moss)
+                    Text("Every angle in. That's as sharp as it gets.").font(BowerFont.ui(13.5)).foregroundStyle(theme.text)
+                }
+                .padding(.vertical, 10)
+                .overlay(alignment: .top) { Hairline() }
+            } else {
+                ForEach(missing.prefix(3)) { shot in
                     Button {
                         pendingShot = shot
                         showSheet = true
                     } label: {
-                        HStack(spacing: 6) {
-                            if covered {
-                                Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(theme.moss)
-                            } else {
-                                Image(systemName: shot.symbol).font(.system(size: 12)).foregroundStyle(theme.muted)
+                        HStack(spacing: 12) {
+                            Image(systemName: shot.symbol)
+                                .font(.system(size: 14))
+                                .foregroundStyle(theme.satin)
+                                .frame(width: 34, height: 34)
+                                .background(theme.subtle)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(shot.label).font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
+                                Text(shot.hint).font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                             }
-                            Text(shot.label).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text)
+                            Spacer(minLength: 0)
+                            Image(systemName: "plus").font(.system(size: 15, weight: .medium)).foregroundStyle(theme.satin)
                         }
-                        .padding(.vertical, 7)
-                        .padding(.leading, 9)
-                        .padding(.trailing, 12)
-                        .background(covered ? theme.moss.opacity(0.08) : theme.card)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(covered ? theme.moss.opacity(0.45) : theme.line, lineWidth: 0.5))
+                        .padding(.vertical, 11)
+                        .contentShape(Rectangle())
+                        .overlay(alignment: .top) { Hairline() }
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.vertical, 2)
         }
-        .scrollClipDisabled()
+        .padding(.vertical, 14)
+        .padding(.horizontal, 15)
+        .background(theme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.line, lineWidth: 0.5))
+    }
+
+    /// Pinned above the tab bar once there is something to price.
+    private var footer: some View {
+        VStack(spacing: 9) {
+            BowerButton(title: "Price it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
+            HStack(spacing: 9) {
+                BowerButton(title: "Upload more", kind: .secondary) { showLibrary = true }
+                Button("Clear") { state.photos = [] }
+                    .buttonStyle(.plain)
+                    .font(BowerFont.ui(12.5, weight: .medium))
+                    .foregroundStyle(theme.muted)
+                    .padding(.horizontal, 8)
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.top, 12)
+        .padding(.bottom, 10)
+        .background(theme.chrome)
+        .overlay(alignment: .top) { Hairline() }
+    }
+
+    private var preparing: some View {
+        HStack(spacing: 8) {
+            ProgressView().tint(theme.satin)
+            Text("Preparing photos…").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var pile: some View {

@@ -76,7 +76,6 @@ struct RootView: View {
     @Environment(\.colorScheme) private var scheme
 
     @State private var showSplash = true
-    @State private var showHelp = false
 
     private var theme: BowerTheme { .of(scheme) }
 
@@ -90,6 +89,13 @@ struct RootView: View {
             case .signin:
                 // Full-bleed on avenue, like analysing — no nav, no scroll.
                 SignInScreen()
+            case .capture:
+                // Home owns its nav, scroll and pinned footer; only the tab
+                // bar is added here.
+                CaptureScreen()
+                    .safeAreaInset(edge: .bottom) {
+                        BowerTabBar(active: .home) { selectTab($0) }
+                    }
             default:
                 VStack(spacing: 0) {
                     nav
@@ -113,13 +119,6 @@ struct RootView: View {
                 LaunchSplash().transition(.opacity).zIndex(10)
             }
         }
-        .sheet(isPresented: $showHelp) {
-            HelpSheet()
-                .environment(\.bower, theme)
-                .presentationDetents([.fraction(0.78)])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(theme.bg)
-        }
         .environment(\.bower, theme)
         .animation(.snappy(duration: 0.22), value: state.screen)
         .task {
@@ -139,14 +138,14 @@ struct RootView: View {
     /// the height above it. The rest are lists and read from the top.
     private var fillsHeight: Bool {
         switch state.screen {
-        case .how, .platforms, .capture: return true
+        case .how, .platforms: return true
         default: return false
         }
     }
 
     private var showsTabBar: Bool {
         switch state.screen {
-        case .capture, .listing, .history, .settings: return true
+        case .listing, .history, .settings: return true
         default: return false
         }
     }
@@ -185,7 +184,7 @@ struct RootView: View {
                 Text("2 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
             }
         case .capture:
-            HomeNav { showHelp = true }
+            EmptyView()
         case .listing:
             BowerNav(title: "Price and listing") {
                 BackButton(label: "Photos") { state.screen = .capture }
@@ -210,45 +209,6 @@ struct RootView: View {
         case .history:   HistoryScreen()
         case .settings:  SettingsScreen()
         }
-    }
-}
-
-// MARK: - Home nav
-
-/// The mark and the wordmark on the left, the ? on the right, one row. Home
-/// has no serif headline under it any more, so the wordmark carries the page.
-struct HomeNav: View {
-    let onHelp: () -> Void
-    @Environment(\.bower) private var theme
-
-    var body: some View {
-        HStack {
-            HStack(spacing: 9) {
-                Arch(size: 30)
-                HStack(spacing: 0) {
-                    Text("bower").foregroundStyle(theme.text)
-                    Text(".").foregroundStyle(theme.coral)
-                }
-                .font(BowerFont.serif(36))
-            }
-            Spacer()
-            Button(action: onHelp) {
-                Text("?")
-                    .font(BowerFont.ui(17, weight: .semibold))
-                    .foregroundStyle(theme.satin)
-                    .frame(width: 44, height: 44)
-                    .background(theme.card)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(theme.line, lineWidth: 0.5))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("How bower works")
-        }
-        .padding(.leading, 20)
-        .padding(.trailing, 18)
-        .padding(.top, 6)
-        .padding(.bottom, 12)
-        .background(theme.chrome)
     }
 }
 
