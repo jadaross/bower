@@ -26,6 +26,8 @@ export interface HistoryItem {
   price_min: number | null;
   price_max: number | null;
   preferred_platform: Platform | null;
+  /** The full Neutral Listing as first seen; null on older rows. */
+  listing: Listing | null;
   valuation: StoredValuation | null;
 }
 
@@ -61,6 +63,8 @@ export async function recordItem(
         price_min: listing.price_min,
         price_max: listing.price_max,
         preferred_platform: preferredPlatform ?? null,
+        // The whole Neutral Listing, so the detail view can show it as first seen.
+        listing,
       });
     if (error) console.warn("[history] recordItem failed:", error.message);
   } catch (err) {

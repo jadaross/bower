@@ -100,6 +100,11 @@ private struct HistoryDetail: View {
                 }
                 Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
 
+                if let listing = item.listing {
+                    listingCard(listing.asPlatformListing)
+                }
+
+                Kicker("Details")
                 BowerCard {
                     VStack(alignment: .leading, spacing: 0) {
                         detail("Brand", item.brand)
@@ -150,6 +155,55 @@ private struct HistoryDetail: View {
                 .multilineTextAlignment(.trailing)
         }
         .padding(.vertical, 9)
+    }
+
+    /// The listing as it was first seen — every field, each copyable.
+    private func listingCard(_ pl: PlatformListing) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Kicker("The listing")
+            BowerCard(padding: 16) {
+                VStack(alignment: .leading, spacing: 13) {
+                    savedBlock("Title", pl.title, bold: true)
+                    Hairline()
+                    savedBlock("Description", pl.description, bold: false)
+                    if !pl.hashtags.isEmpty {
+                        Hairline()
+                        HStack {
+                            Kicker("Hashtags")
+                            Spacer()
+                            CopyButton(text: pl.displayHashtags.joined(separator: " "))
+                        }
+                        Text(pl.displayHashtags.joined(separator: "  "))
+                            .font(BowerFont.mono(11.5)).foregroundStyle(theme.muted)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    if let fields = pl.fields, !fields.isEmpty {
+                        Hairline()
+                        Kicker("Form fields")
+                        ForEach(fields) { f in
+                            HStack(alignment: .top, spacing: 8) {
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(f.label).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                                    Text(f.value).font(BowerFont.ui(13.5)).foregroundStyle(theme.text)
+                                }
+                                Spacer()
+                                CopyButton(text: f.value)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func savedBlock(_ label: String, _ text: String, bold: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack { Kicker(label); Spacer(); CopyButton(text: text) }
+            Text(text)
+                .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
+                .foregroundStyle(theme.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     /// Bands in the app's canonical platform order, skipping any not present.

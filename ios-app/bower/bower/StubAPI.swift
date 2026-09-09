@@ -89,6 +89,23 @@ struct StubAPI: BowerAPIClient {
                 brand: "Carhartt", clothingType: "Detroit jacket", title: "Carhartt Detroit Jacket — Hamilton Brown, M",
                 colourPrimary: "Hamilton brown", size: "M", condition: "Good",
                 priceMin: 18, priceMax: 26, preferredPlatform: .depop,
+                listing: NeutralListing(
+                    brand: "Carhartt", clothingType: "Detroit jacket",
+                    colourPrimary: "Hamilton brown", colourSecondary: nil,
+                    condition: .good, size: "M", material: "100% cotton duck",
+                    title: "Carhartt Detroit Jacket — Hamilton Brown, Size M",
+                    description: "Carhartt Detroit jacket in Hamilton brown, size M. 100% cotton duck with a corduroy collar and blanket lining. Good nick — light wear at the cuffs, no rips or stains, all poppers work.",
+                    hashtags: ["carhartt", "workwear", "detroitjacket"],
+                    priceMin: 18, priceMax: 26,
+                    priceReasoning: "Judged from the photos alone.",
+                    gender: "men", mainCategory: "Coats & jackets", subcategory: "Workwear",
+                    fields: [
+                        ListingField(label: "Category", value: "Men > Clothing > Outerwear > Coats & jackets", hint: nil),
+                        ListingField(label: "Brand", value: "Carhartt", hint: nil),
+                        ListingField(label: "Size", value: "M", hint: nil),
+                        ListingField(label: "Condition", value: "Good", hint: nil),
+                    ]
+                ),
                 valuation: StoredValuation(
                     perPlatform: [Platform.depop.rawValue: band(42, 58, .depop), Platform.vinted.rawValue: band(34, 46, .vinted)],
                     query: "Carhartt Detroit jacket M brown",
@@ -99,7 +116,20 @@ struct StubAPI: BowerAPIClient {
                 id: "h2", createdAt: "2026-09-07T19:05:00Z", sessionId: "s2",
                 brand: "Levi's", clothingType: "501 jeans", title: "Levi's 501 Original, W32 L34",
                 colourPrimary: "Mid wash", size: "W32 L34", condition: "Excellent",
-                priceMin: 22, priceMax: 34, preferredPlatform: .vinted, valuation: nil
+                priceMin: 22, priceMax: 34, preferredPlatform: .vinted,
+                listing: NeutralListing(
+                    brand: "Levi's", clothingType: "501 jeans",
+                    colourPrimary: "Mid wash", colourSecondary: nil,
+                    condition: .excellent, size: "W32 L34", material: "100% cotton denim",
+                    title: "Levi's 501 Original, W32 L34",
+                    description: "Levi's 501 Original in a mid wash, W32 L34. Straight leg, button fly. Excellent condition, barely worn.",
+                    hashtags: ["levis", "501", "denim"],
+                    priceMin: 22, priceMax: 34,
+                    priceReasoning: "Judged from the photos alone.",
+                    gender: "men", mainCategory: "Jeans", subcategory: "Straight",
+                    fields: nil
+                ),
+                valuation: nil
             ),
         ]
     }

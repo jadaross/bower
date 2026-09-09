@@ -216,6 +216,8 @@ struct HistoryItem: Codable, Sendable, Identifiable {
     let priceMin: Double?
     let priceMax: Double?
     let preferredPlatform: Platform?
+    /// The full Neutral Listing as first seen — for the detail view. Nil on older rows.
+    let listing: NeutralListing?
     /// Present once a real price search ran for this item.
     let valuation: StoredValuation?
 }
