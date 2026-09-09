@@ -11,6 +11,13 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
  *
  * Next.js calls the exported `register()` once at server start.
  */
+// Best practice: traces should say which environment they came from. Default
+// it from Vercel/Node before the processor reads LANGFUSE_TRACING_ENVIRONMENT.
+if (!process.env.LANGFUSE_TRACING_ENVIRONMENT) {
+  process.env.LANGFUSE_TRACING_ENVIRONMENT =
+    process.env.VERCEL_ENV ?? process.env.NODE_ENV ?? "development";
+}
+
 function makeProcessor(): LangfuseSpanProcessor | null {
   if (!(process.env.LANGFUSE_PUBLIC_KEY && process.env.LANGFUSE_SECRET_KEY)) {
     return null;
@@ -24,6 +31,7 @@ export const langfuseSpanProcessor = makeProcessor();
 
 export function register(): void {
   if (!langfuseSpanProcessor) return;
+  if (!process.env.OTEL_SERVICE_NAME) process.env.OTEL_SERVICE_NAME = "bower";
   const sdk = new NodeSDK({ spanProcessors: [langfuseSpanProcessor] });
   sdk.start();
 }
