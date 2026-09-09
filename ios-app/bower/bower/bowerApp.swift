@@ -11,7 +11,15 @@ struct bowerApp: App {
         // simulator and for demos; the flag does not exist in Release builds.
         if CommandLine.arguments.contains("-bowerStub") {
             let s = AppState(session: SupabaseSession(), api: StubAPI())
-            s.screen = .capture
+            // `-bowerScreen signin` (or any `Screen` raw value) opens there
+            // instead of Home, so the one-time pages can be looked at too.
+            let args = CommandLine.arguments
+            if let i = args.firstIndex(of: "-bowerScreen"), i + 1 < args.count,
+               let start = Screen(rawValue: args[i + 1]) {
+                s.screen = start
+            } else {
+                s.screen = .capture
+            }
             _state = State(initialValue: s)
             return
         }

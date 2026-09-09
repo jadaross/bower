@@ -31,7 +31,8 @@ npm test         # Vitest — 222 tests across the backend
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26 against iOS 26.5.
 Prefer the XcodeBuildMCP tools; call `session_show_defaults` first. Launch with
 `-bowerStub` to run every screen on fixtures with no network and no sign-in — DEBUG
-only, the flag does not exist in Release.
+only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,
+`platforms`, …) to open on one of the one-time pages instead of Home.
 
 ## Environment
 
@@ -72,7 +73,7 @@ work it had not enabled.
 | `src/lib/allowance.ts` | The Allowance meter. Counting itself lives in SQL, not here |
 | `src/lib/profile.ts` | Enabled Platforms, read and written as the caller |
 | `supabase/migrations/*` | The schema, and the source of truth for it — never edit in the dashboard |
-| `ios-app/bower/` | **The app.** Six screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
+| `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
 | `ios-app/bower/bower/BowerAPI.swift` | The client, behind `BowerAPIClient`. `StubAPI` is the fixture implementation |
 | `ios-app/bower/bower/Wire.swift` | Codable mirrors of `types.ts` — keep in step. The wire's `Comparable` is `ComparableListing` here |
 | `ios-app/bower/Info.plist` | A *partial* plist merged with the generated one. Custom keys cannot travel via `INFOPLIST_KEY_*`; it sits outside the synced folder deliberately; changing `INFOPLIST_FILE` needs a clean build |
@@ -81,9 +82,10 @@ work it had not enabled.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 222 tests. Client: six screens — sign in, platforms,
-capture, analysing, price-and-listing, settings — with real camera, real Supabase
-session, and every screen exercised in the simulator. Fonts, icon, usage strings,
+the Valuation, account deletion, 222 tests. Client: eight screens — the dark welcome
+(sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
+history, profile — plus the How-it-works sheet behind the `?` on home. Real camera,
+real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
 
 **Waiting on:** an App Store Connect record and the first archive (#33) — human
@@ -92,8 +94,11 @@ steps in Xcode. The ladder above v1 is ordered in #29.
 Two decisions that shape the client and are easy to undo by accident: sign-in is
 **Apple only** (a second method without account linking creates two accounts —
 #30), and `/api/analyse` streams a JSON *document* in text fragments, not events,
-so the client assembles then decodes. The one fact shown mid-stream is the title,
-pattern-matched out of the buffer the moment its closing quote arrives.
+so the client assembles then decodes. Three things are surfaced mid-stream, each a
+real wire event (`AnalyseProgress`): the stream opening, the title (pattern-matched
+out of the buffer the moment its closing quote arrives), and the `tag_data` key,
+which means the listing has closed. The read screen's four frames step on those —
+never on a timer.
 
 ### Prompt design
 
@@ -141,5 +146,7 @@ centre. The wordmark is `bower` in italic serif with a coral full stop. The acce
 moved from `#3b5cff` to the deeper `#2B3AA8`, so the bowerbird-prizes-blue reasoning
 behind the name still holds.
 
-Two things the app says in its own voice, and should keep saying: copy confirmations
-read **"In the bower"**, and the analyse action is **"Have a squiz"**.
+One thing the app says in its own voice, and should keep saying: copy confirmations
+read **"In the bower"**. The analyse action is plainly **"Price it"** — it used to be
+"Suss it out", which was charming once and vague every time after; the verb carries
+the meaning and the serif title carries the voice.

@@ -267,10 +267,6 @@ private struct PriceSection: View {
                             .background(theme.pollen.opacity(0.2))
                             .clipShape(RoundedRectangle(cornerRadius: 5))
                         Spacer()
-                        if state.remaining > 0 {
-                            Text("costs 1 of \(state.remaining)")
-                                .font(BowerFont.mono(10)).foregroundStyle(theme.muted)
-                        }
                     }
                 }
             }
@@ -278,7 +274,7 @@ private struct PriceSection: View {
             if let e = model.searchError {
                 Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
             }
-            Text("Searches live listings across your platforms for an accurate figure.")
+            Text(state.remaining > 0 ? "Searches live listings. Costs 1 of \(state.remaining)." : "Searches live listings.")
                 .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
         }
     }

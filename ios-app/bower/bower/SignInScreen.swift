@@ -7,7 +7,6 @@ import AuthenticationServices
 struct SignInScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
-    @Environment(\.colorScheme) private var scheme
 
     // A reference holder, not @State: mutating a nonce inside the request
     // closure must be visible to the completion closure immediately, and a
@@ -18,61 +17,73 @@ struct SignInScreen: View {
     @State private var failure: String?
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 24)
+        // Avenue ground: the launch splash carries straight through into this
+        // page instead of fading into a paler second version of itself.
+        ZStack {
+            theme.avenue.ignoresSafeArea()
+            VStack(spacing: 0) {
+                Spacer(minLength: 24)
 
-            VStack(spacing: 16) {
-                Arch(size: 92)
-                VStack(spacing: 7) {
-                    HStack(spacing: 0) {
-                        Text("bower").foregroundStyle(theme.text)
-                        Text(".").foregroundStyle(theme.coral)
+                VStack(spacing: 18) {
+                    Arch(size: 104, stroke: theme.sheen, dot: theme.pollen)
+                    VStack(spacing: 10) {
+                        HStack(spacing: 0) {
+                            Text("bower").foregroundStyle(Self.paper)
+                            Text(".").foregroundStyle(theme.coral)
+                        }
+                        .font(BowerFont.serif(64))
+
+                        Text("Love selling your clothes.\nHate writing the listings.")
+                            .font(BowerFont.ui(16))
+                            .foregroundStyle(Self.paper.opacity(0.74))
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(4)
+                            .frame(maxWidth: 250)
+                            .padding(.top, 2)
                     }
-                    .font(BowerFont.serif(58))
+                }
+                .padding(.bottom, 30)
 
-                    Text("Shiny things, arranged nicely.")
-                        .font(BowerFont.ui(13.5))
-                        .foregroundStyle(theme.muted)
+                Spacer(minLength: 28)
+
+                VStack(spacing: 12) {
+                    if let failure { rejection(failure) }
+
+                    SignInWithAppleButton(.signIn) { request in
+                        let fresh = SupabaseSession.AppleNonce()
+                        nonces.current = fresh
+                        request.requestedScopes = [.email]
+                        request.nonce = fresh.hashed
+                    } onCompletion: { result in
+                        Task { await complete(result) }
+                    }
+                    .signInWithAppleButtonStyle(.white)
+                    .frame(height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .disabled(working)
+                    .overlay {
+                        if working {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.black.opacity(0.35))
+                                .overlay { ProgressView().tint(.white) }
+                        }
+                    }
+
+                    Text("Photos are read and thrown away. Bower keeps no images.")
+                        .font(BowerFont.ui(11.5))
+                        .foregroundStyle(Self.paper.opacity(0.45))
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: 210)
+                        .padding(.top, 2)
                 }
             }
-
-            Spacer(minLength: 28)
-
-            VStack(spacing: 12) {
-                if let failure { rejection(failure) }
-
-                SignInWithAppleButton(.signIn) { request in
-                    let fresh = SupabaseSession.AppleNonce()
-                    nonces.current = fresh
-                    request.requestedScopes = [.email]
-                    request.nonce = fresh.hashed
-                } onCompletion: { result in
-                    Task { await complete(result) }
-                }
-                .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
-                .frame(height: 50)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .disabled(working)
-                .overlay {
-                    if working {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(.black.opacity(0.35))
-                            .overlay { ProgressView().tint(.white) }
-                    }
-                }
-
-                Text("Photos are read and thrown away — bower keeps no images.")
-                    .font(BowerFont.ui(11.5))
-                    .foregroundStyle(theme.muted)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 2)
-            }
+            .padding(.horizontal, 26)
+            .padding(.bottom, 30)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 34)
     }
+
+    /// The dark theme's text colour, used here in both appearances because
+    /// the page is always on avenue.
+    private static let paper = Color(hex: 0xF2EEE6)
 
     private func rejection(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
@@ -84,12 +95,12 @@ struct SignInScreen: View {
                 .clipShape(Circle())
             Text(message)
                 .font(BowerFont.ui(12.5))
-                .foregroundStyle(theme.text)
+                .foregroundStyle(Self.paper)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
-        .background(theme.coral.opacity(0.08))
+        .background(theme.coral.opacity(0.18))
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 

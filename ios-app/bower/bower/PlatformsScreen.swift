@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Captures Enabled Platforms. Shown once; the same content lives in Settings
-/// afterwards, where it stays editable.
+/// Captures Enabled Platforms. Shown once, as the second of the two set-up
+/// pages; the same content lives in Settings afterwards, where it stays editable.
 struct PlatformsScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -12,18 +12,17 @@ struct PlatformsScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 0) {
-                Kicker("Set once · change any time")
-                Text("What do you sell on?")
+                Text("Where do you sell?")
                     .font(BowerFont.serif(38))
                     .foregroundStyle(theme.text)
-                    .padding(.top, 6)
-                Text("Bower only prices and writes for the places you actually post. Nothing else gets searched.")
+                Text("Only these get priced and written for.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.muted)
                     .padding(.top, 8)
             }
 
             VStack(spacing: 10) { ForEach(Platform.allCases) { row(for: $0) } }
+                .padding(.top, 2)
 
             if blocked != nil { keepOne }
 
@@ -117,7 +116,7 @@ struct PlatformsScreen: View {
     private var keepOneText: AttributedString {
         var lead = AttributedString("Keep at least one. ")
         lead.foregroundColor = theme.text
-        var tail = AttributedString("With none selected there is nothing to price against and nothing to write for.")
+        var tail = AttributedString("Nothing to price against otherwise.")
         tail.foregroundColor = theme.muted
         return lead + tail
     }

@@ -46,7 +46,7 @@ struct SettingsScreen: View {
                         .buttonStyle(.plain)
                     }
                 }
-                Text("Every listing gets written in this one's voice first. You can still switch on the listing screen.")
+                Text("Written in this voice first. Switch any time.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.leading, 4)
             }
 
@@ -159,7 +159,7 @@ struct SettingsScreen: View {
                 .frame(height: 6)
                 .padding(.top, 12)
                 .animation(.easeOut(duration: 0.5), value: pct)
-                Text("A read costs one. A real market search costs one. There's no way to buy more in this version.")
+                Text("A read costs 1. A price search costs 1.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.top, 9)
             }
         }

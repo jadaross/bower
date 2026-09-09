@@ -52,30 +52,19 @@ struct CaptureScreen: View {
 
     // MARK: - Content
 
+    /// One headline, and the action fills the page. What to shoot and why
+    /// lives behind the ? in the nav, read once, not on the screen every time.
     private var content: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 0) {
-                Kicker(empty ? "Add as many as you like" : "\(state.photos.count) photo\(state.photos.count == 1 ? "" : "s") · add as many as you like")
-                Text(empty ? "Photograph the thing" : "Anything else worth a shot?")
-                    .font(BowerFont.serif(30))
-                    .foregroundStyle(theme.text)
-                    .padding(.top, 5)
-                Text("More angles read better, but one photo is enough to start. Daylight, plain wall, tag flat.")
-                    .font(BowerFont.ui(13))
-                    .foregroundStyle(theme.muted)
-                    .padding(.top, 6)
-            }
+        VStack(alignment: .leading, spacing: 12) {
+            if empty { captureZone } else { pile }
 
             suggestions
 
-            if !empty { pile }
-
             VStack(spacing: 9) {
                 if empty {
-                    BowerButton(title: "Take a photo", icon: "camera") { openCamera() }
                     BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
                 } else {
-                    BowerButton(title: "Suss it out") { state.screen = .analysing }
+                    BowerButton(title: "Price it") { state.screen = .analysing }
                     HStack(spacing: 9) {
                         BowerButton(title: "Upload more", kind: .secondary) { showLibrary = true }
                         Button("Clear") { state.photos = [] }
@@ -96,44 +85,78 @@ struct CaptureScreen: View {
             }
         }
         .padding(.horizontal, 22)
-        .padding(.top, 16)
-        .padding(.bottom, 30)
+        .padding(.bottom, 22)
+        .animation(.snappy(duration: 0.22), value: empty)
     }
 
-    private var suggestions: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Kicker("Worth including")
-            FlowLayout(spacing: 7) {
-                    ForEach(SuggestedShot.allCases) { shot in
-                        let covered = state.photos.contains { $0.shot == shot }
-                        Button {
-                            pendingShot = shot
-                            showSheet = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                if covered {
-                                    Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(theme.moss)
-                                } else {
-                                    Image(systemName: shot.symbol).font(.system(size: 12)).foregroundStyle(theme.muted)
-                                }
-                                Text(shot.label).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text)
-                            }
-                            .padding(.vertical, 6)
-                            .padding(.leading, 8)
-                            .padding(.trailing, 11)
-                            .background(covered ? theme.moss.opacity(0.08) : .clear)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(covered ? theme.moss.opacity(0.45) : theme.line, lineWidth: 0.5))
-                        }
-                        .buttonStyle(.plain)
-                    }
+    /// The empty state: a big, obvious place to tap. Opens the camera.
+    private var captureZone: some View {
+        Button { openCamera() } label: {
+            VStack(spacing: 14) {
+                Image(systemName: "camera")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 62, height: 62)
+                    .background(theme.satin)
+                    .clipShape(Circle())
+                VStack(spacing: 5) {
+                    Text("Photograph the piece")
+                        .font(BowerFont.serif(32))
+                        .foregroundStyle(theme.text)
+                    Text("One photo is enough to start.")
+                        .font(BowerFont.ui(13.5))
+                        .foregroundStyle(theme.muted)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(minHeight: 300)
+            .background(
+                LinearGradient(colors: [theme.shell.opacity(0.5), theme.card.opacity(0.7)],
+                               startPoint: .top, endPoint: .bottom)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .strokeBorder(theme.satin.opacity(0.27), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 20))
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 13)
-        .background(theme.card)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+        .buttonStyle(.plain)
+        .accessibilityLabel("Photograph the piece")
+    }
+
+    /// One row of chips, scrolling sideways. Each is a suggestion, not a slot —
+    /// tapping one opens the camera with a hint, and it ticks once covered.
+    private var suggestions: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 7) {
+                ForEach(SuggestedShot.allCases) { shot in
+                    let covered = state.photos.contains { $0.shot == shot }
+                    Button {
+                        pendingShot = shot
+                        showSheet = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            if covered {
+                                Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(theme.moss)
+                            } else {
+                                Image(systemName: shot.symbol).font(.system(size: 12)).foregroundStyle(theme.muted)
+                            }
+                            Text(shot.label).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text)
+                        }
+                        .padding(.vertical, 7)
+                        .padding(.leading, 9)
+                        .padding(.trailing, 12)
+                        .background(covered ? theme.moss.opacity(0.08) : theme.card)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(covered ? theme.moss.opacity(0.45) : theme.line, lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .scrollClipDisabled()
     }
 
     private var pile: some View {

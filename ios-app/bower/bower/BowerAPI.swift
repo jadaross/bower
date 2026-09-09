@@ -22,12 +22,12 @@ protocol BowerAPIClient: Sendable {
     func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform) async throws -> ProfileResponse
     func setPreferredPlatform(_ platform: Platform) async throws -> ProfileResponse
     /// Photos in, Neutral Listing out. Streams, and assembles before returning —
-    /// the wire format is a JSON document delivered in text fragments. One fact
-    /// is surfaced mid-flight: the title, called back the moment it is complete
-    /// in the buffer, so the user sees what the read made of the item while
-    /// the description is still being written.
+    /// the wire format is a JSON document delivered in text fragments. Three
+    /// things are surfaced mid-flight, each a real event on the wire (see
+    /// `AnalyseProgress`), so the analysing screen can show the read as it
+    /// happens rather than a spinner and a guess.
     func analyse(images: [Data], tone: Tone, platform: Platform?,
-                 onTitle: @escaping @Sendable (String) -> Void) async throws -> AnalysisResult
+                 onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult
     func valuate(item: ValuationItem) async throws -> ValuationResponse
     func format(listing: NeutralListing, platform: Platform, tone: Tone) async throws -> PlatformListing
     func refine(listing: PlatformListing, platform: Platform, instructions: [String]) async throws -> PlatformListing
@@ -37,6 +37,21 @@ protocol BowerAPIClient: Sendable {
     func history() async throws -> [HistoryItem]
     /// Records a feedback signal against a listing's Langfuse trace. Best-effort.
     func feedback(traceId: String, name: String, value: Int?) async throws
+}
+
+/// What an analyse call reports before it returns, in the order it happens.
+/// Every case is something that actually occurred on the wire — none is a
+/// timer — so the screen that shows them never claims progress it has not seen.
+enum AnalyseProgress: Sendable, Equatable {
+    /// The server has accepted the photos and opened the stream. The model is
+    /// looking at the images; nothing has been written yet.
+    case reading
+    /// The listing title is complete in the buffer — the first field written,
+    /// so this is the moment the read has an opinion about what the item is.
+    case title(String)
+    /// The listing object has closed and the tag OCR is streaming. Only the
+    /// short tail of the document remains.
+    case finishing
 }
 
 // MARK: - Live
@@ -208,7 +223,7 @@ struct BowerAPI: BowerAPIClient {
     // MARK: analyse — the streaming one
 
     func analyse(images: [Data], tone: Tone, platform: Platform?,
-                 onTitle: @escaping @Sendable (String) -> Void) async throws -> AnalysisResult {
+                 onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult {
         struct Body: Encodable { let images: [String]; let tone: Tone; let platform: Platform? }
         let body = Body(images: images.map { $0.base64EncodedString() }, tone: tone, platform: platform)
         // A new analyse starts a new item; format/refine/valuate reuse this id.
@@ -219,7 +234,7 @@ struct BowerAPI: BowerAPIClient {
         // The model call runs long; the default 60s is not enough.
         req.timeoutInterval = 120
 
-        let assembled = try await readStringStream(req, onTitle: onTitle)
+        let assembled = try await readStringStream(req, onProgress: onProgress)
         guard let data = assembled.data(using: .utf8) else {
             throw APIError.decoding(URLError(.cannotDecodeContentData))
         }
@@ -233,12 +248,12 @@ struct BowerAPI: BowerAPIClient {
     /// The wire format is defined once, in `src/lib/streaming-text.ts`: each
     /// frame is `data: ` followed by a JSON-encoded *string* fragment, and a
     /// `[DONE]` sentinel closes the stream. Fragments are concatenated into one
-    /// document — there are no structured events. The one thing read early is
-    /// the listing title, found by pattern in the growing buffer as soon as its
-    /// closing quote has arrived. Malformed frames are skipped, matching the
-    /// reference consumer.
+    /// document — there are no structured events. Two things are read early by
+    /// pattern in the growing buffer: the listing title, as soon as its closing
+    /// quote has arrived, and the `tag_data` key, which means the listing has
+    /// closed. Malformed frames are skipped, matching the reference consumer.
     private func readStringStream(_ req: URLRequest,
-                                  onTitle: (@Sendable (String) -> Void)? = nil) async throws -> String {
+                                  onProgress: (@Sendable (AnalyseProgress) -> Void)? = nil) async throws -> String {
         let (bytes, response): (URLSession.AsyncBytes, URLResponse)
         do {
             (bytes, response) = try await urlSession.bytes(for: req)
@@ -252,8 +267,11 @@ struct BowerAPI: BowerAPIClient {
             try Self.check(response, collected)
         }
 
+        onProgress?(.reading)
+
         var assembled = ""
         var titleSeen = false
+        var tailSeen = false
         do {
             for try await line in bytes.lines {
                 guard line.hasPrefix("data: ") else { continue }
@@ -261,9 +279,13 @@ struct BowerAPI: BowerAPIClient {
                 if payload == "[DONE]" { return assembled }
                 guard let fragment = try? Self.decoder.decode(String.self, from: Data(payload.utf8)) else { continue }
                 assembled += fragment
-                if !titleSeen, let onTitle, let title = Self.earlyTitle(in: assembled) {
+                if !titleSeen, let title = Self.earlyTitle(in: assembled) {
                     titleSeen = true
-                    onTitle(title)
+                    onProgress?(.title(title))
+                }
+                if !tailSeen, assembled.contains("\"tag_data\"") {
+                    tailSeen = true
+                    onProgress?(.finishing)
                 }
             }
         } catch {

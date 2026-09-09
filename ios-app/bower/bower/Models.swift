@@ -137,10 +137,11 @@ enum SuggestedShot: String, CaseIterable, Identifiable {
 
 // MARK: - Navigation
 
-/// Six screens. Confirm was folded into `listing` — correction happens there
-/// under "Not right?" rather than as a stop of its own.
+/// Confirm was folded into `listing` — correction happens there under
+/// "Not right?" rather than as a stop of its own. `how` is the one-time
+/// "what bower does" page between sign-in and the platforms question.
 enum Screen: String, Hashable {
-    case signin, platforms, capture, analysing, listing, settings, history
+    case signin, how, platforms, capture, analysing, listing, settings, history
 }
 
 // MARK: - App state
@@ -164,14 +165,14 @@ final class AppState {
     init(session: SupabaseSession, api: any BowerAPIClient) {
         self.session = session
         self.api = api
-        screen = session.hasSession ? (onboardingComplete ? .capture : .platforms) : .signin
+        screen = session.hasSession ? (onboardingComplete ? .capture : .how) : .signin
     }
 
     /// After sign-in: pull the profile so Enabled Platforms and the allowance
     /// are the server's truth, then route past onboarding if it is done.
     func didSignIn() async {
         await loadProfile()
-        screen = onboardingComplete ? .capture : .platforms
+        screen = onboardingComplete ? .capture : .how
     }
 
     /// Called once at launch. A returning user's Enabled Platforms, Preferred

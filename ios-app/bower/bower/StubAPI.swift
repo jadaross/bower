@@ -39,10 +39,16 @@ struct StubAPI: BowerAPIClient {
     }
 
     func analyse(images: [Data], tone: Tone, platform: Platform?,
-                 onTitle: @escaping @Sendable (String) -> Void) async throws -> AnalysisResult {
-        try await Task.sleep(for: .seconds(1))
-        onTitle("Carhartt Detroit Jacket — Hamilton Brown, Size M")
-        try await Task.sleep(for: .seconds(1))
+                 onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult {
+        // Paced like the real thing: the stream opens fast, the title lands
+        // around the image-reading floor, the tail is short.
+        try await Task.sleep(for: .milliseconds(600))
+        onProgress(.reading)
+        try await Task.sleep(for: .milliseconds(1500))
+        onProgress(.title("Carhartt Detroit Jacket — Hamilton Brown, Size M"))
+        try await Task.sleep(for: .milliseconds(1500))
+        onProgress(.finishing)
+        try await Task.sleep(for: .milliseconds(900))
         return AnalysisResult(
             tagData: TagData(
                 brand: "Carhartt", size: "M", sizeSystem: "US",

@@ -76,6 +76,7 @@ struct RootView: View {
     @Environment(\.colorScheme) private var scheme
 
     @State private var showSplash = true
+    @State private var showHelp = false
 
     private var theme: BowerTheme { .of(scheme) }
 
@@ -83,13 +84,22 @@ struct RootView: View {
         ZStack {
             theme.bg.ignoresSafeArea()
 
-            if state.screen == .analysing {
+            switch state.screen {
+            case .analysing:
                 AnalysingScreen()
-            } else {
+            case .signin:
+                // Full-bleed on avenue, like analysing — no nav, no scroll.
+                SignInScreen()
+            default:
                 VStack(spacing: 0) {
                     nav
-                    ScrollView { body(for: state.screen) }
+                    GeometryReader { geo in
+                        ScrollView {
+                            body(for: state.screen)
+                                .frame(maxWidth: .infinity, minHeight: fillsHeight ? geo.size.height : 0, alignment: .top)
+                        }
                         .scrollBounceBehavior(.basedOnSize)
+                    }
                 }
                 .safeAreaInset(edge: .bottom) {
                     if showsTabBar {
@@ -103,6 +113,13 @@ struct RootView: View {
                 LaunchSplash().transition(.opacity).zIndex(10)
             }
         }
+        .sheet(isPresented: $showHelp) {
+            HelpSheet()
+                .environment(\.bower, theme)
+                .presentationDetents([.fraction(0.78)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
         .environment(\.bower, theme)
         .animation(.snappy(duration: 0.22), value: state.screen)
         .task {
@@ -115,6 +132,15 @@ struct RootView: View {
         Task {
             try? await Task.sleep(for: .seconds(0.9))
             withAnimation(.easeOut(duration: 0.35)) { showSplash = false }
+        }
+    }
+
+    /// Pages whose primary button sits at the foot, with the content filling
+    /// the height above it. The rest are lists and read from the top.
+    private var fillsHeight: Bool {
+        switch state.screen {
+        case .how, .platforms, .capture: return true
+        default: return false
         }
     }
 
@@ -146,18 +172,20 @@ struct RootView: View {
         switch state.screen {
         case .signin, .analysing:
             EmptyView()
-        case .platforms:
+        case .how:
             BowerNav(title: "Set up") {
                 EmptyView()
+            } trailing: {
+                Text("1 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+            }
+        case .platforms:
+            BowerNav(title: "Set up") {
+                BackButton(label: "Back") { state.screen = .how }
             } trailing: {
                 Text("2 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
             }
         case .capture:
-            BowerNav(title: "bower", large: true, wordmark: true) {
-                EmptyView()
-            } trailing: {
-                EmptyView()
-            }
+            HomeNav { showHelp = true }
         case .listing:
             BowerNav(title: "Price and listing") {
                 BackButton(label: "Photos") { state.screen = .capture }
@@ -174,6 +202,7 @@ struct RootView: View {
     @ViewBuilder private func body(for screen: Screen) -> some View {
         switch screen {
         case .signin:    SignInScreen()
+        case .how:       HowScreen()
         case .platforms: PlatformsScreen()
         case .capture:   CaptureScreen()
         case .analysing: AnalysingScreen()
@@ -181,6 +210,45 @@ struct RootView: View {
         case .history:   HistoryScreen()
         case .settings:  SettingsScreen()
         }
+    }
+}
+
+// MARK: - Home nav
+
+/// The mark and the wordmark on the left, the ? on the right, one row. Home
+/// has no serif headline under it any more, so the wordmark carries the page.
+struct HomeNav: View {
+    let onHelp: () -> Void
+    @Environment(\.bower) private var theme
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 9) {
+                Arch(size: 30)
+                HStack(spacing: 0) {
+                    Text("bower").foregroundStyle(theme.text)
+                    Text(".").foregroundStyle(theme.coral)
+                }
+                .font(BowerFont.serif(36))
+            }
+            Spacer()
+            Button(action: onHelp) {
+                Text("?")
+                    .font(BowerFont.ui(17, weight: .semibold))
+                    .foregroundStyle(theme.satin)
+                    .frame(width: 44, height: 44)
+                    .background(theme.card)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(theme.line, lineWidth: 0.5))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("How bower works")
+        }
+        .padding(.leading, 20)
+        .padding(.trailing, 18)
+        .padding(.top, 6)
+        .padding(.bottom, 12)
+        .background(theme.chrome)
     }
 }
 

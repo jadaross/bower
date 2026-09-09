@@ -1,17 +1,23 @@
 import SwiftUI
 
-/// One mark, one word, and then the title. The arch fills while the photos
-/// are read; the item's title appears the moment the stream has written it,
-/// well before the description and price. There is still no percentage: the
-/// fragments are opaque, so any number would be invented.
+/// The read, shown as it happens. Four frames, one per stage of the read,
+/// each swept once and ticked; the stage label under them names what the
+/// server is actually doing, and the item's title lands the moment the stream
+/// has written it. Nothing here is a timer — every step is a real event on
+/// the wire (`AnalyseProgress`) — so there is still no percentage: the
+/// fragments are opaque, and any number would be invented.
 struct AnalysingScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
 
     enum Phase: Equatable { case reading, failed, allowance(AllowanceState) }
 
+    /// Left to right. `sent` is true the moment the request is built; the rest
+    /// arrive from the stream.
+    private static let stages = ["Photos sent", "Reading tag and label", "Writing the listing", "Finishing touches"]
+
     @State private var phase: Phase = .reading
-    @State private var fill: CGFloat = 0
+    @State private var stage = 0
     @State private var title: String?
     @State private var task: Task<Void, Never>?
 
@@ -31,34 +37,54 @@ struct AnalysingScreen: View {
     // MARK: Reading
 
     private var reading: some View {
-        VStack(spacing: 26) {
-            ArchFill(progress: fill, stroke: .white, fillColor: theme.sheen, dot: theme.pollen)
-                .frame(width: 190, height: 190)
-            VStack(spacing: 14) {
-                Text("Sussing it out")
-                    .font(BowerFont.serif(40))
-                    .foregroundStyle(.white)
-                if let title {
-                    Text(title)
-                        .font(BowerFont.ui(15, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.75))
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 290)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+        VStack(alignment: .leading, spacing: 38) {
+            HStack(spacing: 10) {
+                ForEach(0..<Self.stages.count, id: \.self) { n in
+                    ReadFrame(state: n < stage ? .read : (n == stage ? .active : .waiting), pollen: theme.pollen)
                 }
             }
+
+            VStack(alignment: .leading, spacing: 0) {
+                Kicker(Self.stages[min(stage, Self.stages.count - 1)], color: theme.pollen)
+                    .contentTransition(.opacity)
+                    .animation(.easeOut(duration: 0.25), value: stage)
+
+                Group {
+                    if let title {
+                        Text(title)
+                            .font(BowerFont.serif(44))
+                            .lineSpacing(2)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    } else {
+                        Text("Reading your photos")
+                            .font(BowerFont.serif(36))
+                            .opacity(0.9)
+                    }
+                }
+                .foregroundStyle(.white)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 130, alignment: .top)
+                .padding(.top, 12)
+
+                HStack(spacing: 4) {
+                    ForEach(0..<Self.stages.count, id: \.self) { n in
+                        Capsule()
+                            .fill(n <= stage ? theme.sheen : .white.opacity(0.15))
+                            .frame(height: 2)
+                    }
+                }
+                .padding(.top, 8)
+                .animation(.easeOut(duration: 0.4), value: stage)
+            }
         }
-        .padding(30)
-        .animation(.easeOut(duration: 0.3), value: title)
+        .padding(.horizontal, 30)
+        .animation(.easeOut(duration: 0.45), value: title)
     }
 
     private func start() {
         phase = .reading
         title = nil
-        // Breathe continuously while reading — a rising/falling fill that never
-        // stalls at the top — then snap to full when the result lands.
-        fill = 0.15
-        withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) { fill = 1.0 }
+        stage = 0
 
         task = Task {
             do {
@@ -66,13 +92,13 @@ struct AnalysingScreen: View {
                     images: state.photos.map(\.data),
                     tone: .casual,
                     platform: state.preferred,
-                    onTitle: { t in Task { @MainActor in title = t } }
+                    onProgress: { p in Task { @MainActor in advance(p) } }
                 )
                 guard !Task.isCancelled else { return }
                 state.analysis = result
                 state.used += 1
-                withAnimation(.easeOut(duration: 0.3)) { fill = 1 }
-                try? await Task.sleep(for: .milliseconds(320))
+                stage = Self.stages.count
+                try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {
                 state.used = a.used; state.allowance = a.limit
@@ -82,6 +108,16 @@ struct AnalysingScreen: View {
             } catch {
                 phase = .failed
             }
+        }
+    }
+
+    /// Stages only ever move forward; a late or repeated event cannot wind the
+    /// frames back.
+    private func advance(_ p: AnalyseProgress) {
+        switch p {
+        case .reading:        stage = max(stage, 1)
+        case .title(let t):   title = t; stage = max(stage, 2)
+        case .finishing:      stage = max(stage, 3)
         }
     }
 
@@ -104,7 +140,7 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
             title: "That's the lot for today",
-            body: "You've used all \(a.limit) reads this month. There's no way to buy more in this version, so it's a hard stop until it resets\(resetText(a))."
+            body: "That's all \(a.limit) reads for this month.\(resetText(a))"
         ) {
             Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }
@@ -113,7 +149,7 @@ struct AnalysingScreen: View {
 
     private func resetText(_ a: AllowanceState) -> String {
         guard let iso = a.resetsAt, let date = ISO8601DateFormatter().date(from: iso) else { return "" }
-        return " on \(date.formatted(.dateTime.day().month(.wide)))"
+        return " Resets \(date.formatted(.dateTime.day().month(.wide)))."
     }
 
     // MARK: Shared
@@ -153,45 +189,42 @@ struct AnalysingScreen: View {
     }
 }
 
-/// The arch, filling from the bottom. The same geometry as `Arch`, closed
-/// along the base so it can clip a rising fill.
-struct ArchFill: View {
-    var progress: CGFloat
-    var stroke: Color
-    var fillColor: Color
-    var dot: Color
+/// One frame of the read. Waiting is an outline; active is a pollen sweep
+/// running top to bottom; read is a tick that stays.
+private struct ReadFrame: View {
+    enum State { case waiting, active, read }
+    let state: State
+    let pollen: Color
+
+    @SwiftUI.State private var sweep = false
 
     var body: some View {
-        GeometryReader { geo in
-            let S = min(geo.size.width, geo.size.height)
-            let w = S * 0.5
-            let x = S / 2 - w / 2
-            let top = S * 0.2
-            let bot = S * 0.82
-            let shoulder = top + w / 2
-            let shape = Path { p in
-                p.move(to: CGPoint(x: x, y: bot))
-                p.addLine(to: CGPoint(x: x, y: shoulder))
-                p.addArc(center: CGPoint(x: S / 2, y: shoulder), radius: w / 2,
-                         startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false)
-                p.addLine(to: CGPoint(x: x + w, y: bot))
-                p.closeSubpath()
+        Color.clear
+            .aspectRatio(3 / 4, contentMode: .fit)
+            .background(.white.opacity(0.05))
+            .overlay {
+                if state == .active {
+                    GeometryReader { geo in
+                        LinearGradient(colors: [.clear, pollen, .clear], startPoint: .top, endPoint: .bottom)
+                            .opacity(0.8)
+                            .frame(height: geo.size.height * 0.38)
+                            .offset(y: sweep ? geo.size.height * 1.1 : -geo.size.height * 0.42)
+                            .animation(.linear(duration: 0.75).repeatForever(autoreverses: false), value: sweep)
+                            .onAppear { sweep = true }
+                    }
+                }
+                if state == .read {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(pollen)
+                        .transition(.scale.combined(with: .opacity))
+                }
             }
-
-            ZStack {
-                shape.fill(.white.opacity(0.06))
-                Rectangle()
-                    .fill(fillColor.opacity(0.9))
-                    .frame(height: S * progress)
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-                    .clipShape(shape)
-                shape.stroke(stroke, style: StrokeStyle(lineWidth: S * 0.035, lineJoin: .round))
-                Circle()
-                    .fill(dot)
-                    .frame(width: S * 0.15, height: S * 0.15)
-                    .position(x: S / 2, y: S * 0.58)
-            }
-            .frame(width: S, height: S)
-        }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(state == .active ? pollen : .white.opacity(0.14), lineWidth: 1)
+            )
+            .animation(.easeOut(duration: 0.3), value: state)
     }
 }
