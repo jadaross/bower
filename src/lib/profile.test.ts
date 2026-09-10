@@ -40,6 +40,7 @@ describe("getProfile", () => {
     expect(await getProfile("token-abc")).toEqual({
       enabledPlatforms: ["vinted", "depop"],
       preferredPlatform: "depop",
+      sellerNotes: [],
       allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
     });
   });

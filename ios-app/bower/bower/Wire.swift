@@ -231,5 +231,7 @@ struct HistoryResponse: Codable, Sendable {
 struct ProfileResponse: Codable, Sendable {
     let enabledPlatforms: [Platform]
     let preferredPlatform: Platform
+    /// Raw wire values; `SellerNote(rawValue:)` drops any the app does not know.
+    var sellerNotes: [String] = []
     let allowance: AllowanceState
 }

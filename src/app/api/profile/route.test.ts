@@ -5,11 +5,13 @@ vi.mock("@/lib/auth", async () => (await import("@/test/auth-mock")).authMock())
 const getProfile = vi.fn();
 const setEnabledPlatforms = vi.fn();
 const setPreferredPlatform = vi.fn();
+const setSellerNotes = vi.fn();
 vi.mock("@/lib/profile", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/profile")>()),
   getProfile,
   setEnabledPlatforms,
   setPreferredPlatform,
+  setSellerNotes,
 }));
 
 const deleteUser = vi.fn();
@@ -23,6 +25,7 @@ const { GET, PATCH, DELETE } = await import("./route");
 const profile = {
   enabledPlatforms: ["vinted", "depop"],
   preferredPlatform: "depop",
+  sellerNotes: [],
   allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
 };
 
@@ -57,6 +60,8 @@ beforeEach(() => {
     ...profile,
     preferredPlatform: preferred,
   }));
+  setSellerNotes.mockReset();
+  setSellerNotes.mockImplementation(async (_t, _u, notes) => ({ ...profile, sellerNotes: notes }));
 });
 
 describe("GET /api/profile", () => {
@@ -66,6 +71,7 @@ describe("GET /api/profile", () => {
     expect(await res.json()).toEqual({
       enabled_platforms: ["vinted", "depop"],
       preferred_platform: "depop",
+      seller_notes: [],
       allowance: { used: 4, limit: 20, resets_at: "2026-09-01T00:00:00.000Z" },
     });
   });
@@ -108,6 +114,19 @@ describe("PATCH /api/profile", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ preferred_platform: "vinted" });
     expect(setPreferredPlatform).toHaveBeenCalledWith("test-access-token", "test-user-id", "vinted");
+  });
+
+  it("updates the seller notes alone, deduplicated and in canonical order", async () => {
+    const res = await PATCH(patch({ seller_notes: ["bundles", "smoke_free", "bundles"] }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ seller_notes: ["smoke_free", "bundles"] });
+    expect(setSellerNotes).toHaveBeenCalledWith("test-access-token", "test-user-id", ["smoke_free", "bundles"]);
+  });
+
+  it("400s on an unknown seller note", async () => {
+    const res = await PATCH(patch({ seller_notes: ["smoke_free", "washed"] }));
+    expect(res.status).toBe(400);
+    expect(setSellerNotes).not.toHaveBeenCalled();
   });
 
   it("400s on a preferred platform that is not enabled", async () => {

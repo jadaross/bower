@@ -6,10 +6,12 @@ import {
   InvalidPreferredPlatform,
   setEnabledPlatforms,
   setPreferredPlatform,
+  setSellerNotes,
   validatePlatformSet,
   validatePreferredPlatform,
 } from "@/lib/profile";
 import type { Profile } from "@/lib/profile";
+import { InvalidSellerNotes, validateSellerNotes } from "@/lib/seller-notes";
 
 export const runtime = "nodejs";
 
@@ -17,6 +19,7 @@ function body(profile: Profile) {
   return {
     enabled_platforms: profile.enabledPlatforms,
     preferred_platform: profile.preferredPlatform,
+    seller_notes: profile.sellerNotes,
     allowance: {
       used: profile.allowance.used,
       limit: profile.allowance.limit,
@@ -41,6 +44,7 @@ export const GET = withAuth(async (_request, user) => {
 interface PatchBody {
   enabled_platforms?: unknown;
   preferred_platform?: unknown;
+  seller_notes?: unknown;
 }
 
 /**
@@ -55,9 +59,13 @@ export const PATCH = withAuth(async (request, user) => {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (patch.enabled_platforms === undefined && patch.preferred_platform === undefined) {
+  if (
+    patch.enabled_platforms === undefined &&
+    patch.preferred_platform === undefined &&
+    patch.seller_notes === undefined
+  ) {
     return Response.json(
-      { error: "enabled_platforms or preferred_platform is required" },
+      { error: "enabled_platforms, preferred_platform or seller_notes is required" },
       { status: 400 }
     );
   }
@@ -65,7 +73,9 @@ export const PATCH = withAuth(async (request, user) => {
   try {
     let profile: Profile;
 
-    if (patch.enabled_platforms !== undefined) {
+    if (patch.seller_notes !== undefined) {
+      profile = await setSellerNotes(user.token, user.id, validateSellerNotes(patch.seller_notes));
+    } else if (patch.enabled_platforms !== undefined) {
       const platforms = validatePlatformSet(patch.enabled_platforms);
       const preferred =
         patch.preferred_platform !== undefined
@@ -80,7 +90,11 @@ export const PATCH = withAuth(async (request, user) => {
 
     return Response.json(body(profile));
   } catch (err) {
-    if (err instanceof InvalidPlatformSet || err instanceof InvalidPreferredPlatform) {
+    if (
+      err instanceof InvalidPlatformSet ||
+      err instanceof InvalidPreferredPlatform ||
+      err instanceof InvalidSellerNotes
+    ) {
       return Response.json({ error: err.message }, { status: 400 });
     }
     const message = err instanceof Error ? err.message : "Unknown error";

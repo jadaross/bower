@@ -1,5 +1,6 @@
 import { withAuth } from "@/lib/auth";
 import { refineListing } from "@/lib/llm/refine";
+import { getSellerNotes } from "@/lib/profile";
 import type { Platform, PlatformListing } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -10,7 +11,7 @@ interface RequestBody {
   instructions: string[];
 }
 
-export const POST = withAuth(async (request) => {
+export const POST = withAuth(async (request, user) => {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: "ANTHROPIC_API_KEY is not configured" }, { status: 500 });
   }
@@ -32,7 +33,8 @@ export const POST = withAuth(async (request) => {
 
   try {
     let traceId: string | undefined;
-    const result = await refineListing({ platform, listing, instructions, onTraceId: (id) => { traceId = id; } });
+    const sellerNotes = await getSellerNotes(user.token).catch(() => []);
+    const result = await refineListing({ platform, listing, instructions, sellerNotes, onTraceId: (id) => { traceId = id; } });
     return Response.json({ ...result, trace_id: traceId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

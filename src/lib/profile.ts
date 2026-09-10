@@ -2,6 +2,7 @@ import { userClient } from "@/lib/supabase";
 import { PLATFORM_IDS } from "@/platforms";
 import type { Platform } from "@/lib/types";
 import type { AllowanceState } from "@/lib/allowance";
+import { SELLER_NOTES, type SellerNote } from "@/lib/seller-notes";
 
 /**
  * A user's Enabled Platforms and their meter.
@@ -19,19 +20,22 @@ export interface Profile {
   enabledPlatforms: Platform[];
   /** Which Enabled Platform listings are written for first. Always one of `enabledPlatforms`. */
   preferredPlatform: Platform;
+  /** Opt-in facts about the seller a listing may state. See `seller-notes.ts`. */
+  sellerNotes: SellerNote[];
   allowance: AllowanceState;
 }
 
 interface ProfileRow {
   enabled_platforms: Platform[];
   preferred_platform: Platform;
+  seller_notes: string[] | null;
   allowance_used: number;
   allowance_limit: number;
   allowance_period_start: string;
 }
 
 const SELECT =
-  "enabled_platforms, preferred_platform, allowance_used, allowance_limit, allowance_period_start";
+  "enabled_platforms, preferred_platform, seller_notes, allowance_used, allowance_limit, allowance_period_start";
 
 function toProfile(row: ProfileRow): Profile {
   const periodStart = new Date(row.allowance_period_start);
@@ -43,6 +47,7 @@ function toProfile(row: ProfileRow): Profile {
   return {
     enabledPlatforms: row.enabled_platforms,
     preferredPlatform: row.preferred_platform,
+    sellerNotes: SELLER_NOTES.filter((n) => (row.seller_notes ?? []).includes(n)),
     allowance: {
       used: row.allowance_used,
       limit: row.allowance_limit,
@@ -146,4 +151,25 @@ export async function setPreferredPlatform(
 
   if (error) throw new Error(`Could not update preferred platform: ${error.message}`);
   return toProfile(data as ProfileRow);
+}
+
+export async function setSellerNotes(
+  token: string,
+  userId: string,
+  notes: SellerNote[]
+): Promise<Profile> {
+  const { data, error } = await userClient(token)
+    .from("profiles")
+    .update({ seller_notes: notes })
+    .eq("id", userId)
+    .select(SELECT)
+    .single();
+
+  if (error) throw new Error(`Could not update seller notes: ${error.message}`);
+  return toProfile(data as ProfileRow);
+}
+
+/** The caller's seller notes, for the listing prompts. Empty when none are on. */
+export async function getSellerNotes(token: string): Promise<SellerNote[]> {
+  return (await getProfile(token)).sellerNotes;
 }

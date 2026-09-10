@@ -36,6 +36,45 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// MARK: - Seller notes
+
+/// The things a listing may say about the seller rather than the garment. The
+/// model cannot see any of them in a photo, so each is off until the user
+/// switches it on in Profile; the server then writes the one agreed line per
+/// platform (`src/lib/seller-notes.ts`). Raw values are the wire format.
+enum SellerNote: String, CaseIterable, Identifiable, Codable {
+    case smokeFree = "smoke_free"
+    case petFree = "pet_free"
+    case postsNextDay = "posts_next_day"
+    case bundles
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .smokeFree:    "Smoke-free home"
+        case .petFree:      "Pet-free home"
+        case .postsNextDay: "Posts within a day"
+        case .bundles:      "Happy to bundle"
+        }
+    }
+
+    /// The line the listing ends with, in Vinted's register, for the preview.
+    /// Mirrors `sellerNotesLine` on the server; the server's wording wins.
+    static func previewLine(_ on: Set<SellerNote>) -> String {
+        var parts: [String] = []
+        if on.contains(.smokeFree) && on.contains(.petFree) {
+            parts.append("From a smoke-free, pet-free home.")
+        } else {
+            if on.contains(.smokeFree) { parts.append("From a smoke-free home.") }
+            if on.contains(.petFree) { parts.append("Pet-free home.") }
+        }
+        if on.contains(.postsNextDay) { parts.append("Posted within a day.") }
+        if on.contains(.bundles) { parts.append("Happy to bundle.") }
+        return parts.joined(separator: " ")
+    }
+}
+
 // MARK: - Refinement Chips
 
 /// Kept in step with `src/lib/chip-vocab.ts` — the ids are the wire format and
@@ -68,10 +107,10 @@ enum RefinementChip: String, CaseIterable, Identifiable {
         case .longer:       "Add more useful detail without padding or repetition."
         case .casual:       "Make it more casual and conversational — natural, friendly, not corporate."
         case .serious:      "Tone down the emojis and fashion-speak; keep it plain and honest."
-        case .measurements: "Add a measurements section: chest 23\", length 26\", sleeve 25\" (only if not already present)."
-        case .hashtags:     "Expand the hashtags/keywords array with relevant search terms (no duplicates)."
-        case .condition:    "Stress the condition: be explicit that there are no rips, stains, smells, or repairs, and that the lining is intact."
-        case .vintage:      "Lean into the vintage angle — mention era (90s/2000s) and broken-in character."
+        case .measurements: "Add a measurements line for the seller to complete, laid flat, in cm, suited to the garment (e.g. \"Pit to pit __ cm, length __ cm, sleeve __ cm\"; waist and inseam for trousers). Only if not already present. Never invent a number."
+        case .hashtags:     "Expand the hashtags/keywords array with relevant search terms (no duplicates). Respect the platform cap (Depop 5, at most 2 brands; eBay none)."
+        case .condition:    "Move the condition to the first or second line and make it concrete using only what the listing already says: name the flaws it mentions in plain words (mark, stain, hole, pilling, fading) or, if it mentions none, say \"no marks or damage that I can see\". Do not add new claims such as \"no smells\" or \"lining intact\"."
+        case .vintage:      "Lean into the vintage angle only if the brand, tag or style already supports it; name the decade, never write \"rare\" or \"deadstock\"."
         }
     }
 }
@@ -193,6 +232,7 @@ final class AppState {
     func apply(_ p: ProfileResponse) {
         enabled = Set(p.enabledPlatforms)
         preferred = p.preferredPlatform
+        sellerNotes = Set(p.sellerNotes.compactMap(SellerNote.init(rawValue:)))
         used = p.allowance.used
         allowance = p.allowance.limit
     }
@@ -204,6 +244,14 @@ final class AppState {
     func savePreferred(_ platform: Platform) async {
         preferred = platform
         if let p = try? await api.setPreferredPlatform(platform) { apply(p) }
+    }
+
+    /// Flips one note and saves the set. Optimistic: the toggle moves at once,
+    /// and the server's answer, when it comes, is the truth.
+    func toggleSellerNote(_ note: SellerNote) async {
+        if sellerNotes.contains(note) { sellerNotes.remove(note) } else { sellerNotes.insert(note) }
+        let ordered = SellerNote.allCases.filter { sellerNotes.contains($0) }
+        if let p = try? await api.setSellerNotes(ordered) { apply(p) }
     }
 
     func deleteAccount() async throws {
@@ -226,6 +274,9 @@ final class AppState {
 
     /// The one bower writes for first. Always one of `enabled`.
     var preferred: Platform = .depop
+
+    /// What every listing may say about the seller. Off by default.
+    var sellerNotes: Set<SellerNote> = []
 
     var photos: [CapturedPhoto] = []
 

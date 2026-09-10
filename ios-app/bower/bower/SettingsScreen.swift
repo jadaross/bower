@@ -50,6 +50,8 @@ struct SettingsScreen: View {
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.leading, 4)
             }
 
+            section("Added to every listing") { sellerNotesCard }
+
             section("What's left") { allowanceCard }
 
             section("Account") {
@@ -136,6 +138,53 @@ struct SettingsScreen: View {
             )
         }
         .padding(.vertical, 12).padding(.horizontal, 16)
+    }
+
+    /// Off by default, because the model cannot see any of these in a photo.
+    /// Each switch adds one agreed line to the end of every listing, and the
+    /// preview shows exactly that line so the effect is never a mystery.
+    private var sellerNotesCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            BowerGroup {
+                ForEach(Array(SellerNote.allCases.enumerated()), id: \.element) { i, note in
+                    if i > 0 { Hairline() }
+                    HStack {
+                        Text(note.label).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
+                        Spacer()
+                        BowerToggle(isOn: Binding(
+                            get: { state.sellerNotes.contains(note) },
+                            set: { _ in Task { await state.toggleSellerNote(note) } }
+                        ))
+                    }
+                    .padding(.vertical, 10).padding(.horizontal, 16)
+                }
+            }
+            sellerNotesPreview
+        }
+    }
+
+    /// A listing's last lines, with the added line in the seller's own voice.
+    private var sellerNotesPreview: some View {
+        let line = SellerNote.previewLine(state.sellerNotes)
+        return VStack(alignment: .leading, spacing: 6) {
+            Kicker("How it ends")
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Good condition, light wear at the cuffs.")
+                    .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                if line.isEmpty {
+                    Text("Nothing about you. Only what the photos show.")
+                        .font(BowerFont.ui(13)).foregroundStyle(theme.muted).italic()
+                } else {
+                    Text(line).font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(theme.text)
+                }
+            }
+            .padding(.vertical, 12).padding(.horizontal, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(theme.subtle)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .animation(.easeOut(duration: 0.18), value: line)
+        }
+        .padding(.top, 4)
     }
 
     private var allowanceCard: some View {

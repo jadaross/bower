@@ -1,4 +1,5 @@
 import type { Platform, PlatformListing } from "@/lib/types";
+import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS } from "./client";
 import { createStructured } from "./structured";
@@ -9,14 +10,18 @@ export interface RefineInput {
   platform: Platform;
   listing: PlatformListing;
   instructions: string[];
+  /** The seller's opt-in notes, read from their profile, never the body. */
+  sellerNotes?: SellerNote[];
   /** Receives the Langfuse trace id so the client can attach feedback (#42). */
   onTraceId?: (traceId: string) => void;
 }
 
-function buildPrompt({ platform, listing, instructions }: RefineInput): string {
+function buildPrompt({ platform, listing, instructions, sellerNotes = [] }: RefineInput): string {
   return `You are a secondhand fashion listing specialist. Refine an existing ${platformMetadata[platform].name} listing based on user feedback.
 
 ${platformListingSpec[platform].promptFragment}
+
+${sellerNotesPrompt(sellerNotes, platform)}
 
 Current listing:
 ${JSON.stringify(listing, null, 2)}
@@ -28,6 +33,8 @@ Rules:
 - Apply every refinement above. If two refinements conflict, the later one wins.
 - Keep all factual details accurate; only change style, length, and format.
 - Never use an em dash (—). Use a comma, a full stop, or a hyphen instead.
+- Do not add claims about the seller (smoke-free, pet-free, washed, dispatch speed) beyond the SELLER NOTES line above, or label data (country of manufacture, care instructions, RN/style numbers), unless the refinement instruction supplies that fact in its own words.
+- Do not add "rare", "deadstock" or an era unless the current listing already supports it.
 - Do NOT invent new information (no measurements unless asked; no condition claims that weren't in the source).
 - Respect platform format rules (title length, hashtag conventions).
 - "fields": return the EXACT SAME array that came in unless a refinement instruction specifically changes a structured value (e.g. an instruction like "set condition to Pre-owned – Fair"). Do not rewrite labels or values gratuitously.`;

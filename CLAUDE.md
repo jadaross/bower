@@ -56,6 +56,12 @@ there are no anonymous requests, because the meter needs someone to meter
 | `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and Allowance. PATCH takes either or both. |
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
 
+`PATCH /api/profile` also takes `seller_notes`: the opt-in facts about the seller a
+listing may state (`smoke_free`, `pet_free`, `posts_next_day`, `bundles`). The three
+listing prompts read them from the profile, never the body, and write exactly one agreed
+line per platform (`src/lib/seller-notes.ts`). With none on, a listing says nothing about
+the seller. See `docs/research/what-sells-terminology.md` for why.
+
 `/api/valuate` reads the Enabled Platforms from the caller's profile — never
 from the request body. A client that could name its own platforms could ask for
 work it had not enabled.
@@ -71,7 +77,8 @@ work it had not enabled.
 | `src/lib/auth.ts` | Bearer-token verification and the `withAuth` route wrapper |
 | `src/lib/supabase.ts` | The three Supabase clients — anon, per-user (RLS applies), service role (RLS bypassed) |
 | `src/lib/allowance.ts` | The Allowance meter. Counting itself lives in SQL, not here |
-| `src/lib/profile.ts` | Enabled Platforms, read and written as the caller |
+| `src/lib/profile.ts` | Enabled Platforms, Preferred Platform and seller notes, read and written as the caller |
+| `src/lib/seller-notes.ts` | The seller-note vocabulary and its one phrasing per platform |
 | `supabase/migrations/*` | The schema, and the source of truth for it — never edit in the dashboard |
 | `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
 | `ios-app/bower/bower/BowerAPI.swift` | The client, behind `BowerAPIClient`. `StubAPI` is the fixture implementation |

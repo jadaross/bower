@@ -38,6 +38,13 @@ struct StubAPI: BowerAPIClient {
                                allowance: AllowanceState(used: 11, limit: 40, resetsAt: nil))
     }
 
+    func setSellerNotes(_ notes: [SellerNote]) async throws -> ProfileResponse {
+        await wait()
+        return ProfileResponse(enabledPlatforms: [.vinted, .depop, .ebay], preferredPlatform: .depop,
+                               sellerNotes: notes.map(\.rawValue),
+                               allowance: AllowanceState(used: 11, limit: 40, resetsAt: nil))
+    }
+
     func analyse(images: [Data], tone: Tone, platform: Platform?,
                  onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult {
         // Paced like the real thing: the stream opens fast, the title lands

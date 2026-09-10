@@ -2,6 +2,7 @@ import { withAuth } from "@/lib/auth";
 import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
 import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
+import { getSellerNotes } from "@/lib/profile";
 import { toStringStreamResponse, type StreamRejection } from "@/lib/streaming-text";
 import type { Platform, Tone } from "@/lib/types";
 
@@ -81,12 +82,16 @@ export const POST = withAuth(async (request, user) => {
   if (!spend.allowed) return allowanceExhausted(spend);
 
   const sessionId = request.headers.get("x-bower-session") ?? undefined;
+  // From the profile, never the body: a client that could name its own seller
+  // notes could put "smoke-free" on a listing the seller never claimed.
+  const sellerNotes = await getSellerNotes(user.token).catch(() => []);
   let stream: ReadableStream<string>;
   try {
     stream = analyseListingStream({
       photos: images,
       tone,
       platform,
+      sellerNotes,
       trace: { userId: user.id, route: "/api/analyse", sessionId },
       // Best-effort: record the analysed item for the user's history (#41).
       onResult: (result) => {

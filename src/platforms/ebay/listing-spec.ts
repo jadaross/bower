@@ -6,7 +6,7 @@ const promptFragment = `Format for eBay UK. eBay has NO hashtag field and no emo
 
 TITLE: use as many of the 80 characters as you can with the item's REAL attributes only, ordered Brand -> Department -> Type -> Colour -> Material -> Style/Fit -> Size (add a model number/name if known, e.g. "Detroit"). Do NOT pad with unrelated brand names, "like", "fits", "for", comparisons, question marks, or emojis — eBay's search-manipulation policy forbids them for clothing and can suppress the listing.
 
-DESCRIPTION: factual and complete, roughly 80-200 words. Include brand, model/style name, material, and — whenever the source provides them — laid-flat measurements (pit-to-pit, length, sleeve). Disclose condition specifically and name any flaws with reference to the photos; accurate condition is tied to search visibility and to who pays for a "not as described" return (the seller always does). Close with postage expectations ("sent tracked, dispatched within 1 working day") when appropriate. Real searchable keywords, no hashtags, no flattery in place of detail.
+DESCRIPTION: factual and short, 50-120 words. Buyers read the item specifics and the condition; the description is for measurements, flaws and what is included. Include brand, model/style name, material, and, ONLY when the source provides them, laid-flat measurements (pit-to-pit, length, sleeve). Never estimate a measurement the source does not give. Disclose condition specifically and name any flaws with reference to the photos; accurate condition is tied to search visibility and to who pays for a "not as described" return (the seller always does). Do not state postage times, smoke-free or pet-free, washing, care instructions or a "Made in" line in the description; country of manufacture belongs in the Country/Region of Origin specific. Real searchable keywords, no hashtags, no flattery in place of detail.
 
 ITEM SPECIFICS: populate every field in the schema below — do not just mention an attribute in prose, MIRROR it into the specific. Brand, Size and Colour are required by eBay and a blank specific makes the listing invisible to that filter.
 
@@ -23,7 +23,8 @@ const fieldsSchema = `Return these fields in the "fields" array, in this order. 
 - { "label": "Style", "value": "<one or two of: Casual | Smart Casual | Workwear | Streetwear | Vintage | Sportswear | Bohemian | Y2K | Preppy | Grunge>" }
 - { "label": "Colour", "value": "<primary colour>" }
 - { "label": "Material", "value": "<dominant material from the tag or visible fabric>" }
-- { "label": "Condition", "value": "<MUST be one of: New with tags | New without tags | New with imperfections | Pre-owned – Excellent | Pre-owned – Good | Pre-owned – Fair>" }`;
+- { "label": "Condition", "value": "<MUST be one of: New with tags | New without tags | New with imperfections | Pre-owned – Excellent | Pre-owned – Good | Pre-owned – Fair>" }
+- { "label": "Country/Region of Origin", "value": "<country from the tag, e.g. 'China', 'United Kingdom'; omit this row if no tag shows it>", "hint": "eBay requires this for listings visible to US buyers; 'Unknown' is not accepted" }`;
 
 const REQUIRED_LABELS = [
   "Category",

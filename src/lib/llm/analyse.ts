@@ -5,6 +5,7 @@ import { parseAnalysisResult } from "./analyse-parse";
 import { jsonSchemaFormat } from "./structured";
 import { analysisResultSchema } from "./schemas";
 import { beginGeneration, observeGeneration, type TraceContext } from "@/lib/observability";
+import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
 export { parseAnalysisResult };
 
 export interface AnalyseInput {
@@ -13,6 +14,8 @@ export interface AnalyseInput {
   tone: Tone;
   /** When set, the prompt is platform-specific; otherwise the neutral prompt is used. */
   platform?: Platform;
+  /** The seller's opt-in notes (smoke-free etc.), read from their profile, never the body. */
+  sellerNotes?: SellerNote[];
   /** Observability (#37): caller + route for the Langfuse trace. Optional. */
   trace?: TraceContext;
   /** History (#41): called with the parsed result so the route can persist it. */
@@ -21,7 +24,7 @@ export interface AnalyseInput {
 
 const TONE_HINT: Record<Tone, string> = {
   casual:
-    "The description should be casual, friendly, and conversational — like how a real person sells on Depop or Vinted. Use natural language. Keep it genuine and relatable. No corporate speak.",
+    "The description should be casual, friendly, and conversational — like how a real person sells on Depop or Vinted. Use natural language. Keep it genuine and relatable. No corporate speak. Short. Real sellers write two or three lines, not paragraphs.",
   professional:
     "The description should be clean, factual, and professional. Lead with the most important details. No slang. Focus on measurements, condition, fabric, and fit. Concise.",
 };
@@ -85,14 +88,17 @@ When the subject is anything but "clothing", fill the rest of the document with 
 
 STYLE:
 - Never use an em dash (—) anywhere in the title or description. Use a comma, a full stop, or a hyphen instead.
+- Never claim anything the photos cannot show: not "smoke-free home", "pet-free", "washed before sending", "posted next day" or any fact about the seller. If the seller wants those lines they will add them.
 
-TAG DATA:
-- Extract ALL readable text from any tag/label visible in any photo
-- rn_number: US FTC Registered Identification Number (format "RN XXXXX") — critical for vintage dating
+TAG DATA (a record for the seller, NOT material for the listing):
+- Extract ALL readable text from any tag/label visible in any photo into tag_data.
+- rn_number: US FTC Registered Identification Number (format "RN XXXXX"), useful for dating vintage
 - size_system: "UK" | "EU" | "US" | "IT" | "Universal" | null
-- care_instructions: plain English summary of care symbols/text`;
+- care_instructions: plain English summary of care symbols/text
+- Never copy tag_data into the title or description: no country of manufacture, no RN or style number, no care instructions, no barcode. Buyers do not search for these and copying them reads as a robot reading a label.
+- The one exception is country of manufacture when it genuinely raises the price or dates the piece for THIS brand: Made in USA (Carhartt, Levi's, vintage tees), Made in England (Dr. Martens, Barbour), Made in Italy or France (designer, Ray-Ban, Lacoste), Made in Japan (denim). Then it may go in the title or first line. Never mention China, Bangladesh, Vietnam, Turkey, Cambodia or similar.`;
 
-function buildPlatformPrompt(platform: Platform, tone: Tone, photoCount: number): string {
+function buildPlatformPrompt(platform: Platform, tone: Tone, photoCount: number, notes: SellerNote[] = []): string {
   const spec = platformListingSpec[platform];
   return `You are an expert clothing photographer and professional reselling assistant for secondhand fashion platforms.
 
@@ -106,6 +112,8 @@ Return exactly this JSON structure (fill in all fields):
 
 ${jsonShape(platform)}
 
+${sellerNotesPrompt(notes, platform)}
+
 ${COMMON_RULES}
 
 LISTING:
@@ -114,7 +122,11 @@ LISTING:
 - price_min/price_max: realistic GBP resale prices. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: ${platform === 'ebay' ? 'max 80 characters' : 'max 60 characters'}
-- description: ${platform === 'depop' ? '3–4 short punchy sentences, max 60 words. Give it personality. No filler phrases.' : platform === 'vinted' ? '4–5 clear sentences, max 80 words. Lead with the most important details. No waffle.' : '4–6 sentences, 150–250 words. Detailed and factual. Include fabric, visible measurements, condition specifics, care info.'}
+- description: ${platform === 'depop'
+    ? 'Line 1 is the searchable title (3-5 words + size). Then 2-3 short lines: fit or a measurement, condition with any flaw named, one personal line at most. Under 60 words before the hashtags.'
+    : platform === 'vinted'
+    ? '2-4 short lines, under 50 words. Fragments are fine. What it is, size (with one measurement if visible), condition with any flaw named. Nothing else unless it carries a fact.'
+    : '50-120 words, factual. What it is (brand, line, material), size with laid-flat measurements if visible, condition with flaws named against the photos, what is included. No care instructions, no country line, no story.'}
 - hashtags: ${platform === 'depop' ? 'UP TO 5 actual hashtag strings with # prefix (mix: 3 descriptive — type/brand/material — + 1–2 style/aesthetic like #y2k, #cottagecore). Each tag must be genuinely relevant.' : 'EMPTY ARRAY []. ' + (platform === 'vinted' ? 'Vinted has no hashtag system — its search reads title and description directly, so bake keywords into those instead.' : 'eBay has no tag field — search runs off the 80-char title and item specifics, so pack keywords into the title.')}
 - gender: "women" | "men" | "kids" | "unisex" — who this item is for
 - main_category: "tops" | "bottoms" | "dresses" | "outerwear" | "knitwear" | "swimwear" | "underwear" | "sportswear" | "shoes" | "accessories" | "bags" | "other"
@@ -148,7 +160,7 @@ LISTING:
 - price_min/price_max: realistic GBP resale prices. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: max 70 characters, descriptive and search-friendly (brand + type + key feature)
-- description: 4–5 clear sentences, 80–100 words. Lead with the most important details. Factual and thorough.
+- description: 3-4 short lines, 40-70 words. Lead with the most important details. Factual, nothing padded.
 - hashtags: 8–10 general search keywords relevant across all resale platforms (no # prefix)
 - gender: "women" | "men" | "kids" | "unisex" — who this item is for
 - main_category: "tops" | "bottoms" | "dresses" | "outerwear" | "knitwear" | "swimwear" | "underwear" | "sportswear" | "shoes" | "accessories" | "bags" | "other"
@@ -168,7 +180,7 @@ function imageBlocks(photos: string[]) {
 
 function buildPrompt(input: AnalyseInput): string {
   return input.platform
-    ? buildPlatformPrompt(input.platform, input.tone, input.photos.length)
+    ? buildPlatformPrompt(input.platform, input.tone, input.photos.length, input.sellerNotes)
     : buildNeutralPrompt(input.tone, input.photos.length);
 }
 
