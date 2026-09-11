@@ -47,6 +47,7 @@ struct CaptureScreen: View {
         }
         .safeAreaInset(edge: .bottom) { if !empty { footer } }
         .animation(.snappy(duration: 0.22), value: empty)
+        .animation(.snappy(duration: 0.22), value: state.analysis == nil)
         .sheet(isPresented: $showTips) {
             TipsSheet()
                 .environment(\.bower, theme)
@@ -266,18 +267,26 @@ struct CaptureScreen: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.line, lineWidth: 0.5))
     }
 
-    /// Pinned above the tab bar once there is something to price.
+    /// Pinned above the tab bar once there is something to price. With a
+    /// listing already written for these photos, the way back to it leads
+    /// and writing again is a stated cost, never the only thing to tap.
     private var footer: some View {
         VStack(spacing: 9) {
-            BowerButton(title: "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
-            HStack(spacing: 9) {
-                BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
-                            kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
-                Button("Clear") { state.photos = [] }
-                    .buttonStyle(.plain)
-                    .font(BowerFont.ui(12.5, weight: .medium))
-                    .foregroundStyle(theme.muted)
-                    .padding(.horizontal, 8)
+            if state.analysis != nil {
+                BowerButton(title: "View listing") { state.screen = .listing }
+                HStack(spacing: 9) {
+                    BowerButton(title: "Write it again", kind: .secondary) { state.screen = .analysing }
+                    clearButton
+                }
+                Text("Writing it again uses another listing.")
+                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+            } else {
+                BowerButton(title: "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
+                HStack(spacing: 9) {
+                    BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
+                                kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
+                    clearButton
+                }
             }
         }
         .padding(.horizontal, 22)
@@ -285,6 +294,14 @@ struct CaptureScreen: View {
         .padding(.bottom, 10)
         .background(theme.chrome)
         .overlay(alignment: .top) { Hairline() }
+    }
+
+    private var clearButton: some View {
+        Button("Clear") { state.photos = [] }
+            .buttonStyle(.plain)
+            .font(BowerFont.ui(12.5, weight: .medium))
+            .foregroundStyle(theme.muted)
+            .padding(.horizontal, 8)
     }
 
     private var turnedAwayNote: some View {

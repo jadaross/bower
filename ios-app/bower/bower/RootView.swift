@@ -160,7 +160,7 @@ struct RootView: View {
 
     private func selectTab(_ tab: BowerTab) {
         switch tab {
-        case .home: state.screen = .capture
+        case .home: state.screen = state.home
         case .history: state.screen = .history
         case .profile: state.screen = .settings
         }

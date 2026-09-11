@@ -9,9 +9,9 @@ struct ListingScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
 
-    @State private var model = ListingModel()
-
     var body: some View {
+        // The model belongs to AppState so it outlives this view; see there.
+        @Bindable var model = state.listingModel
         VStack(alignment: .leading, spacing: 20) {
             if let listing = model.listing {
                 ItemSummary(listing: listing)
@@ -61,6 +61,13 @@ final class ListingModel {
     private weak var state: AppState?
     private var searchTask: Task<Void, Never>?
     private var formatTask: Task<Void, Never>?
+
+    /// Called when the model is being replaced, so an in-flight search or
+    /// rewrite cannot land in a model nothing is looking at any more.
+    func cancel() {
+        searchTask?.cancel()
+        formatTask?.cancel()
+    }
 
     /// What to ask, and where. The server's Recommendation when there is one
     /// (more than one platform enabled); otherwise the midpoint of the single

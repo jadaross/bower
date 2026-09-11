@@ -297,10 +297,26 @@ final class AppState {
     /// What every listing may say about the seller. Off by default.
     var sellerNotes: Set<SellerNote> = []
 
-    var photos: [CapturedPhoto] = []
+    /// Any change to the pile — a photo added, removed, or the lot cleared —
+    /// drops the listing written for it, so Home never offers "View listing"
+    /// for photos the listing no longer describes.
+    var photos: [CapturedPhoto] = [] {
+        didSet { if photos.map(\.id) != oldValue.map(\.id) { analysis = nil } }
+    }
 
     /// What the last read produced. Cleared with the photos on a new item.
-    var analysis: AnalysisResult?
+    /// Setting it hands the listing screen a fresh working model.
+    var analysis: AnalysisResult? {
+        didSet { listingModel.cancel(); listingModel = ListingModel() }
+    }
+
+    /// The listing screen's working state — the platform shown, chips, edits,
+    /// the market check — kept here rather than in the screen so leaving for
+    /// History or Profile and coming back finds it exactly as it was left.
+    var listingModel = ListingModel()
+
+    /// Where the Home tab goes: the listing while one exists, else the pile.
+    var home: Screen { analysis == nil ? .capture : .listing }
 
     /// The two meters. A generation (Price it) spends from `reads`; a deep
     /// research spends from `searches`. A nil limit is no limit.
