@@ -289,11 +289,14 @@ final class AppState {
     /// What the last read produced. Cleared with the photos on a new item.
     var analysis: AnalysisResult?
 
-    /// The Allowance meter. A read costs one; a search costs one.
+    /// The Allowance meter: credits a month, spent on reads or searches alike.
+    /// A nil limit is no limit.
     var used: Int = 0
-    var allowance: Int = 40
+    var allowance: Int? = 10
 
-    var remaining: Int { max(0, allowance - used) }
+    /// Credits left, or nil when there is no limit.
+    var remaining: Int? { allowance.map { max(0, $0 - used) } }
+    var canSpend: Bool { remaining.map { $0 > 0 } ?? true }
 
     func enable(_ platform: Platform, _ on: Bool) -> Bool {
         if !on && enabled.count == 1 { return false }

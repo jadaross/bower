@@ -20,7 +20,7 @@ struct HelpSheet: View {
                  body: "Take them now or pick what you already have. Upload up to 20 photos."),
             Step(title: "Tap Price it",
                  body: "Bower reads the photos and tells you the brand, size, condition, material and a first estimate of what it's worth.",
-                 tip: "A read costs 1 of your \(state.allowance) this month."),
+                 tip: state.allowance.map { "A read costs 1 of your \($0) credits this month." } ?? "A read costs 1 credit."),
             Step(title: "Get a real price",
                  body: "The estimate is a guess from the photos. Tap Get a real price and bower searches what similar things are listed at right now.",
                  tip: "A search costs 1 as well."),

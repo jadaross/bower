@@ -30,7 +30,7 @@ interface ProfileRow {
   preferred_platform: Platform;
   seller_notes: string[] | null;
   allowance_used: number;
-  allowance_limit: number;
+  allowance_limit: number | null;
   allowance_period_start: string;
 }
 

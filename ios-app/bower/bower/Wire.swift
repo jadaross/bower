@@ -160,10 +160,12 @@ struct Recommendation: Codable, Sendable {
 
 struct AllowanceState: Codable, Sendable, Equatable {
     let used: Int
-    let limit: Int
+    /// Credits per month. Nil means no limit.
+    let limit: Int?
     let resetsAt: String?
 
-    var remaining: Int { max(0, limit - used) }
+    /// Nil when there is no limit.
+    var remaining: Int? { limit.map { max(0, $0 - used) } }
 }
 
 struct ValuationResponse: Codable, Sendable {

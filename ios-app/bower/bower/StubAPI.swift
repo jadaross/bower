@@ -19,30 +19,31 @@ struct StubAPI: BowerAPIClient {
 
     func profile() async throws -> ProfileResponse {
         await wait()
+        let unlimited = CommandLine.arguments.contains("-bowerUnlimited")
         return ProfileResponse(
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
-            allowance: AllowanceState(used: 11, limit: 40, resetsAt: "2026-10-01T00:00:00Z")
+            allowance: AllowanceState(used: 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z")
         )
     }
 
     func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform) async throws -> ProfileResponse {
         await wait()
         return ProfileResponse(enabledPlatforms: platforms, preferredPlatform: preferred,
-                               allowance: AllowanceState(used: 11, limit: 40, resetsAt: nil))
+                               allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
     }
 
     func setPreferredPlatform(_ platform: Platform) async throws -> ProfileResponse {
         await wait()
         return ProfileResponse(enabledPlatforms: [.vinted, .depop, .ebay], preferredPlatform: platform,
-                               allowance: AllowanceState(used: 11, limit: 40, resetsAt: nil))
+                               allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
     }
 
     func setSellerNotes(_ notes: [SellerNote]) async throws -> ProfileResponse {
         await wait()
         return ProfileResponse(enabledPlatforms: [.vinted, .depop, .ebay], preferredPlatform: .depop,
                                sellerNotes: notes.map(\.rawValue),
-                               allowance: AllowanceState(used: 11, limit: 40, resetsAt: nil))
+                               allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
     }
 
     func analyse(images: [Data], tone: Tone, platform: Platform?,
@@ -186,7 +187,7 @@ struct StubAPI: BowerAPIClient {
                     RunnerUp(platform: .vinted, listAt: 40, net: 40),
                 ]
             ),
-            allowance: AllowanceState(used: 12, limit: 40, resetsAt: "2026-10-01T00:00:00Z")
+            allowance: AllowanceState(used: 5, limit: 10, resetsAt: "2026-10-01T00:00:00Z")
         )
     }
 

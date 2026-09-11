@@ -13,7 +13,8 @@ import { serviceClient } from "@/lib/supabase";
 
 export interface AllowanceState {
   used: number;
-  limit: number;
+  /** Credits per month. Null means no limit (the owner's account). */
+  limit: number | null;
   /** When the period rolls over and the meter goes back to zero. ISO-8601. */
   resetsAt: string;
 }
@@ -25,7 +26,7 @@ export interface SpendResult extends AllowanceState {
 interface AllowanceRow {
   allowed: boolean;
   allowance_used: number;
-  allowance_limit: number;
+  allowance_limit: number | null;
   resets_at: string;
 }
 

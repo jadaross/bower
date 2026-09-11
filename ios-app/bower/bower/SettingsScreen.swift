@@ -216,27 +216,35 @@ struct SettingsScreen: View {
     }
 
     private var allowanceCard: some View {
-        let pct = state.allowance > 0 ? Double(state.used) / Double(state.allowance) : 0
+        let limit = state.allowance
+        let pct = limit.map { $0 > 0 ? Double(state.used) / Double($0) : 0 } ?? 0
         return BowerCard(padding: 16) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text("\(state.remaining)").font(BowerFont.serif(30)).foregroundStyle(theme.text)
-                        Text("of \(state.allowance) left").font(BowerFont.serif(17)).foregroundStyle(theme.muted)
+                        if let limit, let remaining = state.remaining {
+                            Text("\(remaining)").font(BowerFont.serif(30)).foregroundStyle(theme.text)
+                            Text("of \(limit) left").font(BowerFont.serif(17)).foregroundStyle(theme.muted)
+                        } else {
+                            Text("No limit").font(BowerFont.serif(30)).foregroundStyle(theme.text)
+                            Text("\(state.used) used").font(BowerFont.serif(17)).foregroundStyle(theme.muted)
+                        }
                     }
                     Spacer()
                     Text("resets on the 1st").font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                 }
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(theme.subtle)
-                        Capsule().fill(pct > 0.8 ? theme.coral : theme.satin).frame(width: geo.size.width * pct)
+                if limit != nil {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(theme.subtle)
+                            Capsule().fill(pct > 0.8 ? theme.coral : theme.satin).frame(width: geo.size.width * pct)
+                        }
                     }
+                    .frame(height: 6)
+                    .padding(.top, 12)
+                    .animation(.easeOut(duration: 0.5), value: pct)
                 }
-                .frame(height: 6)
-                .padding(.top, 12)
-                .animation(.easeOut(duration: 0.5), value: pct)
-                Text("A read costs 1. A price search costs 1.")
+                Text("A read costs 1 credit. A price search costs 1 credit.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.top, 9)
             }
         }

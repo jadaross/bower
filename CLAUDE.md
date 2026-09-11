@@ -53,7 +53,7 @@ there are no anonymous requests, because the meter needs someone to meter
 | `POST /api/format`  | Neutral `Listing` + platform + tone → `PlatformListing`. |
 | `POST /api/refine`  | Existing `PlatformListing` + chip instruction text → rewritten `PlatformListing`. |
 | `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one Allowance unit.** |
-| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and Allowance. PATCH takes either or both. |
+| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and Allowance (10 credits a month, a read or a search each costing one; a null limit is unlimited, which the owner's account has). PATCH takes either or both. |
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
 | `POST /api/feedback/note` | Typed feedback, stored in `feedback_notes` with the screen, session, platform and trace it was written from. Opened from the listing ("Tell us", beside the thumbs) and from Profile. |
 

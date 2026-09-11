@@ -131,7 +131,7 @@ final class ListingModel {
                 priceState = .searched
             } catch APIError.allowanceExhausted(let a) {
                 state.used = a.used; state.allowance = a.limit
-                searchError = "That's the lot for this month. No searches left."
+                searchError = "That's the lot for this month. No credits left."
                 priceState = .estimated
             } catch {
                 searchError = "The search didn't come back. Your guess is still here. Try again when you have signal."
@@ -269,10 +269,10 @@ private struct PriceSection: View {
                         PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
                             .padding(.top, 8)
                     }
-                    BowerButton(title: state.remaining > 0 ? "Get a real price" : "No searches left",
-                                disabled: state.remaining == 0) { model.search() }
+                    BowerButton(title: state.canSpend ? "Get a real price" : "No credits left",
+                                disabled: !state.canSpend) { model.search() }
                         .padding(.top, 14)
-                    Text(state.remaining > 0 ? "Searches live listings. Costs 1 of \(state.remaining)." : "Searches live listings.")
+                    Text(state.remaining.map { $0 > 0 ? "Searches live listings. Costs 1 of \($0)." : "Searches live listings." } ?? "Searches live listings.")
                         .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 9)

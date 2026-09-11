@@ -155,8 +155,8 @@ struct AnalysingScreen: View {
     private func allowance(_ a: AllowanceState) -> some View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
-            title: "That's the lot for today",
-            body: "That's all \(a.limit) reads for this month.\(resetText(a))"
+            title: "That's the lot for this month",
+            body: "That's all \(a.limit ?? a.used) credits for this month.\(resetText(a))"
         ) {
             Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }
