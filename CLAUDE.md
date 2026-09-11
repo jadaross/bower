@@ -171,6 +171,6 @@ behind the name still holds.
 
 One thing the app says in its own voice, and should keep saying: copy confirmations
 read **"In the bower"**. The analyse action is plainly **"Price it"** (a *generation*)
-and the live price search is **"Run a deep research"**; the photo-only price is an
+and the live price search is **"Check the market"** (a *market check*); the photo-only price is an
 *estimate*, never a guess. "Suss it out" was charming once and vague every time after;
 the verb carries the meaning and the serif title carries the voice.

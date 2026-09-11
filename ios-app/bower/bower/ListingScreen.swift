@@ -136,10 +136,10 @@ final class ListingModel {
                 )
             } catch APIError.allowanceExhausted(let a) {
                 state.searches = a
-                searchError = "That's all your deep researches for this month."
+                searchError = "That's all your market checks for this month."
                 priceState = .estimated
             } catch {
-                searchError = "The deep research didn't come back. Your estimate is still here. Try again when you have signal."
+                searchError = "The market check didn't come back. Your estimate is still here. Try again when you have signal."
                 priceState = .estimated
             }
         }
@@ -274,7 +274,7 @@ private struct PriceSection: View {
                         PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
                             .padding(.top, 8)
                     }
-                    BowerButton(title: state.searches.canSpend ? "Run a deep research" : "No deep researches left",
+                    BowerButton(title: state.searches.canSpend ? "Check the market" : "No market checks left",
                                 disabled: !state.searches.canSpend) { model.search() }
                         .padding(.top, 14)
                     Text(deepResearchNote)
@@ -292,8 +292,8 @@ private struct PriceSection: View {
 
     private var deepResearchNote: String {
         let what = "Searches live listings for what this is actually going for."
-        guard let left = state.searches.remaining else { return what + " Uses 1 deep research." }
-        return left > 0 ? what + " Uses 1 of your \(left) deep researches." : what
+        guard let left = state.searches.remaining else { return what + " Uses 1 market check." }
+        return left > 0 ? what + " Uses 1 of your \(left) market checks." : what
     }
 
     // One row per platform being read. The valuation comes back all at once,
@@ -303,7 +303,7 @@ private struct PriceSection: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Kicker("Deep research", color: theme.satin)
+                    Kicker("Checking the market", color: theme.satin)
                     Spacer()
                     Text(String(format: "%02d:%02d", model.elapsed / 60, model.elapsed % 60))
                         .font(BowerFont.mono(11)).foregroundStyle(theme.muted).monospacedDigit()
@@ -469,6 +469,24 @@ private struct ListingSection: View {
             }
 
             card
+
+            // Straight to where it gets posted. A universal link, so the platform's
+            // app opens when installed; iOS puts "◀ bower" in the status bar for
+            // the way back. Copy first, then this.
+            Link(destination: model.platform.sellURL) {
+                HStack(spacing: 8) {
+                    Text("Open \(model.platform.name)")
+                    Image(systemName: "arrow.up.right").font(.system(size: 11, weight: .bold))
+                }
+                .font(BowerFont.ui(15, weight: .semibold))
+                .foregroundStyle(theme.text)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(theme.card)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(model.platform.tint.opacity(0.6), lineWidth: 1))
+            }
+            .simultaneousGesture(TapGesture().onEnded { model.recordFeedback("opened-platform") })
 
             // Nudge it — a few one-tap rewrites sitting right under the listing.
             // Tone folded in here; a separate control was doing the same job.

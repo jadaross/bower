@@ -218,7 +218,7 @@ private struct HistoryDetail: View {
                         .background(theme.pollen.opacity(0.28))
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                     PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32)
-                    Text("No deep research was run.")
+                    Text("The market wasn't checked.")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
             }

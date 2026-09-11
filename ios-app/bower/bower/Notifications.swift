@@ -50,7 +50,7 @@ enum Notifications {
         guard reads != nil || searches != nil else { return }
         let content = UNMutableNotificationContent()
         content.title = "Your credits are back"
-        content.body = [reads.map { "\($0) generations" }, searches.map { "\($0) deep researches" }]
+        content.body = [reads.map { "\($0) generations" }, searches.map { "\($0) market checks" }]
             .compactMap { $0 }.joined(separator: " and ") + " for the month."
         content.sound = .default
         let now = Date()

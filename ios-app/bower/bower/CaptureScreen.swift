@@ -1,10 +1,10 @@
 import SwiftUI
 import PhotosUI
 
-/// Home. Empty, it is one big place to tap. With photos in, the blank space
-/// becomes the next shot: a checklist of the angles not yet covered, each a
-/// suggestion rather than a slot — the user may ignore every one and upload
-/// whatever they have. Owns its nav, its scroll and its pinned footer.
+/// Home. Empty, it is one big place to tap. With photos in, the pile sits
+/// above one sentence of advice; nothing about the advice is a slot, and the
+/// user may upload whatever they have. Owns its nav, its scroll and its
+/// pinned footer.
 struct CaptureScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -25,8 +25,6 @@ struct CaptureScreen: View {
     @State private var turnedAway = false
 
     private var empty: Bool { state.photos.isEmpty }
-    private var covered: [SuggestedShot] { SuggestedShot.allCases.filter { shot in state.photos.contains { $0.shot == shot } } }
-    private var missing: [SuggestedShot] { SuggestedShot.allCases.filter { shot in !state.photos.contains { $0.shot == shot } } }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -176,9 +174,14 @@ struct CaptureScreen: View {
                     .frame(width: 62, height: 62)
                     .background(theme.satin)
                     .clipShape(Circle())
-                Text("Photograph the piece")
-                    .font(BowerFont.serif(32))
-                    .foregroundStyle(theme.text)
+                VStack(spacing: 5) {
+                    Text("Photograph the piece")
+                        .font(BowerFont.serif(32))
+                        .foregroundStyle(theme.text)
+                    Text("Up to 5 photos.")
+                        .font(BowerFont.ui(13.5))
+                        .foregroundStyle(theme.muted)
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(minHeight: 260)
@@ -202,7 +205,7 @@ struct CaptureScreen: View {
     private var filledContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             pile
-            checklist
+            tipsCard
             if importing { preparing }
             if turnedAway { turnedAwayNote }
             if overLimit { overLimitNote }
@@ -211,67 +214,26 @@ struct CaptureScreen: View {
         .padding(.bottom, 16)
     }
 
-    /// The gap becomes the next shot. Six thin bars, one per angle, and the
-    /// first three angles not yet covered as rows to tap.
-    private var checklist: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    /// What to photograph, as a sentence. Nothing to tap; the advice is the
+    /// whole card, and Tips has the longer version.
+    private var tipsCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Kicker("\(covered.count) of \(SuggestedShot.allCases.count) angles in")
+                Kicker("Tips")
                 Spacer()
-                Button("Tips") { showTips = true }
+                Button("More") { showTips = true }
                     .buttonStyle(.plain)
                     .font(BowerFont.ui(12, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
-
-            HStack(spacing: 3) {
-                ForEach(SuggestedShot.allCases) { shot in
-                    Capsule()
-                        .fill(covered.contains(shot) ? theme.moss : theme.line)
-                        .frame(height: 3)
-                }
-            }
-            .padding(.top, 10)
-            .padding(.bottom, 8)
-            .animation(.easeOut(duration: 0.25), value: covered)
-
-            if missing.isEmpty {
-                HStack(spacing: 9) {
-                    Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.moss)
-                    Text("Every angle in. That's as sharp as it gets.").font(BowerFont.ui(13.5)).foregroundStyle(theme.text)
-                }
-                .padding(.vertical, 10)
-                .overlay(alignment: .top) { Hairline() }
-            } else {
-                ForEach(missing.prefix(3)) { shot in
-                    Button {
-                        pendingShot = shot
-                        showSheet = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: shot.symbol)
-                                .font(.system(size: 14))
-                                .foregroundStyle(theme.satin)
-                                .frame(width: 34, height: 34)
-                                .background(theme.subtle)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(shot.label).font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
-                                Text(shot.hint).font(BowerFont.ui(12)).foregroundStyle(theme.muted)
-                            }
-                            Spacer(minLength: 0)
-                            Image(systemName: "plus").font(.system(size: 15, weight: .medium)).foregroundStyle(theme.satin)
-                        }
-                        .padding(.vertical, 11)
-                        .contentShape(Rectangle())
-                        .overlay(alignment: .top) { Hairline() }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            Text("Front, back, the size tag and the brand label. A fifth for any flaw.")
+                .font(BowerFont.ui(14)).foregroundStyle(theme.text).lineSpacing(3)
+            Text("Up to 5 photos.")
+                .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 15)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(theme.card)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.line, lineWidth: 0.5))

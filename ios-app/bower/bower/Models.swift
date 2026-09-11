@@ -27,6 +27,17 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// Where a listing gets posted. The https link is a universal link, so it
+    /// opens the platform's app when it is installed and the site when not.
+    /// iOS then shows "◀ bower" in the status bar to come straight back.
+    var sellURL: URL {
+        switch self {
+        case .vinted: URL(string: "https://www.vinted.co.uk/items/new")!
+        case .depop:  URL(string: "https://www.depop.com/products/create")!
+        case .ebay:   URL(string: "https://www.ebay.co.uk/sl/sell")!
+        }
+    }
+
     var tint: Color {
         switch self {
         case .vinted: Color(hex: 0x09B1BA)

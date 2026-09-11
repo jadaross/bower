@@ -13,6 +13,7 @@ export const runtime = "nodejs";
 const SIGNALS: Record<string, { value: number; dataType: ScoreDataType }> = {
   // Named by source, not meaning (skill guidance).
   copied: { value: 1, dataType: "NUMERIC" },       // positive: the user kept it
+  "opened-platform": { value: 1, dataType: "NUMERIC" }, // positive: went to post it
   "manual-edit": { value: 1, dataType: "NUMERIC" }, // negative: the user reworked it
   thumbs: { value: 1, dataType: "BOOLEAN" },         // explicit; value overridden below
 };

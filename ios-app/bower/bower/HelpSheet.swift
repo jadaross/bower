@@ -21,9 +21,9 @@ struct HelpSheet: View {
             Step(title: "Tap Price it",
                  body: "Bower reads the photos and tells you the brand, size, condition, material and a first estimate of what it's worth.",
                  tip: state.reads.limit.map { "A generation costs 1 of your \($0) this month." } ?? "A generation costs 1."),
-            Step(title: "Run a deep research",
-                 body: "The estimate is from the photos alone. A deep research looks up what the same thing is listed at right now, on the platforms you sell on.",
-                 tip: state.searches.limit.map { "A deep research costs 1 of your \($0) this month." } ?? "A deep research costs 1."),
+            Step(title: "Check the market",
+                 body: "The estimate is from the photos alone. Checking the market looks up what the same thing is listed at right now, on the platforms you sell on.",
+                 tip: state.searches.limit.map { "A market check costs 1 of your \($0) this month." } ?? "A market check costs 1."),
             Step(title: "Copy it across",
                  body: "Switch between Vinted, Depop and eBay. Title, description and every platform field has its own copy button. Bower never posts for you."),
         ]
