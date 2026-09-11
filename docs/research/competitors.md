@@ -116,6 +116,77 @@ buyer alerts); Reluv, Dropstitch, Spadeberry (marketplaces).
 
 ---
 
+## 2a. The iOS field only
+
+bower ships only on iOS, so this is the list that matters. Web tools and Chrome
+extensions (Vinting.app, Snappy, AutoLister, ListingGenie's site, the SharkScribe
+tail) are excluded here; they are still profiled below for their pricing methods,
+but a seller browsing the App Store never sees them. Android-only apps (Descripto,
+FlipStudio) are excluded for the same reason.
+
+Sorted by best-storefront rating count, which is the only traction signal Apple
+exposes. "Live" means updated within the last 60 days.
+
+### Direct: photo → AI listing and/or price, for casual UK/EU sellers
+
+| # | App | Launched | Age | Best store · rating (n) | GB rating (n) | Price from | Metering | Prices how | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | **Listed AI** | 24 Jun 2025 | 15 mo | FR · 4.7 (489) | 4.7 (43) | free + ads; £5.99 | listings/mo + rewarded ads | AI guess | live (20 Aug) |
+| 2 | **VintyLook** | 12 Apr 2026 | 5 mo | FR · 4.5 (29) | 1.9 (9) | £3.99 / 10 cr | credits | no, photos only | stalled (May) |
+| 3 | **Sell AI - Listing Maker** | 15 Jan 2026 | 8 mo | FR · 4.7 (26) | — | £7.99 | tiered | AI guess | live (8 Jul) |
+| 4 | **PreLoved AI** | 6 Aug 2025 | 13 mo | GB · 4.5 (22) | 4.5 (22) | £4.99/mo | listings/mo | AI guess | live (3 Sep) |
+| 5 | **SnapFlip** | 1 Apr 2026 | 5 mo | US · 4.8 (22) | — | £7.99/wk | weekly sub | eBay sold (sourcing) | live (7 Sep) |
+| 6 | **VintSnap** | 16 Apr 2026 | 5 mo | GB · 4.6 (11) | 4.6 (11) | £2.49 / 20 cr | credits + rewarded ads | eBay sold data | live (8 Sep) |
+| 7 | **Future Reference** | 20 Mar 2025 | 18 mo | US · 4.0 (9) | — | free, 10% of sale | commission | yes, and posts | stalled (Dec 25) |
+| 8 | **Flip: AI Resale Pricing** | 5 Aug 2026 | 1 mo | GB · 5.0 (5) | 5.0 (5) | £1.99 top-up | pay as you go | AI guess + venue pick | live (8 Sep) |
+| 9 | **Closet Resale App** | 11 Mar 2026 | 6 mo | US · 5.0 (4) | — | £1.99 / 5 cr | credits + sub | AI guess | live (4 Sep) |
+| 10 | **Itemise** | 29 Jul 2026 | 6 wk | GB · 5.0 (3) | 5.0 (3) | £0.99 / 10 cr | credits | AI guess | live (4 Sep) |
+| 11 | **AI Listing Assistant** | 16 Apr 2026 | 5 mo | GB · 3.7 (3) | 3.7 (3) | £2.99/wk | weekly sub | AI guess | live (10 Sep) |
+| 12 | **Sell AI — Snap, List, Sold** | 16 Apr 2026 | 5 mo | GB · 5.0 (3) | 5.0 (3) | £2.99 / 5 cr | credits | AI guess | live (4 Sep) |
+| 13 | **Listing Monster AI** | 30 Jun 2026 | 2 mo | GB · 5.0 (3) | 5.0 (3) | n/d | n/d | AI guess | live (10 Sep) |
+| 14 | **Vintsnap: AI Listing Photos** | 4 Jul 2026 | 2 mo | GB · 5.0 (3) | 5.0 (3) | £5.99/wk | sub | no, photos only | quiet (Jul) |
+| 15 | **FlipFast** | 26 Jun 2026 | 3 mo | GB · 5.0 (2) | 5.0 (2) | £4.99 one-off | one-off | AI guess | live (11 Aug) |
+| 16 | **ListingLab** | 4 Apr 2026 | 5 mo | US · 5.0 (1) | — | $9.99/mo | sub | AI guess | live (27 Aug) |
+| 17 | **ListingGenie** | 25 Mar 2023 | 3.5 yr | 5.0 (7) | — | free tier | n/d | AI guess | abandoned (Jun 23) |
+| 18 | **QuickList** | 13 Mar 2026 | 6 mo | — (0) | — | £19.99 | tiered | AI guess | abandoned (day 1) |
+| 19 | **Rapid Sell AI** | 3 Jul 2026 | 2 mo | — (0) | — | n/d | n/d | AI guess | live (3 Sep) |
+
+Nineteen iOS apps. Only **one** has more than 30 ratings on any storefront (Listed
+AI), and only **four** have more than 10. Twelve launched in 2026; the median is
+five months old. Three are dead or stalled. Eleven of the nineteen have never been
+rated in Britain by more than five people.
+
+The three that overlap bower's actual thesis (a price, not just a listing): VintSnap
+(eBay sold data, one number for every platform), Flip (AI guess plus "which venue"),
+and SnapFlip (eBay sold, aimed at sourcing, £415 a year). None prices per marketplace.
+
+### Adjacent on iOS: crosslisters for full-time resellers
+
+Different product (connect your accounts, list everywhere, $15–60 a month) and a
+different customer, but they share the App Store search results and the "AI listing"
+keyword.
+
+| App | Launched | Best store · rating (n) | GB rating (n) | Price/mo | Note |
+|---|---|---|---|---|---|
+| **SellRaze** | 11 Sep 2023 | US · **4.8 (39,298)** | 4.8 (601) | £7.99–£34.99 | The only scale in the category. GB reviews: "Not for the UK" |
+| Vendoo | 2022 | US · 4.5 (2,768) | **2.7 (14)** | $14.99–$59.99 | Same app, collapses in Britain |
+| Crosslist | 9 Apr 2026 (iOS) | US · 4.7 (271) | 4.5 (54) | $29.99–$44.99 + $4.99 AI | Two dated Vinted bans in GB reviews |
+| Evriwhere (UK) | 2025 | GB · 2.7 (47) | 2.7 (47) | tiered | 20 of 47 ratings are one star; support silence |
+
+### What the app-only view changes
+
+- **The real ceiling for bower's kind of app is ~500 ratings, and it is in France.**
+  Listed AI got there with ads and a French audience. Nobody in Britain has passed 22.
+- **Credits, not subscriptions, is where the iOS apps have settled.** Nine of the
+  nineteen sell credits or pay-as-you-go; the two weekly subscriptions are the
+  lowest-rated; Flip dropped its subscription five weeks in.
+- **Every iOS competitor is one or two people.** The version histories show solo
+  cadence (a burst at launch, then monthly). There is no funded company in the
+  direct field; the funded ones are the US crosslisters, selling something else.
+- **The web tools with the best pricing method (Vinting's eBay asking prices) are
+  invisible to an App Store user.** bower's per-platform live price has no iOS rival
+  at all.
+
 ## 3. The direct competitors, in order of traction
 
 ### 3.1 Listed AI — the actual leader, and it is French
