@@ -9,6 +9,8 @@ struct HistoryScreen: View {
     @State private var items: [HistoryItem]?
     @State private var failed = false
     @State private var selected: HistoryItem?
+    @State private var confirmClear = false
+    @State private var clearing = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -42,40 +44,84 @@ struct HistoryScreen: View {
         .frame(maxWidth: .infinity).padding(.top, 80)
     }
 
+    /// One card per item, full width, so a title is never cut off and the
+    /// platform it was written for is on the card, not hidden in a dot.
     private func list(_ items: [HistoryItem]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Kicker("\(items.count) item\(items.count == 1 ? "" : "s")")
-            BowerGroup {
-                ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
-                    if i > 0 { Hairline() }
-                    Button { selected = item } label: { row(item) }
-                        .buttonStyle(.plain)
-                }
+        VStack(alignment: .leading, spacing: 12) {
+            Kicker("\(items.count) item\(items.count == 1 ? "" : "s") · text only, no photos")
+            ForEach(items) { item in
+                Button { selected = item } label: { card(item) }
+                    .buttonStyle(.plain)
             }
-            Text("A text-only record. Bower keeps no photos.")
-                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.leading, 4)
+            BowerButton(title: clearing ? "Clearing…" : "Clear history", kind: .danger, disabled: clearing) {
+                confirmClear = true
+            }
+            .padding(.top, 8)
+        }
+        .confirmationDialog("Clear your history?", isPresented: $confirmClear, titleVisibility: .visible) {
+            Button("Clear history", role: .destructive) { Task { await clear() } }
+            Button("Keep it", role: .cancel) {}
+        } message: {
+            Text("Every item and its prices. There is nothing else to remove; bower keeps no photos.")
         }
     }
 
-    private func row(_ item: HistoryItem) -> some View {
-        HStack(spacing: 12) {
-            Circle().fill(item.preferredPlatform?.tint ?? theme.muted)
-                .frame(width: 9, height: 9)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.title).font(BowerFont.ui(14.5, weight: .medium))
-                    .foregroundStyle(theme.text).lineLimit(1)
+    private func card(_ item: HistoryItem) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline) {
+                if let p = item.preferredPlatform {
+                    HStack(spacing: 6) {
+                        Circle().fill(p.tint).frame(width: 7, height: 7)
+                        Kicker("Written for \(p.name)")
+                    }
+                } else {
+                    Kicker("Listing")
+                }
+                Spacer()
                 Text(HistoryFormat.relative(item.createdAt))
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.mono(10.5)).foregroundStyle(theme.muted)
             }
-            Spacer(minLength: 8)
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(HistoryFormat.price(item)).font(BowerFont.mono(13)).foregroundStyle(theme.text)
-                Text(HistoryFormat.priceKind(item)).font(BowerFont.mono(9)).tracking(0.8).foregroundStyle(theme.muted)
+
+            Text(item.title)
+                .font(BowerFont.serif(22))
+                .foregroundStyle(theme.text)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
+
+            Text([item.brand, item.size, item.condition].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                .padding(.top, 3)
+
+            HStack(alignment: .lastTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(HistoryFormat.price(item))
+                        .font(BowerFont.serifUpright(26)).foregroundStyle(theme.text).monospacedDigit()
+                    Text(HistoryFormat.priceLabel(item))
+                        .font(BowerFont.mono(9.5)).tracking(0.8).foregroundStyle(theme.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
             }
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
+            .padding(.top, 12)
         }
-        .padding(.vertical, 12).padding(.horizontal, 16).contentShape(Rectangle())
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(theme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.line, lineWidth: 0.5))
+        .contentShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func clear() async {
+        clearing = true
+        defer { clearing = false }
+        do {
+            try await state.api.clearHistory()
+            withAnimation(.snappy(duration: 0.22)) { items = [] }
+        } catch {
+            failed = true
+        }
     }
 
     private func message(_ text: String) -> some View {
@@ -160,19 +206,19 @@ private struct HistoryDetail: View {
                     }
                 }
                 if let lo = item.priceMin, let hi = item.priceMax {
-                    Text("Guess from the photos was £\(trim(lo)) to £\(trim(hi)).")
+                    Text("Estimate was £\(trim(lo)) to £\(trim(hi)).")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
             } else if let lo = item.priceMin, let hi = item.priceMax {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("GUESS FROM THE PHOTOS")
+                    Text("ESTIMATE")
                         .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
                         .foregroundStyle(theme.text)
                         .padding(.vertical, 3).padding(.horizontal, 7)
                         .background(theme.pollen.opacity(0.28))
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                     PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32)
-                    Text("No price search was run.")
+                    Text("No deep research was run.")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
             }
@@ -241,11 +287,11 @@ private struct HistoryDetail: View {
 enum HistoryFormat {
     /// The price shown on a row: the recommendation if a search ran, else the
     /// first searched band, else the photo-only guess.
-    /// What the row's price is: the ask from a search, the searched range, or the guess.
-    static func priceKind(_ item: HistoryItem) -> String {
-        if item.valuation?.recommendation != nil { return "ASK" }
-        if item.valuation?.perPlatform.values.first != nil { return "LISTED" }
-        return "GUESS"
+    /// What the card's price is: the ask and where, the searched range, or the estimate.
+    static func priceLabel(_ item: HistoryItem) -> String {
+        if let rec = item.valuation?.recommendation { return "ASK ON \(rec.platform.name.uppercased())" }
+        if item.valuation?.perPlatform.values.first != nil { return "LISTED AT" }
+        return "ESTIMATE"
     }
 
     static func price(_ item: HistoryItem) -> String {

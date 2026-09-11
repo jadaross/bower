@@ -17,13 +17,13 @@ struct HelpSheet: View {
     private var steps: [Step] {
         [
             Step(title: "Photograph the piece",
-                 body: "Take them now or pick what you already have. Upload up to 20 photos."),
+                 body: "Take them now or pick what you already have. Up to 5 photos."),
             Step(title: "Tap Price it",
                  body: "Bower reads the photos and tells you the brand, size, condition, material and a first estimate of what it's worth.",
-                 tip: state.allowance.map { "A read costs 1 of your \($0) credits this month." } ?? "A read costs 1 credit."),
-            Step(title: "Get a real price",
-                 body: "The estimate is a guess from the photos. Tap Get a real price and bower searches what similar things are listed at right now.",
-                 tip: "A search costs 1 as well."),
+                 tip: state.reads.limit.map { "A generation costs 1 of your \($0) this month." } ?? "A generation costs 1."),
+            Step(title: "Run a deep research",
+                 body: "The estimate is from the photos alone. A deep research looks up what the same thing is listed at right now, on the platforms you sell on.",
+                 tip: state.searches.limit.map { "A deep research costs 1 of your \($0) this month." } ?? "A deep research costs 1."),
             Step(title: "Copy it across",
                  body: "Switch between Vinted, Depop and eBay. Title, description and every platform field has its own copy button. Bower never posts for you."),
         ]

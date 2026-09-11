@@ -49,12 +49,13 @@ there are no anonymous requests, because the meter needs someone to meter
 
 | Route | Purpose |
 |---|---|
-| `POST /api/analyse` | Photos → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price guess, plus the named platform's form fields). Streams SSE. **Spends one Allowance unit.** |
+| `POST /api/analyse` | Photos → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price estimate, plus the named platform's form fields). Streams SSE. Up to 5 photos. **Spends one generation.** |
 | `POST /api/format`  | Neutral `Listing` + platform + tone → `PlatformListing`. |
 | `POST /api/refine`  | Existing `PlatformListing` + chip instruction text → rewritten `PlatformListing`. |
-| `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one Allowance unit.** |
-| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and Allowance (10 credits a month, a read or a search each costing one; a null limit is unlimited, which the owner's account has). PATCH takes either or both. |
+| `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one deep research.** |
+| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and the two meters: `allowance` (generations, 10 a month, under the old name so older apps decode) and `searches` (deep researches, 3 a month). A null limit is unlimited, which the owner's account has on both. PATCH takes any of the writable fields. |
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
+| `DELETE /api/history` | Clears the caller's history. |
 | `POST /api/feedback/note` | Typed feedback, stored in `feedback_notes` with the screen, session, platform and trace it was written from. Opened from the listing ("Tell us", beside the thumbs) and from Profile. |
 
 `PATCH /api/profile` also takes `seller_notes`: the opt-in facts about the seller a
@@ -92,9 +93,12 @@ work it had not enabled.
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
 the Valuation, account deletion, 222 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
-history, profile — plus two sheets on home: Tips (what photographs well) and `?`
-(how bower works). With photos in, home shows a checklist of the angles not yet
-covered and pins "Price it" to the foot. Real camera,
+history, profile — plus three sheets on home: Tips (what photographs well), `?`
+(how bower works) and About (tap the mark). Five photos, four suggested angles;
+with photos in, home shows a checklist of the angles not yet covered and pins
+"Price it" to the foot. Local notifications only (`Notifications.swift`): a deep
+research finishing in the background, the meters resetting, one nudge after a
+quiet week. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
 
@@ -166,6 +170,7 @@ moved from `#3b5cff` to the deeper `#2B3AA8`, so the bowerbird-prizes-blue reaso
 behind the name still holds.
 
 One thing the app says in its own voice, and should keep saying: copy confirmations
-read **"In the bower"**. The analyse action is plainly **"Price it"** — it used to be
-"Suss it out", which was charming once and vague every time after; the verb carries
-the meaning and the serif title carries the voice.
+read **"In the bower"**. The analyse action is plainly **"Price it"** (a *generation*)
+and the live price search is **"Run a deep research"**; the photo-only price is an
+*estimate*, never a guess. "Suss it out" was charming once and vague every time after;
+the verb carries the meaning and the serif title carries the voice.

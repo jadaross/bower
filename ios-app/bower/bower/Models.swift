@@ -138,38 +138,38 @@ struct CapturedPhoto: Identifiable, Equatable {
     static func == (a: CapturedPhoto, b: CapturedPhoto) -> Bool { a.id == b.id }
 }
 
-/// Suggestions, never slots. The user may ignore every one of them.
+/// The four angles that matter. Suggestions, never slots; the user may ignore
+/// every one of them. The fifth photo, if there is one, is for anything else,
+/// a flaw most usefully.
 enum SuggestedShot: String, CaseIterable, Identifiable {
-    case front, back, tag, logo, detail, flaw
+    case front, back, tag, logo
 
     var id: String { rawValue }
 
+    /// Photos per item. Four angles and one spare.
+    static let maxPhotos = 5
+
     var label: String {
         switch self {
-        case .front:  "Front"
-        case .back:   "Back"
-        case .tag:    "Garment tag"
-        case .logo:   "Brand label"
-        case .detail: "Detail"
-        case .flaw:   "Any flaw"
+        case .front: "Front"
+        case .back:  "Back"
+        case .tag:   "Size tag"
+        case .logo:  "Brand label"
         }
     }
 
     var hint: String {
         switch self {
-        case .front:  "Whole thing, flat or hung"
-        case .back:   "Same framing as the front"
-        case .tag:    "Size and material, flat and lit"
-        case .logo:   "Neck or chest label, close in"
-        case .detail: "Buttons, stitching, hardware"
-        case .flaw:   "Fade, hole, mark. Buyers ask"
+        case .front: "Whole thing, flat or hung"
+        case .back:  "Same framing as the front"
+        case .tag:   "Size and material, flat and lit"
+        case .logo:  "Neck or chest label, close in"
         }
     }
 
     var hue: Double {
         switch self {
-        case .front: 28; case .back: 32; case .tag: 36
-        case .logo: 20; case .detail: 24; case .flaw: 40
+        case .front: 28; case .back: 32; case .tag: 36; case .logo: 20
         }
     }
 }
@@ -226,6 +226,7 @@ final class AppState {
     func loadProfile() async {
         guard let p = try? await api.profile() else { return }
         apply(p)
+        Notifications.scheduleReset(reads: reads.limit, searches: searches.limit)
     }
 
     /// The server's word on the profile wins over whatever the device thought.
@@ -233,8 +234,8 @@ final class AppState {
         enabled = Set(p.enabledPlatforms)
         preferred = p.preferredPlatform
         sellerNotes = Set(p.sellerNotes.compactMap(SellerNote.init(rawValue:)))
-        used = p.allowance.used
-        allowance = p.allowance.limit
+        reads = p.allowance
+        if let s = p.searches { searches = s }
     }
 
     func savePlatforms() async {
@@ -270,6 +271,7 @@ final class AppState {
 
     func signOut() async {
         await session.signOut()
+        Notifications.clearScheduled()
         photos = []
         screen = .signin
     }
@@ -289,14 +291,10 @@ final class AppState {
     /// What the last read produced. Cleared with the photos on a new item.
     var analysis: AnalysisResult?
 
-    /// The Allowance meter: credits a month, spent on reads or searches alike.
-    /// A nil limit is no limit.
-    var used: Int = 0
-    var allowance: Int? = 10
-
-    /// Credits left, or nil when there is no limit.
-    var remaining: Int? { allowance.map { max(0, $0 - used) } }
-    var canSpend: Bool { remaining.map { $0 > 0 } ?? true }
+    /// The two meters. A generation (Price it) spends from `reads`; a deep
+    /// research spends from `searches`. A nil limit is no limit.
+    var reads = AllowanceState(used: 0, limit: 10)
+    var searches = AllowanceState(used: 0, limit: 3)
 
     func enable(_ platform: Platform, _ on: Bool) -> Bool {
         if !on && enabled.count == 1 { return false }

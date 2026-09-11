@@ -159,20 +159,22 @@ struct Recommendation: Codable, Sendable {
 }
 
 struct AllowanceState: Codable, Sendable, Equatable {
-    let used: Int
-    /// Credits per month. Nil means no limit.
-    let limit: Int?
-    let resetsAt: String?
+    var used: Int
+    /// Per month. Nil means no limit.
+    var limit: Int?
+    var resetsAt: String? = nil
 
     /// Nil when there is no limit.
     var remaining: Int? { limit.map { max(0, $0 - used) } }
+    var canSpend: Bool { remaining.map { $0 > 0 } ?? true }
 }
 
 struct ValuationResponse: Codable, Sendable {
     let perPlatform: [String: PriceBand]
     let query: String
     let recommendation: Recommendation?
-    let allowance: AllowanceState?
+    /// The deep-research meter after this spend.
+    var searches: AllowanceState? = nil
 }
 
 /// Deliberately narrower than the Neutral Listing — a valuation needs less
@@ -235,5 +237,8 @@ struct ProfileResponse: Codable, Sendable {
     let preferredPlatform: Platform
     /// Raw wire values; `SellerNote(rawValue:)` drops any the app does not know.
     var sellerNotes: [String] = []
+    /// Generations this month. Under the old name on the wire.
     let allowance: AllowanceState
+    /// Deep researches this month. Optional so a stub or older server decodes.
+    var searches: AllowanceState? = nil
 }

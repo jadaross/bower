@@ -18,6 +18,9 @@ struct CaptureScreen: View {
     @State private var importing = false
     @State private var showTips = false
     @State private var showHelp = false
+    @State private var showAbout = false
+    /// Set when photos were dropped for being past the limit. Cleared on the next add.
+    @State private var overLimit = false
     /// Set when the on-device check turned a photo away. Cleared on the next add.
     @State private var turnedAway = false
 
@@ -60,6 +63,13 @@ struct CaptureScreen: View {
                 .presentationDragIndicator(.visible)
                 .presentationBackground(theme.bg)
         }
+        .sheet(isPresented: $showAbout) {
+            AboutSheet()
+                .environment(\.bower, theme)
+                .presentationDetents([.fraction(0.72)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
         .fullScreenCover(isPresented: $showCamera) {
             CameraPicker(
                 onCapture: { image in
@@ -72,7 +82,8 @@ struct CaptureScreen: View {
             )
             .ignoresSafeArea()
         }
-        .photosPicker(isPresented: $showLibrary, selection: $libraryItems, maxSelectionCount: 20, matching: .images)
+        .photosPicker(isPresented: $showLibrary, selection: $libraryItems,
+                      maxSelectionCount: max(1, SuggestedShot.maxPhotos - state.photos.count), matching: .images)
         .onChange(of: libraryItems) { _, items in
             guard !items.isEmpty else { return }
             Task { await importLibrary(items) }
@@ -93,14 +104,18 @@ struct CaptureScreen: View {
     /// it any more, so the wordmark carries the page.
     private var nav: some View {
         HStack {
-            HStack(spacing: 9) {
-                Arch(size: 30)
-                HStack(spacing: 0) {
-                    Text("bower").foregroundStyle(theme.text)
-                    Text(".").foregroundStyle(theme.coral)
+            Button { showAbout = true } label: {
+                HStack(spacing: 9) {
+                    Arch(size: 30)
+                    HStack(spacing: 0) {
+                        Text("bower").foregroundStyle(theme.text)
+                        Text(".").foregroundStyle(theme.coral)
+                    }
+                    .font(BowerFont.serif(36))
                 }
-                .font(BowerFont.serif(36))
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("About bower")
             Spacer()
             HStack(spacing: 8) {
                 Button { showTips = true } label: {
@@ -190,6 +205,7 @@ struct CaptureScreen: View {
             checklist
             if importing { preparing }
             if turnedAway { turnedAwayNote }
+            if overLimit { overLimitNote }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 16)
@@ -266,7 +282,8 @@ struct CaptureScreen: View {
         VStack(spacing: 9) {
             BowerButton(title: "Price it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
             HStack(spacing: 9) {
-                BowerButton(title: "Upload more", kind: .secondary) { showLibrary = true }
+                BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
+                            kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
                 Button("Clear") { state.photos = [] }
                     .buttonStyle(.plain)
                     .font(BowerFont.ui(12.5, weight: .medium))
@@ -299,6 +316,24 @@ struct CaptureScreen: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
+    private var overLimitNote: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("!")
+                .font(BowerFont.ui(11, weight: .bold))
+                .foregroundStyle(theme.ink)
+                .frame(width: 16, height: 16)
+                .background(theme.pollen)
+                .clipShape(Circle())
+            Text("Five photos is the limit. The extras weren't added.")
+                .font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(theme.pollen.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
     private var preparing: some View {
         HStack(spacing: 8) {
             ProgressView().tint(theme.satin)
@@ -314,7 +349,8 @@ struct CaptureScreen: View {
                     state.photos.removeAll { $0.id == photo.id }
                 }
             }
-            Button { pendingShot = nil; showSheet = true } label: {
+            if state.photos.count < SuggestedShot.maxPhotos {
+              Button { pendingShot = nil; showSheet = true } label: {
                 Color.clear
                     .aspectRatio(3 / 4, contentMode: .fit)
                     .overlay {
@@ -324,8 +360,9 @@ struct CaptureScreen: View {
                         }
                     }
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(theme.line, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
+              }
+              .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -388,6 +425,7 @@ struct CaptureScreen: View {
     /// flagged photo is dropped and said so, once; the rest go in as normal.
     private func add(_ images: [UIImage], shot: SuggestedShot?) async {
         turnedAway = false
+        overLimit = false
         var batch: [CapturedPhoto] = []
         for image in images {
             if await SensitiveContent.isSensitive(image) { turnedAway = true; continue }
@@ -395,7 +433,9 @@ struct CaptureScreen: View {
         }
         guard !batch.isEmpty else { return }
         if let shot { batch[0].shot = shot }
-        state.photos.append(contentsOf: batch)
+        let room = max(0, SuggestedShot.maxPhotos - state.photos.count)
+        if batch.count > room { overLimit = true }
+        state.photos.append(contentsOf: batch.prefix(room))
     }
 
     private func importLibrary(_ items: [PhotosPickerItem]) async {
@@ -419,8 +459,6 @@ extension SuggestedShot {
         case .back:   "tshirt.fill"
         case .tag:    "tag"
         case .logo:   "rectangle.and.text.magnifyingglass"
-        case .detail: "magnifyingglass.circle"
-        case .flaw:   "exclamationmark.triangle"
         }
     }
 }

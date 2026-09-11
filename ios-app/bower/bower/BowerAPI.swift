@@ -38,6 +38,8 @@ protocol BowerAPIClient: Sendable {
     func deleteAccount() async throws
     /// The caller's past items, newest first. Text only — no photos.
     func history() async throws -> [HistoryItem]
+    /// Removes every one of them.
+    func clearHistory() async throws
     /// Records a feedback signal against a listing's Langfuse trace. Best-effort.
     func feedback(traceId: String, name: String, value: Int?) async throws
     /// Typed feedback, with where it was written from. The item's session id
@@ -210,6 +212,11 @@ struct BowerAPI: BowerAPIClient {
 
     func history() async throws -> [HistoryItem] {
         try await send("/api/history", as: HistoryResponse.self).items
+    }
+
+    func clearHistory() async throws {
+        struct Ack: Decodable {}
+        _ = try await send("/api/history", method: "DELETE", as: Ack.self)
     }
 
     func feedback(traceId: String, name: String, value: Int?) async throws {

@@ -10,10 +10,9 @@ struct TipsSheet: View {
     private static let tips: [(SuggestedShot, String, String)] = [
         (.front, "Daylight, plain wall", "Near a window, no flash."),
         (.front, "Whole piece in frame", "Flat or hung, straight on."),
-        (.tag, "Tag flat and in focus", "Size and material come from here."),
+        (.back, "The back too", "Same framing as the front."),
+        (.tag, "Size tag flat and in focus", "Size and material come from here."),
         (.logo, "Brand label close in", "Neck or chest label."),
-        (.detail, "One detail", "Buttons, stitching, hardware."),
-        (.flaw, "Any flaw", "Buyers ask anyway."),
     ]
 
     var body: some View {
@@ -26,7 +25,7 @@ struct TipsSheet: View {
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
-            Text("None of it is required. Each one sharpens the price.")
+            Text("Four angles, none required. The fifth photo is for a flaw, if there is one.")
                 .font(BowerFont.ui(13))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)

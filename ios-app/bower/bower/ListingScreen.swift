@@ -110,6 +110,8 @@ final class ListingModel {
         priceState = .searching
         elapsed = 0
         searchError = nil
+        // The one moment "we'll tell you when it's done" is a fair ask.
+        Task { await Notifications.requestIfNeeded() }
         searchTask = Task {
             // Counted from the clock, not by ticks: the ticker stops while the
             // app is suspended but the search does not.
@@ -127,14 +129,17 @@ final class ListingModel {
                 for (k, b) in v.perPlatform { if let p = Platform(rawValue: k) { out[p] = b } }
                 bands = out
                 recommendation = v.recommendation
-                if let a = v.allowance { state.used = a.used; state.allowance = a.limit }
+                if let s = v.searches { state.searches = s }
                 priceState = .searched
+                Notifications.priceIsIn(
+                    ask.map { "Ask £\($0.listAt) on \($0.platform.name)." } ?? "Nothing comparable listed today."
+                )
             } catch APIError.allowanceExhausted(let a) {
-                state.used = a.used; state.allowance = a.limit
-                searchError = "That's the lot for this month. No credits left."
+                state.searches = a
+                searchError = "That's all your deep researches for this month."
                 priceState = .estimated
             } catch {
-                searchError = "The search didn't come back. Your guess is still here. Try again when you have signal."
+                searchError = "The deep research didn't come back. Your estimate is still here. Try again when you have signal."
                 priceState = .estimated
             }
         }
@@ -259,7 +264,7 @@ private struct PriceSection: View {
         VStack(alignment: .leading, spacing: 10) {
             BowerCard(padding: 16, dashed: true, fill: theme.subtle) {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("GUESS FROM THE PHOTOS")
+                    Text("ESTIMATE")
                         .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
                         .foregroundStyle(theme.text)
                         .padding(.vertical, 3).padding(.horizontal, 7)
@@ -269,10 +274,10 @@ private struct PriceSection: View {
                         PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
                             .padding(.top, 8)
                     }
-                    BowerButton(title: state.canSpend ? "Get a real price" : "No credits left",
-                                disabled: !state.canSpend) { model.search() }
+                    BowerButton(title: state.searches.canSpend ? "Run a deep research" : "No deep researches left",
+                                disabled: !state.searches.canSpend) { model.search() }
                         .padding(.top, 14)
-                    Text(state.remaining.map { $0 > 0 ? "Searches live listings. Costs 1 of \($0)." : "Searches live listings." } ?? "Searches live listings.")
+                    Text(deepResearchNote)
                         .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 9)
@@ -285,6 +290,12 @@ private struct PriceSection: View {
         }
     }
 
+    private var deepResearchNote: String {
+        let what = "Searches live listings for what this is actually going for."
+        guard let left = state.searches.remaining else { return what + " Uses 1 deep research." }
+        return left > 0 ? what + " Uses 1 of your \(left) deep researches." : what
+    }
+
     // One row per platform being read. The valuation comes back all at once,
     // so every row pulses until the whole answer lands — no row claims to be
     // done before it is.
@@ -292,7 +303,7 @@ private struct PriceSection: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Kicker("Reading live listings", color: theme.satin)
+                    Kicker("Deep research", color: theme.satin)
                     Spacer()
                     Text(String(format: "%02d:%02d", model.elapsed / 60, model.elapsed % 60))
                         .font(BowerFont.mono(11)).foregroundStyle(theme.muted).monospacedDigit()

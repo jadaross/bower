@@ -145,14 +145,14 @@ describe("POST /api/analyse", () => {
     expect((await POST(post({ images: [], tone: "casual" }))).status).toBe(400);
   });
 
-  it("400s above the 20-image ceiling", async () => {
-    const res = await POST(post({ images: Array(21).fill(PHOTO), tone: "casual" }));
+  it("400s above the 5-image ceiling", async () => {
+    const res = await POST(post({ images: Array(6).fill(PHOTO), tone: "casual" }));
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toMatch(/Maximum 20/);
+    expect((await res.json()).error).toMatch(/Maximum 5/);
   });
 
-  it("accepts exactly 20 images", async () => {
-    const res = await POST(post({ images: Array(20).fill(PHOTO), tone: "casual" }));
+  it("accepts exactly 5 images", async () => {
+    const res = await POST(post({ images: Array(5).fill(PHOTO), tone: "casual" }));
     expect(res.status).toBe(200);
   });
 

@@ -123,7 +123,12 @@ struct SettingsScreen: View {
         .padding(.horizontal, 22)
         .padding(.top, 4)
         .padding(.bottom, 34)
-        .task { await state.loadProfile() }
+        .task {
+            await state.loadProfile()
+            #if DEBUG
+            await Notifications.dumpPending()
+            #endif
+        }
         .sheet(isPresented: $feedback) {
             FeedbackSheet(screen: "profile")
                 .environment(\.bower, theme)
@@ -215,37 +220,49 @@ struct SettingsScreen: View {
         .padding(.top, 4)
     }
 
+    /// Two meters in one card. A generation and a deep research are different
+    /// things at very different costs, so they are counted apart.
     private var allowanceCard: some View {
-        let limit = state.allowance
-        let pct = limit.map { $0 > 0 ? Double(state.used) / Double($0) : 0 } ?? 0
-        return BowerCard(padding: 16) {
+        BowerCard(padding: 16) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(alignment: .firstTextBaseline) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        if let limit, let remaining = state.remaining {
-                            Text("\(remaining)").font(BowerFont.serif(30)).foregroundStyle(theme.text)
-                            Text("of \(limit) left").font(BowerFont.serif(17)).foregroundStyle(theme.muted)
-                        } else {
-                            Text("No limit").font(BowerFont.serif(30)).foregroundStyle(theme.text)
-                            Text("\(state.used) used").font(BowerFont.serif(17)).foregroundStyle(theme.muted)
-                        }
-                    }
-                    Spacer()
-                    Text("resets on the 1st").font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-                }
-                if limit != nil {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(theme.subtle)
-                            Capsule().fill(pct > 0.8 ? theme.coral : theme.satin).frame(width: geo.size.width * pct)
-                        }
-                    }
-                    .frame(height: 6)
+                meterRow("Generations", state.reads)
+                Hairline().padding(.vertical, 12)
+                meterRow("Deep researches", state.searches)
+                Text("A generation reads your photos and writes the listing. A deep research searches live listings for the price. Both reset on the 1st.")
+                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                     .padding(.top, 12)
-                    .animation(.easeOut(duration: 0.5), value: pct)
+            }
+        }
+    }
+
+    private func meterRow(_ label: String, _ m: AllowanceState) -> some View {
+        let pct = m.limit.map { $0 > 0 ? Double(m.used) / Double($0) : 0 } ?? 0
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline) {
+                Kicker(label)
+                Spacer()
+                if let limit = m.limit, let remaining = m.remaining {
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text("\(remaining)").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                        Text("of \(limit) left").font(BowerFont.serif(15)).foregroundStyle(theme.muted)
+                    }
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text("No limit").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                        Text("\(m.used) used").font(BowerFont.serif(15)).foregroundStyle(theme.muted)
+                    }
                 }
-                Text("A read costs 1 credit. A price search costs 1 credit.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.top, 9)
+            }
+            if m.limit != nil {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(theme.subtle)
+                        Capsule().fill(pct > 0.8 ? theme.coral : theme.satin).frame(width: geo.size.width * pct)
+                    }
+                }
+                .frame(height: 6)
+                .padding(.top, 8)
+                .animation(.easeOut(duration: 0.5), value: pct)
             }
         }
     }

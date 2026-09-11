@@ -23,7 +23,8 @@ struct StubAPI: BowerAPIClient {
         return ProfileResponse(
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
-            allowance: AllowanceState(used: 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z")
+            allowance: AllowanceState(used: 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: 1, limit: unlimited ? nil : 3, resetsAt: "2026-10-01T00:00:00Z")
         )
     }
 
@@ -99,6 +100,8 @@ struct StubAPI: BowerAPIClient {
     func feedback(traceId: String, name: String, value: Int?) async throws {}
 
     func feedbackNote(_ note: FeedbackNote) async throws { await wait() }
+
+    func clearHistory() async throws { await wait() }
 
     func history() async throws -> [HistoryItem] {
         await wait()
@@ -187,7 +190,7 @@ struct StubAPI: BowerAPIClient {
                     RunnerUp(platform: .vinted, listAt: 40, net: 40),
                 ]
             ),
-            allowance: AllowanceState(used: 5, limit: 10, resetsAt: "2026-10-01T00:00:00Z")
+            searches: AllowanceState(used: 2, limit: 3, resetsAt: "2026-10-01T00:00:00Z")
         )
     }
 

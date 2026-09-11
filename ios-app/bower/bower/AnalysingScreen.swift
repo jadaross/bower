@@ -97,12 +97,13 @@ struct AnalysingScreen: View {
                 )
                 guard !Task.isCancelled else { return }
                 state.analysis = result
-                state.used += 1
+                state.reads.used += 1
+                Notifications.scheduleNudge()
                 stage = Self.stages.count
                 try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {
-                state.used = a.used; state.allowance = a.limit
+                state.reads = a
                 phase = .allowance(a)
             } catch APIError.notSignedIn, APIError.sessionInvalid {
                 await state.signOut()
@@ -156,7 +157,7 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
             title: "That's the lot for this month",
-            body: "That's all \(a.limit ?? a.used) credits for this month.\(resetText(a))"
+            body: "That's all \(a.limit ?? a.used) generations for this month.\(resetText(a))"
         ) {
             Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }

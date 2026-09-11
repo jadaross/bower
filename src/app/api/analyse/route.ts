@@ -65,8 +65,8 @@ export const POST = withAuth(async (request, user) => {
   if (!Array.isArray(images) || images.length === 0) {
     return Response.json({ error: "No images provided" }, { status: 400 });
   }
-  if (images.length > 20) {
-    return Response.json({ error: "Maximum 20 images allowed per listing" }, { status: 400 });
+  if (images.length > 5) {
+    return Response.json({ error: "Maximum 5 images allowed per listing" }, { status: 400 });
   }
 
   // A read costs one unit, the same as a search. Reserved before the model is
