@@ -22,7 +22,7 @@ export const metadata: PlatformMetadata = {
       itemUrl: items,
       itemUrlExample: "https://www.vinted.co.uk/items/<id>-<slug>",
       searchNote:
-        "Vinted ships between the UK and Australia, so a listing on vinted.com.au is a comparable for a UK seller too; convert its price to GBP and say so. Prefer vinted.co.uk listings when there are enough.",
+        "Vinted ships between the UK and Australia, so a listing on vinted.com.au is a comparable for a UK seller too; convert its price to GBP and say so. Run at least one search on each site. Prefer vinted.co.uk listings when there are enough.",
     },
     AU: {
       feeLabel: "0%",
@@ -32,7 +32,7 @@ export const metadata: PlatformMetadata = {
       itemUrl: items,
       itemUrlExample: "https://www.vinted.com.au/items/<id>-<slug>",
       searchNote:
-        "Vinted ships between Australia and the UK, so a listing on vinted.co.uk is a comparable for an Australian seller too; convert its price to AUD and say so. Prefer vinted.com.au listings when there are enough — the Australian site is new and may have few.",
+        "Vinted ships between Australia and the UK, so a listing on vinted.co.uk is a comparable for an Australian seller too; convert its price to AUD and say so. Run at least one search on each site: the Australian site is new and may have few listings, and vinted.co.uk usually has plenty. Prefer vinted.com.au listings when there are enough.",
     },
   },
 };

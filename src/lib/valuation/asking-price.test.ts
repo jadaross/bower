@@ -7,7 +7,7 @@ vi.mock("@/lib/llm/client", async (importOriginal) => ({
   anthropicClient: () => ({ messages: { create } }),
 }));
 
-const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem, listingUrl } =
+const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem, listingUrl, searchActivity } =
   await import("./asking-price");
 
 const item: ValuationItem = {
@@ -360,5 +360,36 @@ describe("in Australia", () => {
   it("lets a UK Vinted seller see Australian listings too", async () => {
     await askingPriceProvider.band(item, "vinted", "GB");
     expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["vinted.co.uk", "vinted.com.au"]);
+  });
+});
+
+describe("searchActivity", () => {
+  it("records each query and the hosts of every result", () => {
+    const turns = [
+      [
+        { type: "server_tool_use", id: "t1", name: "web_search", input: { query: "purple bikini set vinted" } },
+        {
+          type: "web_search_tool_result",
+          tool_use_id: "t1",
+          content: [
+            { type: "web_search_result", url: "https://www.vinted.com.au/items/1-a", title: "a", encrypted_content: "", page_age: null },
+            { type: "web_search_result", url: "https://www.vinted.co.uk/items/2-b", title: "b", encrypted_content: "", page_age: null },
+            { type: "web_search_result", url: "https://www.vinted.co.uk/items/3-c", title: "c", encrypted_content: "", page_age: null },
+          ],
+        },
+        { type: "text", text: "{}", citations: null },
+      ],
+    ] as unknown as Parameters<typeof searchActivity>[0];
+    expect(searchActivity(turns)).toEqual({
+      queries: ["purple bikini set vinted"],
+      hits: { "vinted.com.au": 1, "vinted.co.uk": 2 },
+    });
+  });
+
+  it("allows a third search when a platform spans two sites", async () => {
+    await askingPriceProvider.band(item, "vinted", "AU");
+    expect(create.mock.calls.at(-1)![0].tools[0].max_uses).toBe(3);
+    await askingPriceProvider.band(item, "ebay", "AU");
+    expect(create.mock.calls.at(-1)![0].tools[0].max_uses).toBe(2);
   });
 });

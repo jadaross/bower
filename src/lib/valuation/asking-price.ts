@@ -20,13 +20,44 @@ import type { ValuationProvider } from "./provider";
  * back with five Vinted listings under an eBay heading.
  */
 function webSearchTool(platform: Platform, market: Market): Anthropic.Messages.WebSearchTool20260209 {
+  const domains = presence(platform, market).searchDomains;
   return {
     type: "web_search_20260209",
     name: "web_search",
-    max_uses: 2,
+    // Two searches for one site; one more when the platform spans two, so
+    // the second site is not squeezed out by the first.
+    max_uses: domains.length > 1 ? 3 : 2,
     user_location: { type: "approximate", country: MARKETS[market].searchCountry },
-    allowed_domains: [...presence(platform, market).searchDomains],
+    allowed_domains: [...domains],
   };
+}
+
+/**
+ * What the search actually did, for the trace: each query, and how many
+ * results came back from each host. Without this a band with no comparables
+ * cannot be told apart from a search that never reached the second site.
+ */
+export function searchActivity(contents: Anthropic.Messages.ContentBlock[][]): { queries: string[]; hits: Record<string, number> } {
+  const queries: string[] = [];
+  const hits: Record<string, number> = {};
+  for (const content of contents) {
+    for (const block of content) {
+      if (block.type === "server_tool_use" && block.name === "web_search") {
+        const q = (block.input as { query?: unknown })?.query;
+        if (typeof q === "string") queries.push(q);
+      }
+      if (block.type === "web_search_tool_result" && Array.isArray(block.content)) {
+        for (const r of block.content) {
+          if (r.type === "web_search_result" && typeof r.url === "string") {
+            let host = r.url;
+            try { host = new URL(r.url).hostname.replace(/^www\./, ""); } catch { /* keep as is */ }
+            hits[host] = (hits[host] ?? 0) + 1;
+          }
+        }
+      }
+    }
+  }
+  return { queries, hits };
 }
 
 /** A URL that opens one listing on this platform in this market, or undefined. */
@@ -183,10 +214,12 @@ export const askingPriceProvider: ValuationProvider = {
     try {
       const params = request(platform, market);
       let response = await client.messages.create({ ...params, messages });
+      const turns = [response.content];
 
       for (let i = 0; response.stop_reason === "pause_turn" && i < MAX_RESUMES; i++) {
         messages.push({ role: "assistant", content: response.content });
         response = await client.messages.create({ ...params, messages });
+        turns.push(response.content);
       }
 
       if (response.stop_reason === "refusal") {
@@ -195,7 +228,7 @@ export const askingPriceProvider: ValuationProvider = {
 
       const band = coerceBand(parseStructuredContent<RawBand>(response.content), platform, market);
       generation?.finish({
-        output: band,
+        output: { ...band, search: searchActivity(turns) },
         usage: { input: response.usage?.input_tokens, output: response.usage?.output_tokens },
       });
       return band;
