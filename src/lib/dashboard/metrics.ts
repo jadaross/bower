@@ -220,18 +220,22 @@ export function people(data: DashboardData): PersonRow[] {
   const scoresByUser = groupBy(data.scores, (s) => (s.traceId && traceUser.get(s.traceId)) || "");
   const notesByUser = groupBy(data.notes, (n) => n.userId);
   const checksByUser = groupBy(marketChecks(data.generations), (c) => c.userId ?? "");
+  const historyByUser = groupBy(data.history, (h) => h.userId);
 
   return data.accounts
     .filter((a) => data.includeOwner || !a.isOwner)
     .map((a) => {
       const gens = gensByUser.get(a.id) ?? [];
       const scores = scoresByUser.get(a.id) ?? [];
-      const days = [...new Set(gens.map((g) => dayKey(g.startTime)))].sort();
-      const last = gens.map((g) => g.startTime).sort().at(-1) ?? null;
+      const hist = historyByUser.get(a.id) ?? [];
+      const stamps = [...gens.map((g) => g.startTime), ...hist.map((h) => h.createdAt)];
+      const days = [...new Set(stamps.map(dayKey))].sort();
+      const last = stamps.sort().at(-1) ?? null;
       return {
         account: a,
         label: labelFor(data.accounts, a.id),
-        listings: gens.filter(isListing).length,
+        // From the history table, not Langfuse traces — see `summary()`.
+        listings: hist.length,
         rejections: gens.filter((g) => rejectionOf(g) !== null).length,
         checks: (checksByUser.get(a.id) ?? []).length,
         formats: gens.filter((g) => g.route === "format").length,
@@ -280,13 +284,15 @@ export function summary(data: DashboardData): Summary {
   const accounts = data.accounts.filter((a) => data.includeOwner || !a.isOwner);
   const from = data.range.from?.toISOString() ?? "";
   const rows = people(data);
-  const writers = new Set(data.generations.filter(isListing).map((g) => g.userId));
   const everWrote = new Set(data.history.map((h) => h.userId));
   return {
     accounts: accounts.length,
     newAccounts: accounts.filter((a) => a.createdAt >= from).length,
-    activePeople: new Set(data.generations.map((g) => g.userId).filter(Boolean)).size,
-    listings: data.generations.filter(isListing).length,
+    activePeople: new Set([...data.generations.map((g) => g.userId), ...data.history.map((h) => h.userId)].filter(Boolean)).size,
+    // From the history table, not Langfuse traces: a listing is written (and
+    // the allowance spent) whether or not its trace made it to Langfuse, so
+    // this is the count that can never fall behind reality (see the Items page).
+    listings: data.history.length,
     rejections: data.generations.filter((g) => rejectionOf(g) !== null).length,
     checks: marketChecks(data.generations).length,
     spend: data.generations.reduce((s, g) => s + g.cost.total, 0),
@@ -295,7 +301,7 @@ export function summary(data: DashboardData): Summary {
     copied: rows.reduce((s, r) => s + r.copied, 0),
     notes: data.notes.length,
     errors: data.generations.filter(isError).length,
-    neverWrote: accounts.filter((a) => !writers.has(a.id) && !everWrote.has(a.id)).length,
+    neverWrote: accounts.filter((a) => !everWrote.has(a.id)).length,
   };
 }
 
@@ -332,7 +338,6 @@ export function daily(data: DashboardData): DayRow[] {
   for (const g of data.generations) {
     const r = rows.get(dayKey(g.startTime));
     if (!r) continue;
-    if (isListing(g)) r.listings++;
     if (rejectionOf(g) !== null) r.rejections++;
     if (g.route === "format") r.formats++;
     if (g.route === "refine") r.refines++;
@@ -343,6 +348,15 @@ export function daily(data: DashboardData): DayRow[] {
       set.add(g.userId);
       peopleByDay.set(r.day, set);
     }
+  }
+  // From the history table, not Langfuse traces — see `summary()`.
+  for (const h of data.history) {
+    const r = rows.get(dayKey(h.createdAt));
+    if (!r) continue;
+    r.listings++;
+    const set = peopleByDay.get(r.day) ?? new Set<string>();
+    set.add(h.userId);
+    peopleByDay.set(r.day, set);
   }
   for (const c of marketChecks(data.generations)) {
     const r = rows.get(dayKey(c.startTime));
@@ -371,6 +385,10 @@ export interface Event {
 export function recentEvents(data: DashboardData, limit = 20): Event[] {
   const title = titleBySession(data);
   const traceGen = new Map(data.generations.map((g) => [g.traceId, g]));
+  // A listing's own trace, when Langfuse actually got a copy of it \u2014 see `summary()`.
+  const analyseTraceBySession = new Map(
+    data.generations.filter((g) => g.route === "analyse").map((g) => [g.sessionId, g.traceId])
+  );
   const who = (id: string | null) => labelFor(data.accounts, id);
   const item = (sessionId: string | null, fallback: string) => {
     const t = title.get(sessionId ?? "");
@@ -382,9 +400,14 @@ export function recentEvents(data: DashboardData, limit = 20): Event[] {
     const rej = rejectionOf(g);
     if (isError(g)) events.push({ at: g.startTime, kind: "error", who: who(g.userId), what: `hit an error in ${g.route}: ${g.statusMessage || "no message"}`, traceId: g.traceId });
     else if (rej) events.push({ at: g.startTime, kind: "rejection", who: who(g.userId), what: `sent photos bower rejected (${rej.replace("_", " ")})`, traceId: g.traceId });
-    else if (g.route === "analyse") events.push({ at: g.startTime, kind: "listing", who: who(g.userId), what: `wrote ${item(g.sessionId, "a listing")}`, traceId: g.traceId });
     else if (g.route === "format") events.push({ at: g.startTime, kind: "format", who: who(g.userId), what: `switched platform or tone on ${item(g.sessionId, "a listing")}`, traceId: g.traceId });
     else if (g.route === "refine") events.push({ at: g.startTime, kind: "refine", who: who(g.userId), what: `tapped ${chipsOf(g).join(", ") || "a chip"} on ${item(g.sessionId, "a listing")}`, traceId: g.traceId });
+  }
+  // From the history table, not Langfuse traces, so a listing whose trace
+  // never made it to Langfuse still shows up here (see `summary()`). Its
+  // trace link only resolves when one actually exists.
+  for (const h of data.history) {
+    events.push({ at: h.createdAt, kind: "listing", who: who(h.userId), what: `wrote \u201c${h.title}\u201d`, traceId: (h.sessionId && analyseTraceBySession.get(h.sessionId)) ?? null });
   }
   for (const c of marketChecks(data.generations)) {
     events.push({ at: c.startTime, kind: "check", who: who(c.userId), what: `checked the market on ${c.platforms.join(", ")} for ${item(c.sessionId, "an item")}`, traceId: c.traceId });
@@ -431,6 +454,8 @@ export function countBy<T>(items: T[], key: (t: T) => string | null | undefined,
 }
 
 export interface PhotoStats {
+  /** Listings with an analyse trace in Langfuse — a subset of the true total
+   * (`data.history.length`, shown on the Items page) when a trace is missing. */
   listings: number;
   avgPhotos: number | null;
   distribution: Count[]; // 1..5

@@ -19,7 +19,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
       <p>How many photos go into a listing, what gets rejected, and what the clothes actually are — brands, types, condition and what bower estimated for them. Items come from the text-only history; photos are never stored, so the counts are all that remains of them.</p>
 
       <div className="kpis">
-        <Stat label="Listings written" value={num(ph.listings)} />
+        <Stat label="Listings written" value={num(it.rows.length)} />
         <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint="of a possible 5" />
         <Stat label="With a label photo" value={ph.tagKnown ? pct(ph.withTagPhoto, ph.tagKnown) : "—"} hint="the model saw a care or brand tag" tone={ph.tagKnown && ph.withTagPhoto / ph.tagKnown < 0.3 ? "warn" : undefined} />
         <Stat label="Rejected" value={num(rejected)} hint={rejected ? ph.rejections.map((r) => `${r.count} ${r.label}`).join(" · ") : "nothing that was not clothing"} tone={rejected ? "warn" : undefined} />

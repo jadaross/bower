@@ -13,6 +13,7 @@ import {
   percentile,
   photoStats,
   rangeFor,
+  recentEvents,
   rejectionOf,
   summary,
   type DashboardData,
@@ -135,6 +136,25 @@ describe("labelFor", () => {
   });
 });
 
+const HISTORY_ROW: HistoryRow = {
+  id: "h1",
+  userId: FRIEND,
+  createdAt: "2026-09-11T12:00:00.000Z",
+  sessionId: "S1",
+  brand: "Nike",
+  clothingType: "Hoodie",
+  title: "Nike hoodie",
+  colourPrimary: null,
+  size: null,
+  condition: "Good",
+  priceMin: null,
+  priceMax: null,
+  preferredPlatform: "vinted",
+  mainCategory: null,
+  gender: null,
+  valuation: null,
+};
+
 describe("summary and people", () => {
   const d = data({
     generations: [
@@ -147,6 +167,7 @@ describe("summary and people", () => {
       { id: "1", name: "thumbs", value: true, dataType: "BOOLEAN", timestamp: "2026-09-11T12:01:00.000Z", comment: null, traceId: "A", environment: "production" },
       { id: "2", name: "copied", value: 1, dataType: "NUMERIC", timestamp: "2026-09-11T12:02:00.000Z", comment: null, traceId: "D", environment: "production" },
     ] satisfies Score[],
+    history: [HISTORY_ROW],
   });
 
   it("counts listings, rejections, checks and signals", () => {
@@ -176,6 +197,19 @@ describe("summary and people", () => {
 
   it("flags people who signed up and never wrote", () => {
     expect(summary(data({ generations: [] })).neverWrote).toBe(1);
+  });
+
+  it("counts a listing whose analyse trace never reached Langfuse", () => {
+    // The write (allowance spend + history row) is the ground truth; the
+    // Langfuse trace is best-effort and can go missing (e.g. a cold start).
+    // Only a later valuate trace exists here, same as the real incident.
+    const untraced = data({
+      generations: [gen({ name: "valuate:vinted", traceId: "C", sessionId: "S9" })],
+      history: [{ ...HISTORY_ROW, sessionId: "S9" }],
+    });
+    expect(summary(untraced).listings).toBe(1);
+    expect(people(untraced)[0].listings).toBe(1);
+    expect(recentEvents(untraced).some((e) => e.kind === "listing")).toBe(true);
   });
 });
 
