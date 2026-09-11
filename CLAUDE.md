@@ -55,6 +55,7 @@ there are no anonymous requests, because the meter needs someone to meter
 | `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one Allowance unit.** |
 | `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and Allowance. PATCH takes either or both. |
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
+| `POST /api/feedback/note` | Typed feedback, stored in `feedback_notes` with the screen, session, platform and trace it was written from. Opened from the listing ("Tell us", beside the thumbs) and from Profile. |
 
 `PATCH /api/profile` also takes `seller_notes`: the opt-in facts about the seller a
 listing may state (`smoke_free`, `pet_free`, `posts_next_day`, `bundles`). The three

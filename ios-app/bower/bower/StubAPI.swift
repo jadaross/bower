@@ -97,6 +97,8 @@ struct StubAPI: BowerAPIClient {
 
     func feedback(traceId: String, name: String, value: Int?) async throws {}
 
+    func feedbackNote(_ note: FeedbackNote) async throws { await wait() }
+
     func history() async throws -> [HistoryItem] {
         await wait()
         func band(_ lo: Double, _ hi: Double, _ p: Platform) -> PriceBand {

@@ -40,6 +40,18 @@ protocol BowerAPIClient: Sendable {
     func history() async throws -> [HistoryItem]
     /// Records a feedback signal against a listing's Langfuse trace. Best-effort.
     func feedback(traceId: String, name: String, value: Int?) async throws
+    /// Typed feedback, with where it was written from. The item's session id
+    /// is added by the client, so a note about a listing lines up with it.
+    func feedbackNote(_ note: FeedbackNote) async throws
+}
+
+/// A typed note from the user. `platform` and `traceId` are set when it is
+/// about the listing on screen; a general note from Profile has neither.
+struct FeedbackNote: Sendable {
+    let message: String
+    let screen: String
+    var platform: Platform? = nil
+    var traceId: String? = nil
 }
 
 /// What an analyse call reports before it returns, in the order it happens.
@@ -205,6 +217,16 @@ struct BowerAPI: BowerAPIClient {
         struct Ack: Decodable {}
         _ = try await send("/api/feedback", method: "POST",
                            body: Body(traceId: traceId, name: name, value: value), as: Ack.self)
+    }
+
+    func feedbackNote(_ note: FeedbackNote) async throws {
+        struct Body: Encodable {
+            let message: String; let screen: String; let sessionId: String?; let platform: Platform?; let traceId: String?
+        }
+        struct Ack: Decodable {}
+        _ = try await send("/api/feedback/note", method: "POST",
+                           body: Body(message: note.message, screen: note.screen, sessionId: sessionBox.value,
+                                      platform: note.platform, traceId: note.traceId), as: Ack.self)
     }
 
     func deleteAccount() async throws {

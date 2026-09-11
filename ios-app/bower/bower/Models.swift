@@ -246,12 +246,18 @@ final class AppState {
         if let p = try? await api.setPreferredPlatform(platform) { apply(p) }
     }
 
-    /// Flips one note and saves the set. Optimistic: the toggle moves at once,
-    /// and the server's answer, when it comes, is the truth.
+    /// Flips one note and saves the set. Optimistic: the toggle moves at once.
+    /// Only the most recent save is allowed to settle the switches, otherwise
+    /// two quick taps had the first response flick the second one back off
+    /// until its own response arrived.
+    private var sellerNotesSave = 0
     func toggleSellerNote(_ note: SellerNote) async {
         if sellerNotes.contains(note) { sellerNotes.remove(note) } else { sellerNotes.insert(note) }
         let ordered = SellerNote.allCases.filter { sellerNotes.contains($0) }
-        if let p = try? await api.setSellerNotes(ordered) { apply(p) }
+        sellerNotesSave += 1
+        let mine = sellerNotesSave
+        guard let p = try? await api.setSellerNotes(ordered), mine == sellerNotesSave else { return }
+        apply(p)
     }
 
     func deleteAccount() async throws {

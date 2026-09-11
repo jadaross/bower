@@ -440,6 +440,7 @@ private struct ListingSection: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
     @State private var editing: String?
+    @State private var feedback = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -502,11 +503,25 @@ private struct ListingSection: View {
                             .foregroundStyle(model.thumbed[model.platform] == 0 ? theme.coral : theme.muted)
                     }
                     .buttonStyle(.plain).accessibilityLabel("Bad listing")
+                    Button("Tell us") { feedback = true }
+                        .buttonStyle(.plain)
+                        .font(BowerFont.ui(12, weight: .semibold))
+                        .foregroundStyle(theme.satin)
+                        .padding(.leading, 4)
                 }
                 .padding(.top, 2)
             }
         }
         .padding(.horizontal, 22)
+        .sheet(isPresented: $feedback) {
+            FeedbackSheet(screen: "listing",
+                          about: "the \(model.platform.name) listing for \(model.listing.map { "\($0.brand) \($0.clothingType)" } ?? "this item")",
+                          platform: model.platform, traceId: model.traces[model.platform])
+                .environment(\.bower, theme)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
     }
 
     private var card: some View {

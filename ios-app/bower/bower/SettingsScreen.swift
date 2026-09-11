@@ -11,6 +11,7 @@ struct SettingsScreen: View {
     @State private var confirmDelete = false
     @State private var deleting = false
     @State private var deleteFailed = false
+    @State private var feedback = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -53,6 +54,26 @@ struct SettingsScreen: View {
             section("Added to every listing") { sellerNotesCard }
 
             section("What's left") { allowanceCard }
+
+            section("Feedback") {
+                Button { feedback = true } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "bubble.left").font(.system(size: 15)).foregroundStyle(theme.satin)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Tell bower what's wrong").font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
+                            Text("A price, some wording, anything.").font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
+                    }
+                    .padding(.vertical, 12).padding(.horizontal, 16)
+                    .background(theme.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+                    .contentShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .buttonStyle(.plain)
+            }
 
             section("Account") {
                 BowerGroup {
@@ -103,6 +124,13 @@ struct SettingsScreen: View {
         .padding(.top, 4)
         .padding(.bottom, 34)
         .task { await state.loadProfile() }
+        .sheet(isPresented: $feedback) {
+            FeedbackSheet(screen: "profile")
+                .environment(\.bower, theme)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
     }
 
     private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
