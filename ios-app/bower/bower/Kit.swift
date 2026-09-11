@@ -2,44 +2,38 @@ import SwiftUI
 
 // MARK: - The mark
 
-/// The arch — a bower, drawn as a stroked arch with a pollen dot at its centre.
+/// The mark: the arch, filled solid, with a hole punched through the crown so
+/// it reads as a swing tag, and the pollen dot beneath, the one shiny thing
+/// inside the bower. Geometry from the design's 100 × 100 box: body 25→75,
+/// base at 84, shoulder at 47, crown radius 25, hole at (50, 34) r 7 knocked
+/// out even-odd, dot at (50, 62) r 8.5. The hole keeps its size down to 16pt.
 struct Arch: View {
     var size: CGFloat = 40
+    /// The mark's colour. Named `stroke` from when it was a stroked arch;
+    /// every call site still reads naturally.
     var stroke: Color?
     var dot: Color?
-    var lineWidth: CGFloat?
 
     @Environment(\.bower) private var theme
 
     var body: some View {
-        let w = size * 0.5
-        let x = size / 2 - w / 2
-        let top = size * 0.22
-        let bottom = size * 0.8
-        let shoulder = top + w / 2
-
+        let u = size / 100
         ZStack {
             Path { p in
-                p.move(to: CGPoint(x: x, y: bottom))
-                p.addLine(to: CGPoint(x: x, y: shoulder))
-                p.addArc(
-                    center: CGPoint(x: size / 2, y: shoulder),
-                    radius: w / 2,
-                    startAngle: .degrees(180),
-                    endAngle: .degrees(360),
-                    clockwise: false
-                )
-                p.addLine(to: CGPoint(x: x + w, y: bottom))
+                p.move(to: CGPoint(x: 25 * u, y: 84 * u))
+                p.addLine(to: CGPoint(x: 25 * u, y: 47 * u))
+                p.addArc(center: CGPoint(x: 50 * u, y: 47 * u), radius: 25 * u,
+                         startAngle: .degrees(180), endAngle: .degrees(360), clockwise: false)
+                p.addLine(to: CGPoint(x: 75 * u, y: 84 * u))
+                p.closeSubpath()
+                p.addEllipse(in: CGRect(x: 43 * u, y: 27 * u, width: 14 * u, height: 14 * u))
             }
-            .stroke(
-                stroke ?? theme.satin,
-                style: StrokeStyle(lineWidth: lineWidth ?? size * 0.075, lineCap: .round)
-            )
+            .fill(stroke ?? theme.satin, style: FillStyle(eoFill: true))
 
             Circle()
                 .fill(dot ?? theme.pollen)
-                .frame(width: size * 0.17, height: size * 0.17)
-                .position(x: size / 2, y: size * 0.58)
+                .frame(width: 17 * u, height: 17 * u)
+                .position(x: 50 * u, y: 62 * u)
         }
         .frame(width: size, height: size)
     }

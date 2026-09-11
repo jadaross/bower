@@ -214,10 +214,17 @@ struct CaptureScreen: View {
         .padding(.bottom, 16)
     }
 
-    /// What to photograph, as a sentence. Nothing to tap; the advice is the
-    /// whole card, and Tips has the longer version.
+    /// The four things worth photographing, as small boxes with an icon and
+    /// a title. Nothing to tap; More opens the fuller Tips sheet.
+    private static let quickTips: [(SuggestedShot, String)] = [
+        (.front, "Whole piece in frame"),
+        (.back, "The back too"),
+        (.tag, "Size tag, flat and in focus"),
+        (.logo, "Brand label, close in"),
+    ]
+
     private var tipsCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Kicker("Tips")
                 Spacer()
@@ -226,10 +233,30 @@ struct CaptureScreen: View {
                     .font(BowerFont.ui(12, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
-            Text("Front, back, the size tag and the brand label. A fifth for any flaw.")
-                .font(BowerFont.ui(14)).foregroundStyle(theme.text).lineSpacing(3)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                ForEach(Array(Self.quickTips.enumerated()), id: \.offset) { _, tip in
+                    HStack(spacing: 9) {
+                        Image(systemName: tip.0.symbol)
+                            .font(.system(size: 13))
+                            .foregroundStyle(theme.satin)
+                            .frame(width: 30, height: 30)
+                            .background(theme.subtle)
+                            .clipShape(RoundedRectangle(cornerRadius: 9))
+                        Text(tip.1)
+                            .font(BowerFont.ui(12.5, weight: .medium))
+                            .foregroundStyle(theme.text)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(8)
+                    .background(theme.bg)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.line, lineWidth: 0.5))
+                }
+            }
             Text("Up to 5 photos.")
-                .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 15)
@@ -242,7 +269,7 @@ struct CaptureScreen: View {
     /// Pinned above the tab bar once there is something to price.
     private var footer: some View {
         VStack(spacing: 9) {
-            BowerButton(title: "Price it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
+            BowerButton(title: "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
             HStack(spacing: 9) {
                 BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
                             kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }

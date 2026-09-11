@@ -49,11 +49,11 @@ there are no anonymous requests, because the meter needs someone to meter
 
 | Route | Purpose |
 |---|---|
-| `POST /api/analyse` | Photos → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price estimate, plus the named platform's form fields). Streams SSE. Up to 5 photos. **Spends one generation.** |
+| `POST /api/analyse` | Photos → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price estimate, plus the named platform's form fields). Streams SSE. Up to 5 photos. **Spends one listing.** |
 | `POST /api/format`  | Neutral `Listing` + platform + tone → `PlatformListing`. |
 | `POST /api/refine`  | Existing `PlatformListing` + chip instruction text → rewritten `PlatformListing`. |
-| `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one deep research.** |
-| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and the two meters: `allowance` (generations, 10 a month, under the old name so older apps decode) and `searches` (deep researches, 3 a month). A null limit is unlimited, which the owner's account has on both. PATCH takes any of the writable fields. |
+| `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one market check.** |
+| `GET`/`PATCH /api/profile` | The caller's Enabled Platforms, Preferred Platform and the two meters: `allowance` (listings, 10 a month, under the old name so older apps decode) and `searches` (market checks, 3 a month). A null limit is unlimited, which the owner's account has on both. PATCH takes any of the writable fields. |
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
 | `DELETE /api/history` | Clears the caller's history. |
 | `POST /api/feedback/note` | Typed feedback, stored in `feedback_notes` with the screen, session, platform and trace it was written from. Opened from the listing ("Tell us", beside the thumbs) and from Profile. |
@@ -96,8 +96,8 @@ the Valuation, account deletion, 222 tests. Client: eight screens — the dark w
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;
 with photos in, home shows a checklist of the angles not yet covered and pins
-"Price it" to the foot. Local notifications only (`Notifications.swift`): a deep
-research finishing in the background, the meters resetting, one nudge after a
+"Write it" to the foot. Local notifications only (`Notifications.swift`): a market
+check finishing in the background, the meters resetting, one nudge after a
 quiet week. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
@@ -164,13 +164,15 @@ The accent palette is shared by both themes:
 Fonts: **Instrument Serif**, *italic*, for the wordmark and expressive headlines;
 **Geist** for UI; **Geist Mono** for kickers, counters and numerics.
 
-The mark is **the arch** — a bower, drawn as a stroked arch with a pollen dot at its
-centre. The wordmark is `bower` in italic serif with a coral full stop. The accent
+The mark is **the arch** — a bower, filled solid, with a hole punched through the
+crown so it reads as a swing tag, and the pollen dot beneath. One `Arch` view draws
+it everywhere; the launch image and the app icon are rendered from that view by
+`LaunchImageTests` (run with `BOWER_RENDER_LAUNCH=1` after any change to it). The wordmark is `bower` in italic serif with a coral full stop. The accent
 moved from `#3b5cff` to the deeper `#2B3AA8`, so the bowerbird-prizes-blue reasoning
 behind the name still holds.
 
 One thing the app says in its own voice, and should keep saying: copy confirmations
-read **"In the bower"**. The analyse action is plainly **"Price it"** (a *generation*)
+read **"In the bower"**. The analyse action is plainly **"Write it"** (it spends a *listing*)
 and the live price search is **"Check the market"** (a *market check*); the photo-only price is an
 *estimate*, never a guess. "Suss it out" was charming once and vague every time after;
 the verb carries the meaning and the serif title carries the voice.

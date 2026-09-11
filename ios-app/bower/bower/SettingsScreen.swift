@@ -225,10 +225,10 @@ struct SettingsScreen: View {
     private var allowanceCard: some View {
         BowerCard(padding: 16) {
             VStack(alignment: .leading, spacing: 0) {
-                meterRow("Generations", state.reads)
+                meterRow("Listings", state.reads)
                 Hairline().padding(.vertical, 12)
                 meterRow("Market checks", state.searches)
-                Text("A generation reads your photos and writes the listing. A market check searches live listings for the price. Both reset on the 1st.")
+                Text("A listing is written from your photos, with an estimate. A market check looks up what it's really going for. Both reset on the 1st.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                     .padding(.top, 12)
             }

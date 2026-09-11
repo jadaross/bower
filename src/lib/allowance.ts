@@ -11,7 +11,7 @@ import { serviceClient } from "@/lib/supabase";
  * translation between that function and an HTTP response.
  */
 
-/** The two meters: a generation ("read") and a market check ("search"). */
+/** The two meters: a listing ("read") and a market check ("search"). */
 export type AllowanceKind = "read" | "search";
 
 export interface AllowanceState {
@@ -75,7 +75,7 @@ export function allowanceExhausted(state: AllowanceState, kind: AllowanceKind): 
   return Response.json(
     {
       error: kind === "read"
-        ? "Your generations for this month are used up"
+        ? "Your listings for this month are used up"
         : "Your market checks for this month are used up",
       code: "allowance_exhausted",
       kind,
