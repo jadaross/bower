@@ -347,10 +347,18 @@ describe("in Australia", () => {
     expect(band.currency).toBe("AUD");
   });
 
-  it("searches Vinted's Australian site", () => {
+  it("searches Vinted's Australian site and, because Vinted ships between the two, the UK one", async () => {
     const prompt = buildValuationPrompt(item, "vinted", "AU");
     expect(prompt).toContain("vinted.com.au");
+    expect(prompt).toContain("vinted.co.uk is a comparable for an Australian seller too");
     expect(listingUrl("https://www.vinted.com.au/items/12345-jacket", "vinted", "AU")).toBeDefined();
-    expect(listingUrl("https://www.vinted.co.uk/items/12345-jacket", "vinted", "AU")).toBeUndefined();
+    expect(listingUrl("https://www.vinted.co.uk/items/12345-jacket", "vinted", "AU")).toBeDefined();
+    await askingPriceProvider.band(item, "vinted", "AU");
+    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["vinted.com.au", "vinted.co.uk"]);
+  });
+
+  it("lets a UK Vinted seller see Australian listings too", async () => {
+    await askingPriceProvider.band(item, "vinted", "GB");
+    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["vinted.co.uk", "vinted.com.au"]);
   });
 });

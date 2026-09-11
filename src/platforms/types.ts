@@ -21,6 +21,12 @@ export interface MarketPresence {
   itemUrl: RegExp;
   /** The same shape, written out for the prompt: "https://…/items/<id>-…". */
   itemUrlExample: string;
+  /**
+   * Anything the search should know about this platform in this market that
+   * the domains alone do not say — e.g. that buyers here can also buy from
+   * another country's edition, so its listings are comparables too.
+   */
+  searchNote?: string;
 }
 
 export interface PlatformMetadata {

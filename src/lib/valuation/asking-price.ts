@@ -51,7 +51,7 @@ export function buildValuationPrompt(item: ValuationItem, platform: Platform, ma
 Item:
 ${JSON.stringify(item, null, 2)}
 
-Search ${here.webUrl} for items currently LISTED FOR SALE there that are as close to this as you can find — same brand, same kind of garment, comparable size and condition. Only ${meta.name} counts: this band is what the item could be listed at on ${meta.name}, so a listing on any other site is not a comparable here. If ${meta.name} has too little, say so with "low" confidence rather than looking elsewhere.
+Search ${here.webUrl} for items currently LISTED FOR SALE there that are as close to this as you can find — same brand, same kind of garment, comparable size and condition. Only ${meta.name} counts: this band is what the item could be listed at on ${meta.name}, so a listing on any other site is not a comparable here. If ${meta.name} has too little, say so with "low" confidence rather than looking elsewhere.${here.searchNote ? `\n${here.searchNote}` : ""}
 
 CRITICAL CONSTRAINTS:
 - You are looking at ASKING prices — what sellers are currently asking. You do NOT have access to sold prices, and you must not claim or imply that you do.
