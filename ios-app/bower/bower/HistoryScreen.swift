@@ -255,7 +255,7 @@ private struct HistoryDetail: View {
                                     Text(f.value).font(BowerFont.ui(13.5)).foregroundStyle(theme.text)
                                 }
                                 Spacer()
-                                CopyButton(text: f.value)
+                                CopyButton(text: f.value, done: "Copied")
                             }
                         }
                     }
