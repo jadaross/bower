@@ -16,7 +16,7 @@ titled "App Store submission — human steps".
 | Age rating: every answer "none" → 4+ | `scripts/asc-metadata.mjs` | same |
 | Content rights: no third-party content | same | same |
 | Six placeholder 6.9" screenshots from the stub | `screenshots/` | `node scripts/asc-screenshots.mjs` — **to be replaced by the designed set** |
-| Availability: United Kingdom only, new territories off | ASC → Pricing and Availability | `appAvailabilities` v2 takes all 175 territories in one request; see #55 for widening to IE + AU |
+| Availability: United Kingdom only, new territories off | ASC → Pricing and Availability | `appAvailabilities` v2 takes all 175 territories in one request. **Australia works from build 35 (ADR-0009) — switch AU on before submitting that build.** Ireland is #56 |
 | App Privacy label: Email, Photos, User ID, Other User Content, Product Interaction, Performance Data — all linked, none tracking | ASC → App Privacy (browser only, done 11 Sep) | matches `PrivacyInfo.xcprivacy` from build 35 |
 
 ## In the build (from build 35)
