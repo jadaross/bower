@@ -1,0 +1,20 @@
+{
+  "_comment": "The App Store listing, kept in the repo so it is reviewed like code. `node scripts/asc-metadata.mjs` pushes it. Limits: subtitle 30, keywords 100, promotionalText 170, description 4000.",
+  "locale": "en-GB",
+  "name": "bower",
+  "subtitle": "Value it, write it, post it",
+  "privacyPolicyUrl": "https://bower-jadas-projects-b3cbda3d.vercel.app/privacy",
+  "supportUrl": "https://bower-jadas-projects-b3cbda3d.vercel.app/support",
+  "marketingUrl": null,
+  "primaryCategory": "SHOPPING",
+  "secondaryCategory": "LIFESTYLE",
+  "copyright": "2026 Jada Ross",
+  "keywords": "vinted,depop,ebay,sell clothes,secondhand,preloved,resale,listing,price,declutter,wardrobe,thrift",
+  "promotionalText": "Photograph the item. bower reads the label, writes the listing in the platform's own voice, and tells you what to ask for it.",
+  "description": "bower turns a few photos of a garment into a listing you can post.\n\nTake up to five photos. bower reads the label, works out what the item is, and writes the title, description, hashtags and every form field for the platform you sell on, in that platform's own voice. Copy each part straight into Vinted, Depop or eBay.\n\nIt gives you a price estimate from the photos alone, and when you want the real answer, a market check searches live listings on each platform you sell on, gives you a low-to-high band with the comparables it found, and recommends where to post and what to ask, net of fees.\n\nWhat it does\n\n- Reads brand, size and fabric from the care label\n- Writes for Vinted, Depop and eBay, each in its own voice\n- Fills the form fields: category, condition, colour, parcel size and the rest\n- Casual or professional tone, and quick refinements: shorter, more detail, stress the condition\n- Photo-only price estimate, and a live market check with real comparables\n- Text-only history of what you have listed and what it was worth\n\nWhat it will not do\n\n- Invent measurements, claims or a smoke-free home you never mentioned\n- Write filler. Every line carries a fact a buyer wants\n- Keep your photos. They are read once and discarded\n\nEach month you get ten listings and three market checks. Sign in with Apple, nothing else to set up.\n\nbower writes in British English for UK platforms.",
+  "whatsNew": "First release.",
+  "review": {
+    "demoAccountRequired": false,
+    "notes": "bower is a listing writer for secondhand clothing. Sign in with Apple is the only sign-in, so no demo account is needed: any Apple ID works and gets a fresh account with 10 listings and 3 market checks for the month.\n\nTo test: on the home screen add photos of any garment (a jumper, a jacket, a pair of trainers; a shot of the care label helps but is optional), tap Write it, and the listing streams in within a few seconds. From the listing you can switch platform (Vinted, Depop, eBay), change tone, tap refinement chips, copy any field, or tap Check the market for a live price search, which takes up to two minutes and can finish in the background with a local notification.\n\nPhotos of anything other than clothing are declined with a message and are not charged. Photos are sent to our backend for analysis and are not stored; the app also runs Apple's on-device Sensitive Content Analysis when that setting is on.\n\nAccount deletion is in Profile. The privacy policy is at the URL above. Prices are in GBP; the platforms are the UK sites."
+  }
+}

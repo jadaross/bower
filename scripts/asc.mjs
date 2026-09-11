@@ -88,14 +88,30 @@ async function distribute(version) {
   console.log(`build ${version}: ${detail.data?.attributes.externalBuildState ?? "submitted"}`);
 }
 
+// `attach <build-number>`: put a processed build on the App Store version in
+// preparation. The last step before pressing Submit for Review in ASC.
+async function attach(version) {
+  const { json: builds } = await api("GET", `/v1/builds?filter[app]=${APP_ID}&filter[version]=${version}&fields[builds]=version,processingState`);
+  const build = builds.data?.[0];
+  if (!build || build.attributes.processingState !== "VALID") { console.error(`build ${version} is not processed (${build?.attributes.processingState ?? "not found"})`); process.exit(1); }
+  const { json: versions } = await api("GET", `/v1/apps/${APP_ID}/appStoreVersions?filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
+  const v = versions.data?.[0];
+  if (!v) { console.error("no App Store version in preparation"); process.exit(1); }
+  const { status, json } = await api("PATCH", `/v1/appStoreVersions/${v.id}/relationships/build`, JSON.stringify({ data: { type: "builds", id: build.id } }));
+  if (status >= 300) { console.error(`attach failed (${status}): ${JSON.stringify(json).slice(0, 300)}`); process.exit(1); }
+  console.log(`build ${version} attached to App Store version ${v.attributes.versionString}`);
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 if (cmd === "distribute") {
   await distribute(rest[0]);
+} else if (cmd === "attach") {
+  await attach(rest[0]);
 } else if (cmd && rest[0]) {
   const { status, json } = await api(cmd.toUpperCase(), rest[0], rest[1]);
   console.log(status);
   console.log(typeof json === "string" ? json.slice(0, 2000) : JSON.stringify(json, null, 1));
 } else {
-  console.error("usage: asc.mjs <METHOD> <path> [body] | asc.mjs distribute <build>");
+  console.error("usage: asc.mjs <METHOD> <path> [body] | asc.mjs distribute <build> | asc.mjs attach <build>");
   process.exit(1);
 }
