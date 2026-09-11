@@ -219,6 +219,8 @@ struct HistoryItem: Codable, Sendable, Identifiable {
     let condition: String
     let priceMin: Double?
     let priceMax: Double?
+    /// ISO 4217 for the estimate. Nil on rows from before markets: pounds.
+    var currency: String? = nil
     let preferredPlatform: Platform?
     /// The full Neutral Listing as first seen — for the detail view. Nil on older rows.
     let listing: NeutralListing?
@@ -233,6 +235,8 @@ struct HistoryResponse: Codable, Sendable {
 // MARK: - profile
 
 struct ProfileResponse: Codable, Sendable {
+    /// Optional so a stub or an older server decodes; nil reads as the UK.
+    var market: Market? = nil
     let enabledPlatforms: [Platform]
     let preferredPlatform: Platform
     /// Raw wire values; `SellerNote(rawValue:)` drops any the app does not know.

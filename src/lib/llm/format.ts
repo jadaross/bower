@@ -1,11 +1,14 @@
 import type { Listing, Platform, PlatformListing, Tone } from "@/lib/types";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
+import { DEFAULT_MARKET, MARKETS, type Market } from "@/lib/markets";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS } from "./client";
 import { createStructured } from "./structured";
 import { platformListingSchema } from "./schemas";
 
 export interface FormatInput {
+  /** The seller's Market, from their profile: sets the currency sign. */
+  market?: Market;
   listing: Listing;
   platform: Platform;
   tone: Tone;
@@ -18,7 +21,9 @@ export interface FormatInput {
 // Applies to every platform. The line between "a person who writes well" and
 // "AI" on these marketplaces is facts + honesty + plain language — see
 // docs/research/seller-voice.md.
-const VOICE_CORE = `VOICE — non-negotiable, all platforms:
+// The voice is British English in every Market — it suits Australian
+// listings too — and only the currency sign follows the Market.
+export const voiceCore = (market: Market = DEFAULT_MARKET) => `VOICE — non-negotiable, all platforms:
 - Every sentence must carry information: a measurement, a condition note, a fit note, a material, or a genuine reason for selling. If a sentence only conveys vibe, cut it — that is what reads as AI-written.
 - Never use empty praise ("nice", "pretty", "good", "gorgeous", "stunning", "beautiful", "lovely", "timeless") or retail/marketing clichés ("elevate your wardrobe", "must-have", "perfect addition to any collection", "effortlessly chic", "transitions from day to night", "exude", "look no further", "grab this beauty", "elevate your style", "artisanal", "curated", "statement piece", "wardrobe staple", "prepare to fall in love"). Buyers do not search for these and they mark a listing as fake.
 - Do not oversell or contradict the condition. If there is a flaw, name it plainly; if you are unsure, be modest, not glowing.
@@ -26,7 +31,7 @@ const VOICE_CORE = `VOICE — non-negotiable, all platforms:
 - Shorter wins. On every platform buyers call long descriptions "a wall of text" and skip the listing. If it can be a fragment, make it a fragment.
 - Never state anything about the seller's home or habits: no "smoke-free", "pet-free", "washed before sending", "posted next day". The source listing does not know these. A false smoke-free line is the complaint buyers make most.
 - Never copy label data into the copy: no "Made in China", no RN or style numbers, no care instructions. Country of manufacture only when it is a known selling point for that brand (Made in USA workwear, Made in England boots, Made in Italy designer).
-- Use British English and British terms throughout: colour, grey, jumper, trainers, dungarees, postage (not "shipping"), £ (not "$"). Sizes in UK format.
+- Use British English and British terms throughout: colour, grey, jumper, trainers, dungarees, postage (not "shipping"). Prices in ${MARKETS[market].symbol} (${MARKETS[market].currency}), never any other currency. Sizes in UK format.
 - Do not stack adjectives. One descriptor anchored to a fact ("cosy oversized knit") is fine; three bare ones are not.
 - Never use an em dash (—). Use a comma, a full stop, or a hyphen instead.`;
 
@@ -39,7 +44,7 @@ const TONE_HINT: Record<Tone, string> = {
     "Tone dial: lean to the plainer, more formal end of this platform's voice — measurements, condition, fabric and fit first; concise; no slang — without stripping the platform's character where it has one.",
 };
 
-function buildPrompt({ listing, platform, tone, sellerNotes = [] }: FormatInput): string {
+function buildPrompt({ listing, platform, tone, sellerNotes = [], market }: FormatInput): string {
   const spec = platformListingSpec[platform];
   // A listing that came from analyse may carry the Preferred Platform's form
   // fields. They are not source material for another platform's form.
@@ -48,7 +53,7 @@ function buildPrompt({ listing, platform, tone, sellerNotes = [] }: FormatInput)
 
 ${spec.promptFragment}
 
-${VOICE_CORE}
+${voiceCore(market)}
 
 ${TONE_HINT[tone]}
 

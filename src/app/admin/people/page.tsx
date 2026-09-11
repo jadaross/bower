@@ -66,6 +66,7 @@ export default async function People({ searchParams }: { searchParams: Promise<Q
                     <th className="num">Spend</th>
                     <th>Listings meter</th>
                     <th>Checks meter</th>
+                    <th>Market</th>
                     <th>Sells on</th>
                     <th>Seller notes</th>
                   </tr>
@@ -91,6 +92,7 @@ export default async function People({ searchParams }: { searchParams: Promise<Q
                       <td className="num">{money(r.cost)}</td>
                       <td><Meter used={r.account.readsUsed} limit={r.account.readsLimit} /></td>
                       <td><Meter used={r.account.searchesUsed} limit={r.account.searchesLimit} /></td>
+                      <td className="dim">{r.account.market}</td>
                       <td className="dim">
                         {r.account.enabledPlatforms.map((p) => (
                           <span key={p} style={{ fontWeight: p === r.account.preferredPlatform ? 600 : 400, color: p === r.account.preferredPlatform ? "var(--text)" : undefined, marginRight: 6 }}>{p}</span>

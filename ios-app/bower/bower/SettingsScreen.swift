@@ -16,8 +16,9 @@ struct SettingsScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             section("Where you sell") {
+                MarketPicker(savesOnChange: true)
                 BowerGroup {
-                    ForEach(Array(Platform.allCases.enumerated()), id: \.element) { i, p in
+                    ForEach(Array(state.market.platforms.enumerated()), id: \.element) { i, p in
                         if i > 0 { Hairline() }
                         platformRow(p)
                     }
@@ -155,7 +156,7 @@ struct SettingsScreen: View {
                 .opacity(on ? 1 : 0.35)
             VStack(alignment: .leading, spacing: 1) {
                 Text(p.name).font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
-                Text(p.note).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+                Text(p.note(in: state.market)).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
             }
             Spacer()
             BowerToggle(

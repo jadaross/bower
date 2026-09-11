@@ -2,9 +2,10 @@ import { withAuth } from "@/lib/auth";
 import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
 import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
-import { getSellerNotes } from "@/lib/profile";
+import { getListingContext } from "@/lib/profile";
 import { toStringStreamResponse, type StreamRejection } from "@/lib/streaming-text";
 import type { Platform, Tone } from "@/lib/types";
+import { MARKETS } from "@/lib/markets";
 
 export const runtime = "nodejs";
 // The web-search valuation and the image read can run long; allow the max.
@@ -84,7 +85,7 @@ export const POST = withAuth(async (request, user) => {
   const sessionId = request.headers.get("x-bower-session") ?? undefined;
   // From the profile, never the body: a client that could name its own seller
   // notes could put "smoke-free" on a listing the seller never claimed.
-  const sellerNotes = await getSellerNotes(user.token).catch(() => []);
+  const { sellerNotes, market } = await getListingContext(user.token).catch(() => ({ sellerNotes: [], market: undefined }));
   let stream: ReadableStream<string>;
   try {
     stream = analyseListingStream({
@@ -92,11 +93,18 @@ export const POST = withAuth(async (request, user) => {
       tone,
       platform,
       sellerNotes,
+      market,
       trace: { userId: user.id, route: "/api/analyse", sessionId },
       // Best-effort, but awaited before the stream closes: record the
       // analysed item for the user's history (#41). See /api/valuate for why.
       onResult: (result) =>
-        recordItem(user.token, { userId: user.id, sessionId, listing: result.listing, preferredPlatform: platform }),
+        recordItem(user.token, {
+          userId: user.id,
+          sessionId,
+          listing: result.listing,
+          preferredPlatform: platform,
+          currency: market ? MARKETS[market].currency : undefined,
+        }),
     });
   } catch (err) {
     await refundAllowance(user.id, "read");

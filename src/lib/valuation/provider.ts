@@ -1,4 +1,5 @@
 import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
+import type { Market } from "@/lib/markets";
 
 /**
  * The seam ADR-0005 promises: today asking prices come from a web search, but
@@ -9,5 +10,5 @@ import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
 export interface ValuationProvider {
   /** Value one item on one platform. Implementations must not throw for
    *  "no comparables found" — return a low-confidence band instead. */
-  band(item: ValuationItem, platform: Platform): Promise<PriceBand>;
+  band(item: ValuationItem, platform: Platform, market: Market): Promise<PriceBand>;
 }

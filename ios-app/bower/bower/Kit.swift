@@ -99,17 +99,18 @@ struct PriceRange: View {
     let high: Int
     var size: CGFloat = 44
     var color: Color?
+    var symbol: String = "£"
 
     @Environment(\.bower) private var theme
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
-            Text("£\(low)").font(BowerFont.serifUpright(size))
+            Text("\(symbol)\(low)").font(BowerFont.serifUpright(size))
             Text("–")
                 .font(BowerFont.serifUpright(size * 0.6))
                 .opacity(0.5)
                 .padding(.horizontal, 3)
-            Text("£\(high)").font(BowerFont.serifUpright(size))
+            Text("\(symbol)\(high)").font(BowerFont.serifUpright(size))
         }
         .foregroundStyle(color ?? theme.text)
         .monospacedDigit()

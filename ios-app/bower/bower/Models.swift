@@ -19,13 +19,20 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     }
 
     /// Fees are display-only. Ranking never uses them — see recommend.ts.
-    var note: String {
-        switch self {
-        case .vinted: "No seller fees · EU buyers"
-        case .depop:  "No seller fees · Gen-Z UK/US"
-        case .ebay:   "13.25% fee · global reach"
+    /// Every platform bower knows is fee-free for a private seller in both
+    /// markets today (eBay UK since Oct 2024; Depop AU since Jul 2026).
+    func note(in market: Market) -> String {
+        switch (self, market) {
+        case (.vinted, _): "No seller fees · EU buyers"
+        case (.depop, .GB): "No seller fees · Gen-Z UK/US"
+        case (.depop, .AU): "No seller fees · Gen-Z"
+        case (.ebay, .GB): "No seller fees · global reach"
+        case (.ebay, .AU): "No seller fees · Australia-wide"
         }
     }
+
+    /// Whether the platform operates in the market at all. Vinted does not in Australia.
+    func operates(in market: Market) -> Bool { market.platforms.contains(self) }
 
     /// What the platform calls the tags under a listing. One place, so the
     /// listing screen and History say the same word.
@@ -39,11 +46,12 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     /// Where a listing gets posted. The https link is a universal link, so it
     /// opens the platform's app when it is installed and the site when not.
     /// iOS then shows "◀ bower" in the status bar to come straight back.
-    var sellURL: URL {
-        switch self {
-        case .vinted: URL(string: "https://www.vinted.co.uk/items/new")!
-        case .depop:  URL(string: "https://www.depop.com/products/create")!
-        case .ebay:   URL(string: "https://www.ebay.co.uk/sl/sell")!
+    func sellURL(in market: Market) -> URL {
+        switch (self, market) {
+        case (.vinted, _): URL(string: "https://www.vinted.co.uk/items/new")!
+        case (.depop, _):  URL(string: "https://www.depop.com/products/create")!
+        case (.ebay, .GB): URL(string: "https://www.ebay.co.uk/sl/sell")!
+        case (.ebay, .AU): URL(string: "https://www.ebay.com.au/sl/sell")!
         }
     }
 
@@ -53,6 +61,63 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         case .depop:  Color(hex: 0xF00D2D)
         case .ebay:   Color(hex: 0x0064D2)
         }
+    }
+}
+
+// MARK: - Market
+
+/// Where the seller sells: which country's editions of the platforms, in
+/// which currency. Mirrors `src/lib/markets.ts`. Lives on the profile; the
+/// server reads it from there for pricing and searching, never from a request.
+enum Market: String, CaseIterable, Identifiable, Codable {
+    case GB, AU
+
+    var id: String { rawValue }
+
+    var name: String {
+        switch self {
+        case .GB: "United Kingdom"
+        case .AU: "Australia"
+        }
+    }
+
+    var currency: String {
+        switch self {
+        case .GB: "GBP"
+        case .AU: "AUD"
+        }
+    }
+
+    /// Platforms that operate here, in registry order.
+    var platforms: [Platform] {
+        switch self {
+        case .GB: [.vinted, .depop, .ebay]
+        case .AU: [.depop, .ebay]
+        }
+    }
+
+    /// The device's Region setting, which is where someone most likely sells.
+    /// A first guess for the where-you-sell screen — always confirmable there
+    /// and changeable in Profile.
+    static var device: Market {
+        Locale.current.region?.identifier == "AU" ? .AU : .GB
+    }
+}
+
+/// One place that turns a currency code into a sign, so an Australian never
+/// sees pounds. Bands and comparables carry their code on the wire; the
+/// estimate uses the profile's Market.
+enum Money {
+    static func symbol(_ code: String?) -> String {
+        switch code {
+        case "AUD": "$"
+        case nil, "GBP": "£"
+        case let c?: c + " "
+        }
+    }
+
+    static func format(_ amount: Int, _ code: String?) -> String {
+        symbol(code) + "\(amount)"
     }
 }
 
@@ -258,10 +323,32 @@ final class AppState {
         guard let p = try? await api.profile() else { return }
         apply(p)
         Notifications.scheduleReset(reads: reads.limit, searches: searches.limit)
+        await adoptDeviceMarketOnce()
+    }
+
+    /// Accounts made before there were markets are all in the UK. The first
+    /// time such an account opens the app on a device set to Australia, move
+    /// it — once, and never again, so a deliberate choice in Profile sticks.
+    private func adoptDeviceMarketOnce() async {
+        let key = "marketChecked"
+        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        UserDefaults.standard.set(true, forKey: key)
+        if market == .GB, Market.device == .AU { await saveMarket(.AU) }
+    }
+
+    func saveMarket(_ m: Market) async {
+        market = m
+        // The server drops any platform that does not operate there and moves
+        // the preference; keep the local set honest until its answer lands.
+        enabled = enabled.filter { $0.operates(in: m) }
+        if enabled.isEmpty { enabled = Set(m.platforms) }
+        if !enabled.contains(preferred), let next = orderedEnabled.first { preferred = next }
+        if let p = try? await api.setMarket(m) { apply(p) }
     }
 
     /// The server's word on the profile wins over whatever the device thought.
     func apply(_ p: ProfileResponse) {
+        if let m = p.market { market = m }
         enabled = Set(p.enabledPlatforms)
         preferred = p.preferredPlatform
         sellerNotes = Set(p.sellerNotes.compactMap(SellerNote.init(rawValue:)))
@@ -270,7 +357,7 @@ final class AppState {
     }
 
     func savePlatforms() async {
-        if let p = try? await api.setEnabledPlatforms(orderedEnabled, preferred: preferred) { apply(p) }
+        if let p = try? await api.setEnabledPlatforms(orderedEnabled, preferred: preferred, market: market) { apply(p) }
     }
 
     func savePreferred(_ platform: Platform) async {
@@ -306,6 +393,11 @@ final class AppState {
         photos = []
         screen = .signin
     }
+
+    /// Where the seller sells. Sets the currency shown and which platforms
+    /// are on offer. Read from the profile server-side for pricing and
+    /// searching, like the platforms.
+    var market: Market = .GB
 
     /// Enabled Platforms. Read from the profile server-side — never sent by the
     /// client on a valuation request. See ARCHITECTURE.md.
@@ -353,7 +445,7 @@ final class AppState {
     }
 
     var orderedEnabled: [Platform] {
-        Platform.allCases.filter { enabled.contains($0) }
+        market.platforms.filter { enabled.contains($0) }
     }
 
     func newItem() {

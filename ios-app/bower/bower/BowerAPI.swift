@@ -19,8 +19,11 @@ protocol BowerAPIClient: Sendable {
     /// Sends the preference alongside, because disabling the preferred platform
     /// has to name its replacement in the same request — the database refuses
     /// to let the two drift apart.
-    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform) async throws -> ProfileResponse
+    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform, market: Market) async throws -> ProfileResponse
     func setPreferredPlatform(_ platform: Platform) async throws -> ProfileResponse
+    /// Moves the seller to another market. The server drops any platform that
+    /// does not operate there and moves the preference in the same statement.
+    func setMarket(_ market: Market) async throws -> ProfileResponse
     /// The seller's opt-in notes. The prompts read these from the profile, so
     /// this is the only way a listing ever says "smoke-free".
     func setSellerNotes(_ notes: [SellerNote]) async throws -> ProfileResponse
@@ -191,11 +194,16 @@ struct BowerAPI: BowerAPIClient {
         try await send("/api/profile", as: ProfileResponse.self)
     }
 
-    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform) async throws -> ProfileResponse {
-        struct Body: Encodable { let enabledPlatforms: [Platform]; let preferredPlatform: Platform }
+    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform, market: Market) async throws -> ProfileResponse {
+        struct Body: Encodable { let market: Market; let enabledPlatforms: [Platform]; let preferredPlatform: Platform }
         return try await send("/api/profile", method: "PATCH",
-                              body: Body(enabledPlatforms: platforms, preferredPlatform: preferred),
+                              body: Body(market: market, enabledPlatforms: platforms, preferredPlatform: preferred),
                               as: ProfileResponse.self)
+    }
+
+    func setMarket(_ market: Market) async throws -> ProfileResponse {
+        struct Body: Encodable { let market: Market }
+        return try await send("/api/profile", method: "PATCH", body: Body(market: market), as: ProfileResponse.self)
     }
 
     func setPreferredPlatform(_ platform: Platform) async throws -> ProfileResponse {

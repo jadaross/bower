@@ -1,15 +1,17 @@
 import type { Confidence, Platform, PriceBand, Recommendation, Valuation } from "@/lib/types";
-import { netPrice, platformMetadata } from "@/platforms";
+import { netPrice, platformMetadata, presence } from "@/platforms";
+import { money, type Market } from "@/lib/markets";
 
 /**
  * Picks the Enabled Platform to post on.
  *
  * The ranking signal is the Price Band weighted by how readily the item sells
- * there — deliberately NOT net-after-fees. Vinted charges sellers 0% against
- * Depop's 0% (its UK seller fee was removed in Mar 2024) and eBay's 13.25%, so
- * ranking on net would skew toward the fee-free platforms every
- * single time and this function would be a constant with a paragraph attached.
- * Fees are applied afterwards, for display only. See ADR-0004.
+ * there — deliberately NOT net-after-fees. When eBay still charged private
+ * sellers 13.25% against Vinted's and Depop's 0%, ranking on net would have
+ * skewed toward the fee-free platforms every single time and this function
+ * would have been a constant with a paragraph attached. Fees are applied
+ * afterwards, for display only, and today every platform bower knows takes
+ * nothing from a private seller in either Market. See ADR-0004.
  */
 
 const LIKELIHOOD_WEIGHT: Record<Confidence, number> = {
@@ -45,7 +47,7 @@ function evidenced([, band]: [Platform, PriceBand]): boolean {
  * Returns null when there is nothing to choose between — a single Enabled
  * Platform means no comparison work runs at all, by design.
  */
-export function recommend(valuation: Valuation): Recommendation | null {
+export function recommend(valuation: Valuation, market: Market): Recommendation | null {
   const all = Object.entries(valuation.perPlatform) as Array<[Platform, PriceBand]>;
   if (all.length < 2) return null;
 
@@ -69,15 +71,15 @@ export function recommend(valuation: Valuation): Recommendation | null {
   return {
     platform: winnerId,
     listAt,
-    net: Math.round(netPrice(listAt, winnerId)),
+    net: Math.round(netPrice(listAt, winnerId, market)),
     currency: winner.currency,
-    reasoning: explain(winnerId, winner, ranked.slice(1)),
+    reasoning: explain(winnerId, winner, ranked.slice(1), market),
     // Runners-up include the unevidenced bands, so the user can still see
     // them — they just cannot win.
     runnersUp: [...ranked.slice(1), ...all.filter((e) => !entries.includes(e))].map(([id, band]) => ({
       platform: id,
       listAt: midpoint(band),
-      net: Math.round(netPrice(midpoint(band), id)),
+      net: Math.round(netPrice(midpoint(band), id, market)),
     })),
   };
 }
@@ -85,13 +87,14 @@ export function recommend(valuation: Valuation): Recommendation | null {
 function explain(
   winnerId: Platform,
   winner: PriceBand,
-  rest: Array<[Platform, PriceBand]>
+  rest: Array<[Platform, PriceBand]>,
+  market: Market
 ): string {
   // The headline already says the price and the platform ("£50 on Depop"),
   // so this only says why — never restating either.
   const listAt = midpoint(winner);
-  const fee = platformMetadata[winnerId].feePct;
-  const feeNote = fee === 0 ? "and takes no seller fee" : `less its ${platformMetadata[winnerId].feeLabel} fee`;
+  const here = presence(winnerId, market);
+  const feeNote = here.feePct === 0 ? "and takes no seller fee" : `less its ${here.feeLabel} fee`;
 
   if (rest.length === 0) return "The only platform with listings to go on.";
 
@@ -100,7 +103,7 @@ function explain(
   const diff = listAt - midpoint(runnerUp);
 
   if (diff > 0) {
-    return `Listed about £${diff} above ${runnerUpName}, ${feeNote}.`;
+    return `Listed about ${money(diff, market)} above ${runnerUpName}, ${feeNote}.`;
   }
   if (winner.sell_likelihood !== runnerUp.sell_likelihood) {
     return `Listed on par with ${runnerUpName}, but this kind of item moves more readily here, ${feeNote}.`;

@@ -180,7 +180,7 @@ private struct HistoryDetail: View {
                                     Circle().fill(pair.0.tint).frame(width: 9, height: 9)
                                     Text(pair.0.name).font(BowerFont.ui(14)).foregroundStyle(theme.text)
                                     Spacer()
-                                    Text("£\(trim(pair.1.low))–£\(trim(pair.1.high))")
+                                    Text("\(Money.symbol(pair.1.currency))\(trim(pair.1.low))–\(Money.symbol(pair.1.currency))\(trim(pair.1.high))")
                                         .font(BowerFont.mono(13)).foregroundStyle(theme.text)
                                 }
                                 .padding(.vertical, 12).padding(.horizontal, 16)
@@ -203,7 +203,7 @@ private struct HistoryDetail: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Kicker("Ask")
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("£\(trim(rec.listAt))").font(BowerFont.serifUpright(40)).foregroundStyle(theme.text).monospacedDigit()
+                        Text("\(Money.symbol(rec.currency))\(trim(rec.listAt))").font(BowerFont.serifUpright(40)).foregroundStyle(theme.text).monospacedDigit()
                         HStack(spacing: 6) {
                             Text("on")
                             Circle().fill(rec.platform.tint).frame(width: 7, height: 7)
@@ -213,7 +213,7 @@ private struct HistoryDetail: View {
                     }
                 }
                 if let lo = item.priceMin, let hi = item.priceMax {
-                    Text("Estimate was £\(trim(lo)) to £\(trim(hi)).")
+                    Text("Estimate was \(Money.symbol(item.currency))\(trim(lo)) to \(Money.symbol(item.currency))\(trim(hi)).")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
             } else if let lo = item.priceMin, let hi = item.priceMax {
@@ -224,7 +224,7 @@ private struct HistoryDetail: View {
                         .padding(.vertical, 3).padding(.horizontal, 7)
                         .background(theme.pollen.opacity(0.28))
                         .clipShape(RoundedRectangle(cornerRadius: 5))
-                    PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32)
+                    PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32, symbol: Money.symbol(item.currency))
                     Text("The market wasn't checked.")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                 }
@@ -302,12 +302,14 @@ enum HistoryFormat {
     }
 
     static func price(_ item: HistoryItem) -> String {
-        if let rec = item.valuation?.recommendation { return "£\(Int(rec.listAt.rounded()))" }
+        if let rec = item.valuation?.recommendation { return Money.format(Int(rec.listAt.rounded()), rec.currency) }
         if let band = item.valuation?.perPlatform.values.first {
-            return "£\(Int(band.low.rounded()))–£\(Int(band.high.rounded()))"
+            let s = Money.symbol(band.currency)
+            return "\(s)\(Int(band.low.rounded()))–\(s)\(Int(band.high.rounded()))"
         }
         if let lo = item.priceMin, let hi = item.priceMax {
-            return "£\(Int(lo.rounded()))–£\(Int(hi.rounded()))"
+            let s = Money.symbol(item.currency)
+            return "\(s)\(Int(lo.rounded()))–\(s)\(Int(hi.rounded()))"
         }
         return ""
     }

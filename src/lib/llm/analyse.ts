@@ -6,12 +6,15 @@ import { jsonSchemaFormat } from "./structured";
 import { analysisResultSchema } from "./schemas";
 import { beginGeneration, observeGeneration, type TraceContext } from "@/lib/observability";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
+import { DEFAULT_MARKET, MARKETS, type Market } from "@/lib/markets";
 export { parseAnalysisResult };
 
 export interface AnalyseInput {
   /** base64 JPEG strings, optionally with a `data:` prefix. */
   photos: string[];
   tone: Tone;
+  /** The seller's Market, from their profile: sets the currency of the estimate. */
+  market?: Market;
   /** When set, the prompt is platform-specific; otherwise the neutral prompt is used. */
   platform?: Platform;
   /** The seller's opt-in notes (smoke-free etc.), read from their profile, never the body. */
@@ -99,7 +102,8 @@ TAG DATA (a record for the seller, NOT material for the listing):
 - Never copy tag_data into the title or description: no country of manufacture, no RN or style number, no care instructions, no barcode. Buyers do not search for these and copying them reads as a robot reading a label.
 - The one exception is country of manufacture when it genuinely raises the price or dates the piece for THIS brand: Made in USA (Carhartt, Levi's, vintage tees), Made in England (Dr. Martens, Barbour), Made in Italy or France (designer, Ray-Ban, Lacoste), Made in Japan (denim). Then it may go in the title or first line. Never mention China, Bangladesh, Vietnam, Turkey, Cambodia or similar.`;
 
-function buildPlatformPrompt(platform: Platform, tone: Tone, photoCount: number, notes: SellerNote[] = []): string {
+function buildPlatformPrompt(platform: Platform, tone: Tone, photoCount: number, notes: SellerNote[] = [], market: Market = DEFAULT_MARKET): string {
+  const currency = MARKETS[market].currency;
   const spec = platformListingSpec[platform];
   return `You are an expert clothing photographer and professional reselling assistant for secondhand fashion platforms.
 
@@ -120,7 +124,7 @@ ${COMMON_RULES}
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
 - condition: infer from visible wear, pilling, fading, stains. Be honest.
-- price_min/price_max: realistic GBP resale prices. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
+- price_min/price_max: realistic ${currency} resale prices in the ${MARKETS[market].name}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: ${platform === 'ebay' ? 'max 80 characters' : 'max 60 characters'}
 - description: ${platform === 'depop'
@@ -142,7 +146,8 @@ For every field:
 - If the photos genuinely lack the info, pick the best safe default (e.g. "Unbranded" if no brand) rather than leaving the value empty.`;
 }
 
-function buildNeutralPrompt(tone: Tone, photoCount: number): string {
+function buildNeutralPrompt(tone: Tone, photoCount: number, market: Market = DEFAULT_MARKET): string {
+  const currency = MARKETS[market].currency;
   return `You are an expert clothing photographer and professional reselling assistant for secondhand fashion platforms.
 
 Analyse these ${photoCount} clothing photo(s) and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
@@ -158,7 +163,7 @@ ${COMMON_RULES}
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
 - condition: infer from visible wear, pilling, fading, stains. Be honest.
-- price_min/price_max: realistic GBP resale prices. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
+- price_min/price_max: realistic ${currency} resale prices in the ${MARKETS[market].name}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: max 70 characters, descriptive and search-friendly (brand + type + key feature)
 - description: 3-4 short lines, 40-70 words. Lead with the most important details. Factual, nothing padded.
@@ -181,8 +186,8 @@ function imageBlocks(photos: string[]) {
 
 function buildPrompt(input: AnalyseInput): string {
   return input.platform
-    ? buildPlatformPrompt(input.platform, input.tone, input.photos.length, input.sellerNotes)
-    : buildNeutralPrompt(input.tone, input.photos.length);
+    ? buildPlatformPrompt(input.platform, input.tone, input.photos.length, input.sellerNotes, input.market)
+    : buildNeutralPrompt(input.tone, input.photos.length, input.market);
 }
 
 /**

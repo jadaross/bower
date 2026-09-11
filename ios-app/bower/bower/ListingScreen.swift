@@ -137,7 +137,7 @@ final class ListingModel {
                 if let s = v.searches { state.searches = s }
                 priceState = .searched
                 Notifications.priceIsIn(
-                    ask.map { "Ask £\($0.listAt) on \($0.platform.name)." } ?? "Nothing comparable listed today."
+                    ask.map { "Ask \(Money.format($0.listAt, state.market.currency)) on \($0.platform.name)." } ?? "Nothing comparable listed today."
                 )
             } catch APIError.allowanceExhausted(let a) {
                 state.searches = a
@@ -276,7 +276,7 @@ private struct PriceSection: View {
                         .background(theme.pollen.opacity(0.28))
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                     if let l = model.listing {
-                        PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40)
+                        PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40, symbol: Money.symbol(state.market.currency))
                             .padding(.top, 8)
                     }
                     BowerButton(title: state.searches.canSpend ? "Check the market" : "No market checks left",
@@ -358,7 +358,7 @@ private struct PriceSection: View {
             VStack(alignment: .leading, spacing: 0) {
                 Kicker("Ask")
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text("£\(ask.listAt)").font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
+                    Text(Money.format(ask.listAt, state.market.currency)).font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
                     HStack(spacing: 6) {
                         Text("on")
                         Circle().fill(ask.platform.tint).frame(width: 7, height: 7)
@@ -398,7 +398,7 @@ private struct PriceSection: View {
                     if empty {
                         Text("Nothing comparable today").font(BowerFont.serifUpright(22)).foregroundStyle(theme.muted)
                     } else {
-                        PriceRange(low: Int(band.low), high: Int(band.high), size: 22)
+                        PriceRange(low: Int(band.low), high: Int(band.high), size: 22, symbol: Money.symbol(band.currency))
                     }
                 }
                 Spacer(minLength: 0)
@@ -508,7 +508,7 @@ private struct ListingSection: View {
             // Straight to where it gets posted. A universal link, so the platform's
             // app opens when installed; iOS puts "◀ bower" in the status bar for
             // the way back. Copy first, then this.
-            Link(destination: model.platform.sellURL) {
+            Link(destination: model.platform.sellURL(in: state.market)) {
                 HStack(spacing: 8) {
                     Text("Open \(model.platform.name)")
                     Image(systemName: "arrow.up.right").font(.system(size: 11, weight: .bold))
@@ -804,7 +804,7 @@ private struct CompsSheet: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Text("£\(Int(c.price))").font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
+                Text(Money.format(Int(c.price), c.currency)).font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
                 if openable {
                     HStack(spacing: 3) { Text("Open"); Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .bold)) }
                         .font(BowerFont.ui(10.5)).foregroundStyle(theme.satin)

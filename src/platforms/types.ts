@@ -1,14 +1,11 @@
 import type { Platform, PlatformListing } from "@/lib/types";
 import type { ChipId } from "@/lib/chip-vocab";
+import type { Market } from "@/lib/markets";
 
-export interface PlatformMetadata {
-  id: Platform;
-  name: string;
-  audience: string;
+/** How a platform shows up in one Market: its site there and what it charges. */
+export interface MarketPresence {
   feeLabel: string;
   feePct: number;
-  color: string;
-  appUrl: string;
   webUrl: string;
   /**
    * Hosts the valuation search is confined to. A Price Band for this platform
@@ -24,6 +21,16 @@ export interface PlatformMetadata {
   itemUrl: RegExp;
   /** The same shape, written out for the prompt: "https://…/items/<id>-…". */
   itemUrlExample: string;
+}
+
+export interface PlatformMetadata {
+  id: Platform;
+  name: string;
+  audience: string;
+  color: string;
+  appUrl: string;
+  /** Absent for a Market the platform does not operate in. */
+  markets: Partial<Record<Market, MarketPresence>>;
 }
 
 export interface PlatformListingSpec {

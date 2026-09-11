@@ -93,7 +93,8 @@ fanned out to.
 | `src/lib/auth.ts` | Bearer-token verification and the `withAuth` route wrapper |
 | `src/lib/supabase.ts` | The three Supabase clients — anon, per-user (RLS applies), service role (RLS bypassed) |
 | `src/lib/allowance.ts` | The Allowance meter. Counting itself lives in SQL, not here |
-| `src/lib/profile.ts` | Enabled Platforms, Preferred Platform and seller notes, read and written as the caller |
+| `src/lib/profile.ts` | Market, Enabled Platforms, Preferred Platform and seller notes, read and written as the caller |
+| `src/lib/markets.ts` | The Market vocabulary: currency, search country and which platforms exist, per market (ADR-0009) |
 | `src/lib/seller-notes.ts` | The seller-note vocabulary and its one phrasing per platform |
 | `supabase/migrations/*` | The schema, and the source of truth for it — never edit in the dashboard |
 | `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |

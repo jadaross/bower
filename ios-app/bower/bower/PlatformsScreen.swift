@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Captures Enabled Platforms. Shown once, as the second of the two set-up
-/// pages; the same content lives in Settings afterwards, where it stays editable.
+/// Captures the Market and the Enabled Platforms. Shown once, as the second
+/// of the two set-up pages; the same content lives in Settings afterwards,
+/// where it stays editable.
 struct PlatformsScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -15,13 +16,15 @@ struct PlatformsScreen: View {
                 Text("Where do you sell?")
                     .font(BowerFont.serif(38))
                     .foregroundStyle(theme.text)
-                Text("Only these get priced and written for.")
+                Text("Prices come in your currency, from your country's listings. Only the platforms you switch on get priced and written for.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.muted)
                     .padding(.top, 8)
             }
 
-            VStack(spacing: 10) { ForEach(Platform.allCases) { row(for: $0) } }
+            MarketPicker()
+
+            VStack(spacing: 10) { ForEach(state.market.platforms) { row(for: $0) } }
                 .padding(.top, 2)
 
             if blocked != nil { keepOne }
@@ -35,6 +38,14 @@ struct PlatformsScreen: View {
         .padding(.horizontal, 22)
         .padding(.top, 10)
         .padding(.bottom, 34)
+        .onAppear {
+            // A first guess from the device's Region setting — the page exists
+            // so it can be corrected before anything is priced.
+            if !state.onboardingComplete { state.market = Market.device }
+            state.enabled = state.enabled.filter { $0.operates(in: state.market) }
+            if state.enabled.isEmpty { state.enabled = Set(state.market.platforms) }
+            if !state.enabled.contains(state.preferred), let next = state.orderedEnabled.first { state.preferred = next }
+        }
     }
 
     private func save() async {
@@ -68,7 +79,7 @@ struct PlatformsScreen: View {
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(platform.name).font(BowerFont.ui(15, weight: .semibold)).foregroundStyle(theme.text)
-                Text(platform.note).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                Text(platform.note(in: state.market)).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
             }
 
             Spacer(minLength: 0)
@@ -126,6 +137,39 @@ struct PlatformsScreen: View {
         Task {
             try? await Task.sleep(for: .seconds(2.6))
             if blocked == platform { blocked = nil }
+        }
+    }
+}
+
+/// United Kingdom or Australia. Switching drops any platform that does not
+/// operate in the new market (Vinted, in Australia) — the rows below it
+/// change to match, so nothing is switched on that cannot be priced.
+struct MarketPicker: View {
+    @Environment(AppState.self) private var state
+    @Environment(\.bower) private var theme
+    /// Saves to the profile on change; off during set-up, where Continue saves the lot.
+    var savesOnChange = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Kicker("Selling in")
+            Segmented(
+                options: Market.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.name) },
+                selection: Binding(
+                    get: { state.market.rawValue },
+                    set: { raw in
+                        guard let m = Market(rawValue: raw), m != state.market else { return }
+                        if savesOnChange {
+                            Task { await state.saveMarket(m) }
+                        } else {
+                            state.market = m
+                            state.enabled = state.enabled.filter { $0.operates(in: m) }
+                            if state.enabled.isEmpty { state.enabled = Set(m.platforms) }
+                            if !state.enabled.contains(state.preferred), let next = state.orderedEnabled.first { state.preferred = next }
+                        }
+                    }
+                )
+            )
         }
     }
 }

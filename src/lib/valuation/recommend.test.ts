@@ -50,35 +50,35 @@ describe("midpoint / score", () => {
 
 describe("recommend — when it runs at all", () => {
   it("returns null for a single platform — nothing to choose between", () => {
-    expect(recommend(valuation({ vinted: band(50, 80) }))).toBeNull();
+    expect(recommend(valuation({ vinted: band(50, 80) }), "GB")).toBeNull();
   });
 
   it("returns null for an empty valuation", () => {
-    expect(recommend(valuation({}))).toBeNull();
+    expect(recommend(valuation({}), "GB")).toBeNull();
   });
 
   it("runs with two platforms", () => {
-    expect(recommend(valuation({ vinted: band(50, 80), depop: band(60, 90) }))).not.toBeNull();
+    expect(recommend(valuation({ vinted: band(50, 80), depop: band(60, 90) }), "GB")).not.toBeNull();
   });
 });
 
 describe("recommend — ranking", () => {
   it("prefers the higher band", () => {
-    const result = recommend(valuation({ vinted: band(40, 60), depop: band(70, 90) }));
+    const result = recommend(valuation({ vinted: band(40, 60), depop: band(70, 90) }), "GB");
     expect(result!.platform).toBe("depop");
   });
 
   it("prefers the faster seller when prices match", () => {
     const result = recommend(
       valuation({ vinted: band(50, 80, "low"), depop: band(50, 80, "high") })
-    );
+    , "GB");
     expect(result!.platform).toBe("depop");
   });
 
   it("lets a big price gap beat a likelihood edge", () => {
     const result = recommend(
       valuation({ vinted: band(100, 140, "low"), depop: band(40, 60, "high") })
-    );
+    , "GB");
     expect(result!.platform).toBe("vinted");
   });
 
@@ -87,7 +87,7 @@ describe("recommend — ranking", () => {
     // return Vinted; ranking on band × likelihood must not.
     const result = recommend(
       valuation({ vinted: band(30, 40, "medium"), ebay: band(90, 110, "medium") })
-    );
+    , "GB");
     expect(result!.platform).toBe("ebay");
   });
 
@@ -97,13 +97,13 @@ describe("recommend — ranking", () => {
         vinted: band(50, 80, "medium", "low"),
         depop: band(50, 80, "medium", "high"),
       })
-    );
+    , "GB");
     expect(result!.platform).toBe("depop");
   });
 
   it("is stable when everything ties", () => {
-    const a = recommend(valuation({ vinted: band(50, 80), depop: band(50, 80) }));
-    const b = recommend(valuation({ vinted: band(50, 80), depop: band(50, 80) }));
+    const a = recommend(valuation({ vinted: band(50, 80), depop: band(50, 80) }), "GB");
+    const b = recommend(valuation({ vinted: band(50, 80), depop: band(50, 80) }), "GB");
     expect(a!.platform).toBe(b!.platform);
   });
 });
@@ -114,21 +114,21 @@ describe("recommend — evidence", () => {
     // well-evidenced Vinted band. It must not.
     const result = recommend(
       valuation({ vinted: band(15, 35, "high", "medium", 5), depop: unevidenced(35, 60) })
-    );
+    , "GB");
     expect(result!.platform).toBe("vinted");
   });
 
   it("still reports the unevidenced platform as a runner-up", () => {
     const result = recommend(
       valuation({ vinted: band(15, 35, "high", "medium", 5), depop: unevidenced(35, 60) })
-    );
+    , "GB");
     expect(result!.runnersUp.map((r) => r.platform)).toContain("depop");
   });
 
   it("falls back to unevidenced bands when nothing found comparables", () => {
     const result = recommend(
       valuation({ vinted: unevidenced(10, 20), depop: unevidenced(30, 60) })
-    );
+    , "GB");
     expect(result!.platform).toBe("depop");
   });
 
@@ -139,54 +139,63 @@ describe("recommend — evidence", () => {
         depop: band(40, 60, "medium", "medium", 3),
         ebay: unevidenced(200, 300),
       })
-    );
+    , "GB");
     expect(result!.platform).toBe("depop");
   });
 });
 
 describe("recommend — output", () => {
   it("lists at the midpoint of the winning band", () => {
-    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }));
+    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }), "GB");
     expect(result!.listAt).toBe(70);
   });
 
   it("applies the fee after ranking, for the net figure", () => {
-    // eBay charges a real fee; Depop's UK seller fee was removed in Mar 2024.
-    const result = recommend(valuation({ ebay: band(100, 100), vinted: band(20, 30) }));
+    // Every platform bower knows is fee-free for a private seller today (eBay
+    // UK since Oct 2024), so net equals the asking price; the plumbing stays
+    // for the day one of them charges again.
+    const result = recommend(valuation({ ebay: band(100, 100), vinted: band(20, 30) }), "GB");
     expect(result!.platform).toBe("ebay");
     expect(result!.listAt).toBe(100);
-    expect(result!.net).toBe(87); // eBay takes 13.25%
+    expect(result!.net).toBe(100);
+  });
+
+  it("writes the difference in the market's currency", () => {
+    const gb = recommend(valuation({ ebay: band(100, 100), depop: band(20, 30) }), "GB");
+    expect(gb!.reasoning).toContain("£75");
+    const au = recommend(valuation({ ebay: band(100, 100), depop: band(20, 30) }), "AU");
+    expect(au!.reasoning).toContain("$75");
   });
 
   it("takes nothing off on Vinted", () => {
-    const result = recommend(valuation({ vinted: band(100, 100), depop: band(20, 30) }));
+    const result = recommend(valuation({ vinted: band(100, 100), depop: band(20, 30) }), "GB");
     expect(result!.net).toBe(100);
   });
 
   it("lists the runners-up with their own numbers", () => {
     const result = recommend(
       valuation({ vinted: band(90, 110), depop: band(50, 70), ebay: band(30, 50) })
-    );
+    , "GB");
     expect(result!.runnersUp).toHaveLength(2);
     expect(result!.runnersUp[0].platform).toBe("depop");
     expect(result!.runnersUp[0].listAt).toBe(60);
   });
 
   it("explains itself in terms of asking prices", () => {
-    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }));
+    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }), "GB");
     expect(result!.reasoning).toMatch(/listed/i);
     expect(result!.reasoning).not.toMatch(/sells for/i);
   });
 
   // The client shows "£50 on Depop" in large type directly above this line.
   it("does not restate the price or the winner", () => {
-    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }));
+    const result = recommend(valuation({ vinted: band(50, 90), depop: band(20, 30) }), "GB");
     expect(result!.reasoning).not.toContain("£70");
     expect(result!.reasoning).not.toContain("Vinted");
   });
 
   it("names the runner-up in its reasoning", () => {
-    const result = recommend(valuation({ vinted: band(90, 110), depop: band(50, 70) }));
+    const result = recommend(valuation({ vinted: band(90, 110), depop: band(50, 70) }), "GB");
     expect(result!.reasoning).toContain("Depop");
   });
 });

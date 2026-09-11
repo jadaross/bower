@@ -1,8 +1,9 @@
 import { userClient } from "@/lib/supabase";
-import { PLATFORM_IDS } from "@/platforms";
+import { PLATFORM_IDS, platformsIn } from "@/platforms";
 import type { Platform } from "@/lib/types";
 import type { AllowanceState } from "@/lib/allowance";
 import { SELLER_NOTES, type SellerNote } from "@/lib/seller-notes";
+import { DEFAULT_MARKET, MARKETS, isMarket, type Market } from "@/lib/markets";
 
 /**
  * A user's Enabled Platforms and their meter.
@@ -17,6 +18,8 @@ import { SELLER_NOTES, type SellerNote } from "@/lib/seller-notes";
  */
 
 export interface Profile {
+  /** Where the seller sells: which country's platforms, in which currency. See `markets.ts`. */
+  market: Market;
   enabledPlatforms: Platform[];
   /** Which Enabled Platform listings are written for first. Always one of `enabledPlatforms`. */
   preferredPlatform: Platform;
@@ -29,6 +32,7 @@ export interface Profile {
 }
 
 interface ProfileRow {
+  market: string | null;
   enabled_platforms: Platform[];
   preferred_platform: Platform;
   seller_notes: string[] | null;
@@ -40,7 +44,7 @@ interface ProfileRow {
 }
 
 const SELECT =
-  "enabled_platforms, preferred_platform, seller_notes, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
+  "market, enabled_platforms, preferred_platform, seller_notes, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
 
 function toProfile(row: ProfileRow): Profile {
   const periodStart = new Date(row.allowance_period_start);
@@ -50,6 +54,7 @@ function toProfile(row: ProfileRow): Profile {
     Date.UTC(periodStart.getUTCFullYear(), periodStart.getUTCMonth() + 1, 1)
   );
   return {
+    market: isMarket(row.market) ? row.market : DEFAULT_MARKET,
     enabledPlatforms: row.enabled_platforms,
     preferredPlatform: row.preferred_platform,
     sellerNotes: SELLER_NOTES.filter((n) => (row.seller_notes ?? []).includes(n)),
@@ -73,20 +78,37 @@ export async function getEnabledPlatforms(token: string): Promise<Platform[]> {
   return (await getProfile(token)).enabledPlatforms;
 }
 
+/** What the Valuation needs from the profile: which platforms, in which Market. */
+export async function getValuationScope(token: string): Promise<{ platforms: Platform[]; market: Market }> {
+  const p = await getProfile(token);
+  return { platforms: p.enabledPlatforms, market: p.market };
+}
+
+/** What the listing prompts need from the profile. */
+export async function getListingContext(token: string): Promise<{ sellerNotes: SellerNote[]; market: Market }> {
+  const p = await getProfile(token);
+  return { sellerNotes: p.sellerNotes, market: p.market };
+}
+
 export class InvalidPlatformSet extends Error {}
 
 /**
  * Validates here as well as in the database. The `enabled_platforms_not_empty`
- * check constraint is the real guarantee — this exists so the caller gets a
- * sentence explaining the problem instead of a Postgres constraint name.
+ * and `platforms_available_in_market` check constraints are the real
+ * guarantee — this exists so the caller gets a sentence explaining the
+ * problem instead of a Postgres constraint name.
  */
-export function validatePlatformSet(input: unknown): Platform[] {
+export function validatePlatformSet(input: unknown, market: Market = DEFAULT_MARKET): Platform[] {
   if (!Array.isArray(input) || input.length === 0) {
     throw new InvalidPlatformSet("At least one platform must stay enabled");
   }
   const unknown = input.filter((p) => !PLATFORM_IDS.includes(p as Platform));
   if (unknown.length > 0) {
     throw new InvalidPlatformSet(`Unknown platform: ${unknown.join(", ")}`);
+  }
+  const elsewhere = input.filter((p) => !platformsIn(market).includes(p as Platform));
+  if (elsewhere.length > 0) {
+    throw new InvalidPlatformSet(`${elsewhere.join(", ")} is not available in ${MARKETS[market].name}`);
   }
   // Deduplicated so the stored set says what it means; order follows the
   // platform registry rather than however the client happened to send it.
@@ -124,6 +146,31 @@ export async function setEnabledPlatforms(
     .single();
 
   if (error) throw new Error(`Could not update enabled platforms: ${error.message}`);
+  return toProfile(data as ProfileRow);
+}
+
+/**
+ * Moves the seller to another Market. Platforms that do not operate there are
+ * dropped from the Enabled set (Vinted, on a move to Australia) and the
+ * preference follows; with nothing left, every platform in the new Market is
+ * enabled, so the seller is never left with an empty set. One statement, so
+ * the `platforms_available_in_market` constraint holds throughout.
+ */
+export async function setMarket(token: string, userId: string, market: Market): Promise<Profile> {
+  const current = await getProfile(token);
+  const available = platformsIn(market);
+  const kept = current.enabledPlatforms.filter((p) => available.includes(p));
+  const platforms = kept.length > 0 ? kept : [...available];
+  const preferred = platforms.includes(current.preferredPlatform) ? current.preferredPlatform : platforms[0];
+
+  const { data, error } = await userClient(token)
+    .from("profiles")
+    .update({ market, enabled_platforms: platforms, preferred_platform: preferred })
+    .eq("id", userId)
+    .select(SELECT)
+    .single();
+
+  if (error) throw new Error(`Could not update market: ${error.message}`);
   return toProfile(data as ProfileRow);
 }
 

@@ -30,9 +30,15 @@ struct StubAPI: BowerAPIClient {
         )
     }
 
-    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform) async throws -> ProfileResponse {
+    func setEnabledPlatforms(_ platforms: [Platform], preferred: Platform, market: Market) async throws -> ProfileResponse {
         await wait()
-        return ProfileResponse(enabledPlatforms: platforms, preferredPlatform: preferred,
+        return ProfileResponse(market: market, enabledPlatforms: platforms, preferredPlatform: preferred,
+                               allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
+    }
+
+    func setMarket(_ market: Market) async throws -> ProfileResponse {
+        await wait()
+        return ProfileResponse(market: market, enabledPlatforms: market.platforms, preferredPlatform: .depop,
                                allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
     }
 

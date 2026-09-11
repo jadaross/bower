@@ -28,6 +28,7 @@ function account(over: Partial<Account>): Account {
     hidesEmail: false,
     createdAt: "2026-09-10T10:00:00.000Z",
     lastSignInAt: null,
+    market: "GB",
     enabledPlatforms: ["vinted", "depop"],
     preferredPlatform: "vinted",
     sellerNotes: [],

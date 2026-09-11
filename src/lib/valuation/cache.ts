@@ -1,4 +1,5 @@
 import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
+import type { Market } from "@/lib/markets";
 
 /**
  * "Nike vintage windbreaker, M, Good" is worth the same to every user who
@@ -20,9 +21,10 @@ interface Entry {
 
 const store = new Map<string, Entry>();
 
-/** Brand + type + size + condition + platform, per ADR-0004. */
-export function cacheKey(item: ValuationItem, platform: Platform): string {
+/** Market + platform + brand + type + size + condition, per ADR-0004. A Depop band in AUD is not a Depop band in GBP. */
+export function cacheKey(item: ValuationItem, platform: Platform, market: Market): string {
   return [
+    market,
     platform,
     item.brand.trim().toLowerCase(),
     item.clothing_type.trim().toLowerCase(),
@@ -31,23 +33,23 @@ export function cacheKey(item: ValuationItem, platform: Platform): string {
   ].join("|");
 }
 
-export function readCache(item: ValuationItem, platform: Platform): PriceBand | null {
-  const entry = store.get(cacheKey(item, platform));
+export function readCache(item: ValuationItem, platform: Platform, market: Market): PriceBand | null {
+  const entry = store.get(cacheKey(item, platform, market));
   if (!entry) return null;
   if (Date.now() - entry.storedAt > TTL_MS) {
-    store.delete(cacheKey(item, platform));
+    store.delete(cacheKey(item, platform, market));
     return null;
   }
   return entry.band;
 }
 
-export function writeCache(item: ValuationItem, platform: Platform, band: PriceBand): void {
+export function writeCache(item: ValuationItem, platform: Platform, market: Market, band: PriceBand): void {
   if (store.size >= MAX_ENTRIES) {
     // Cheapest possible eviction: drop the oldest insertion.
     const oldest = store.keys().next();
     if (!oldest.done) store.delete(oldest.value);
   }
-  store.set(cacheKey(item, platform), { band, storedAt: Date.now() });
+  store.set(cacheKey(item, platform, market), { band, storedAt: Date.now() });
 }
 
 /** Test seam. */

@@ -25,6 +25,8 @@ export interface HistoryItem {
   condition: string;
   price_min: number | null;
   price_max: number | null;
+  /** ISO 4217 for price_min/price_max — the Market's currency when the item was read. */
+  currency: string;
   preferred_platform: Platform | null;
   /** The full Neutral Listing as first seen; null on older rows. */
   listing: Listing | null;
@@ -43,9 +45,9 @@ const TABLE = "item_history";
 /** Record an analysed item. Best-effort. */
 export async function recordItem(
   token: string,
-  params: { userId: string; sessionId?: string; listing: Listing; preferredPlatform?: Platform }
+  params: { userId: string; sessionId?: string; listing: Listing; preferredPlatform?: Platform; currency?: string }
 ): Promise<void> {
-  const { userId, sessionId, listing, preferredPlatform } = params;
+  const { userId, sessionId, listing, preferredPlatform, currency } = params;
   try {
     const { error } = await userClient(token)
       .from(TABLE)
@@ -62,6 +64,7 @@ export async function recordItem(
         condition: listing.condition,
         price_min: listing.price_min,
         price_max: listing.price_max,
+        currency: currency ?? "GBP",
         preferred_platform: preferredPlatform ?? null,
         // The whole Neutral Listing, so the detail view can show it as first seen.
         listing,

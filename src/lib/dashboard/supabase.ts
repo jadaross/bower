@@ -15,6 +15,8 @@ export interface Account {
   hidesEmail: boolean;
   createdAt: string;
   lastSignInAt: string | null;
+  /** Where they sell: GB or AU. */
+  market: string;
   enabledPlatforms: Platform[];
   preferredPlatform: Platform | null;
   sellerNotes: string[];
@@ -77,6 +79,7 @@ export async function fetchAccounts(): Promise<Account[]> {
       hidesEmail: !!email && email.endsWith("@privaterelay.appleid.com"),
       createdAt: u.created_at,
       lastSignInAt: u.last_sign_in_at ?? null,
+      market: (p?.market as string | undefined) ?? "GB",
       enabledPlatforms: (p?.enabled_platforms ?? []) as Platform[],
       preferredPlatform: (p?.preferred_platform ?? null) as Platform | null,
       sellerNotes: (p?.seller_notes ?? []) as string[],

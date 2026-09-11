@@ -6,8 +6,8 @@ const valuate = vi.fn();
 const recommend = vi.fn();
 vi.mock("@/lib/valuation", () => ({ valuate, recommend }));
 
-const getEnabledPlatforms = vi.fn();
-vi.mock("@/lib/profile", () => ({ getEnabledPlatforms }));
+const getValuationScope = vi.fn();
+vi.mock("@/lib/profile", () => ({ getValuationScope }));
 
 const spendAllowance = vi.fn();
 const refundAllowance = vi.fn();
@@ -56,12 +56,12 @@ beforeEach(() => {
   resetAuthState();
   valuate.mockReset();
   recommend.mockReset();
-  getEnabledPlatforms.mockReset();
+  getValuationScope.mockReset();
   spendAllowance.mockReset();
   refundAllowance.mockReset();
   valuate.mockResolvedValue(valuation);
   recommend.mockReturnValue(null);
-  getEnabledPlatforms.mockResolvedValue(["vinted"]);
+  getValuationScope.mockResolvedValue({ platforms: ["vinted"], market: "GB" });
   spendAllowance.mockResolvedValue(allowance);
   refundAllowance.mockResolvedValue(undefined);
 });
@@ -80,7 +80,7 @@ describe("POST /api/valuate", () => {
   it("includes the recommendation when there is one", async () => {
     const rec = { platform: "depop", listAt: 70, net: 63, currency: "GBP", reasoning: "x", runnersUp: [] };
     recommend.mockReturnValue(rec);
-    getEnabledPlatforms.mockResolvedValue(["vinted", "depop"]);
+    getValuationScope.mockResolvedValue({ platforms: ["vinted", "depop"], market: "GB" });
     expect((await (await POST(post({ item }))).json()).recommendation).toEqual(rec);
   });
 
@@ -115,31 +115,37 @@ describe("POST /api/valuate", () => {
 // #10 — the platform set is the user's, not the request's.
 describe("enabled platforms", () => {
   it("values the caller's Enabled Platforms", async () => {
-    getEnabledPlatforms.mockResolvedValue(["vinted", "depop"]);
+    getValuationScope.mockResolvedValue({ platforms: ["vinted", "depop"], market: "GB" });
     await POST(post({ item }));
-    expect(valuate).toHaveBeenCalledWith(item, ["vinted", "depop"]);
+    expect(valuate).toHaveBeenCalledWith(item, ["vinted", "depop"], "GB");
   });
 
   it("reads them for the authenticated caller", async () => {
     await POST(post({ item }));
-    expect(getEnabledPlatforms).toHaveBeenCalledWith("test-access-token");
+    expect(getValuationScope).toHaveBeenCalledWith("test-access-token");
   });
 
   it("ignores a platform list supplied by the client", async () => {
-    getEnabledPlatforms.mockResolvedValue(["vinted"]);
+    getValuationScope.mockResolvedValue({ platforms: ["vinted"], market: "GB" });
     await POST(post({ item, platforms: ["vinted", "depop", "ebay"] }));
-    expect(valuate).toHaveBeenCalledWith(item, ["vinted"]);
+    expect(valuate).toHaveBeenCalledWith(item, ["vinted"], "GB");
+  });
+
+  it("values in the caller's Market, never one named by the client", async () => {
+    getValuationScope.mockResolvedValue({ platforms: ["depop"], market: "AU" });
+    await POST(post({ item, market: "GB" }));
+    expect(valuate).toHaveBeenCalledWith(item, ["depop"], "AU");
   });
 
   it("400s when the user has no platforms enabled", async () => {
-    getEnabledPlatforms.mockResolvedValue([]);
+    getValuationScope.mockResolvedValue({ platforms: [], market: "GB" });
     const res = await POST(post({ item }));
     expect(res.status).toBe(400);
     expect(valuate).not.toHaveBeenCalled();
   });
 
   it("500s when the profile cannot be read", async () => {
-    getEnabledPlatforms.mockRejectedValue(new Error("profile unreachable"));
+    getValuationScope.mockRejectedValue(new Error("profile unreachable"));
     expect((await POST(post({ item }))).status).toBe(500);
   });
 });

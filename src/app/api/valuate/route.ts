@@ -1,6 +1,6 @@
 import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
 import { withAuth } from "@/lib/auth";
-import { getEnabledPlatforms } from "@/lib/profile";
+import { getValuationScope } from "@/lib/profile";
 import { recommend, valuate } from "@/lib/valuation";
 import { recordValuation } from "@/lib/history";
 import type { ValuationItem } from "@/lib/types";
@@ -33,13 +33,13 @@ export const POST = withAuth(async (request, user) => {
     );
   }
 
-  // The Enabled Platforms come from the caller's profile, not from the request
-  // body (#10). A client that could name its own platforms could ask for work
-  // it had not enabled — and the meter charges one unit however many platforms
-  // that turns out to be.
-  let platforms;
+  // The Enabled Platforms and the Market come from the caller's profile, not
+  // from the request body (#10). A client that could name its own platforms
+  // could ask for work it had not enabled — and the meter charges one unit
+  // however many platforms that turns out to be.
+  let platforms, market;
   try {
-    platforms = await getEnabledPlatforms(user.token);
+    ({ platforms, market } = await getValuationScope(user.token));
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
@@ -61,8 +61,8 @@ export const POST = withAuth(async (request, user) => {
   if (!spend.allowed) return allowanceExhausted(spend, "search");
 
   try {
-    const valuation = await valuate(item, platforms);
-    const recommendation = recommend(valuation);
+    const valuation = await valuate(item, platforms, market);
+    const recommendation = recommend(valuation, market);
     // Best-effort, but awaited: attach the valuation to the item's history
     // row (#41) before the response goes out. Fired-and-forgotten, the write
     // raced the function being frozen once the response was sent, and market

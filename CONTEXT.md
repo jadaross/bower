@@ -31,8 +31,12 @@ _Avoid_: tweak, filter, tag
 A resale destination — Vinted, Depop, or eBay. bower writes for them and values against them; it does not post to them.
 _Avoid_: marketplace, channel, site
 
+**Market**:
+Where the user sells — the United Kingdom or Australia. It sets the currency, which country's edition of each Platform the market check searches, and which Platforms exist at all (Vinted does not operate in Australia). Chosen on the where-you-sell page, changed in Settings, and read from the profile by the server, never from a request. The listing voice does not change with it.
+_Avoid_: region, country, locale, territory (that is the App Store's word)
+
 **Enabled Platform**:
-A Platform the user has told us they actually sell on. Only Enabled Platforms are valued, and only they can be recommended.
+A Platform the user has told us they actually sell on, in their Market. Only Enabled Platforms are valued, and only they can be recommended.
 
 **Preferred Platform**:
 The one Enabled Platform bower writes for by default, set by the user and changed in Settings. It answers "which listing do I show first?" — a standing preference, not a judgement about this Item.
