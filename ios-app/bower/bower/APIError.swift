@@ -48,14 +48,14 @@ enum AnalyseRejection: String, Sendable {
     /// something bower will look at.
     var title: String {
         switch self {
-        case .notClothing: "Sorry, we only do clothing"
+        case .notClothing: "Sorry, we can't sell that"
         default:           "Sorry, that was inappropriate"
         }
     }
 
     var body: String {
         switch self {
-        case .notClothing: "Bower reads photos of clothes, shoes and bags. Take one of the piece and try again."
+        case .notClothing: "Bower reads clothes, shoes and bags. Take a photo of the piece and try again."
         default:           "Bower can't read that photo. It has been thrown away, and nothing was charged."
         }
     }

@@ -50,8 +50,8 @@ struct PlatformsScreen: View {
     private var countLabel: String {
         switch state.enabled.count {
         case 3: "all three"
-        case 1: "one"
-        default: "\(state.enabled.count)"
+        case 2: "two"
+        default: "one"
         }
     }
 

@@ -571,7 +571,7 @@ private struct ListingSection: View {
                         Hairline()
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
-                                Kicker(model.platform == .depop ? "Hashtags" : "Keywords")
+                                Kicker(model.platform.tagsLabel)
                                 Spacer()
                                 CopyButton(text: c.displayHashtags.joined(separator: " "), onCopy: { model.recordFeedback("copied") })
                             }
@@ -587,7 +587,7 @@ private struct ListingSection: View {
                     if let fields = c.fields, !fields.isEmpty {
                         Hairline()
                         VStack(alignment: .leading, spacing: 6) {
-                            Kicker("Their form fields")
+                            Kicker("\(model.platform.name)'s form fields")
                             // Each value copies on its own: the platform's
                             // form takes them one dropdown at a time.
                             ForEach(fields) { f in
@@ -756,7 +756,7 @@ private struct CompsSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("What \(platform.name) is asking").font(BowerFont.serif(24)).foregroundStyle(theme.text)
+                    Text("Asking on \(platform.name)").font(BowerFont.serif(24)).foregroundStyle(theme.text)
                     Text("\(comps.count) live listing\(comps.count == 1 ? "" : "s")").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                 }
                 Spacer()

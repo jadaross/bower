@@ -27,6 +27,15 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// What the platform calls the tags under a listing. One place, so the
+    /// listing screen and History say the same word.
+    var tagsLabel: String {
+        switch self {
+        case .vinted, .depop: "Hashtags"
+        case .ebay:           "Keywords"
+        }
+    }
+
     /// Where a listing gets posted. The https link is a universal link, so it
     /// opens the platform's app when it is installed and the site when not.
     /// iOS then shows "◀ bower" in the status bar to come straight back.

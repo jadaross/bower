@@ -49,7 +49,7 @@ enum Notifications {
         center.removePendingNotificationRequests(withIdentifiers: [resetId])
         guard reads != nil || searches != nil else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Your credits are back"
+        content.title = "Your listings and market checks are back"
         content.body = [reads.map { "\($0) listings" }, searches.map { "\($0) market checks" }]
             .compactMap { $0 }.joined(separator: " and ") + " for the month."
         content.sound = .default

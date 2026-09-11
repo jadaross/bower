@@ -37,7 +37,7 @@ struct HistoryScreen: View {
     private var empty: some View {
         VStack(spacing: 10) {
             Text("Nothing yet").font(BowerFont.serif(24)).foregroundStyle(theme.text)
-            Text("Items you run show up here, with the prices you got.")
+            Text("Items you write show up here, with the prices you were given.")
                 .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
         }
@@ -244,7 +244,7 @@ private struct HistoryDetail: View {
                     if !pl.hashtags.isEmpty {
                         Hairline()
                         HStack {
-                            Kicker("Hashtags")
+                            Kicker(item.preferredPlatform?.tagsLabel ?? "Hashtags")
                             Spacer()
                             CopyButton(text: pl.displayHashtags.joined(separator: " "))
                         }

@@ -28,7 +28,7 @@ struct SettingsScreen: View {
                 }
             }
 
-            section("Preferred reseller") {
+            section("Preferred platform") {
                 BowerGroup {
                     ForEach(Array(state.orderedEnabled.enumerated()), id: \.element) { i, p in
                         if i > 0 { Hairline() }
@@ -47,11 +47,11 @@ struct SettingsScreen: View {
                         .buttonStyle(.plain)
                     }
                 }
-                Text("Written in this voice first. Switch any time.")
+                Text("Listings are written for this one first. Switch any time.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.leading, 4)
             }
 
-            section("Added to every listing") { sellerNotesCard }
+            section("Seller notes") { sellerNotesCard }
 
             section("What's left") { allowanceCard }
 
@@ -118,7 +118,7 @@ struct SettingsScreen: View {
             }
             Button("Keep it", role: .cancel) {}
         } message: {
-            Text("This removes your sign-in, your remaining allowance and your whole item history. Bower keeps no photos.")
+            Text("This removes your sign-in, your remaining listings and market checks, and your whole item history. Bower keeps no photos.")
         }
         .padding(.horizontal, 22)
         .padding(.top, 4)
@@ -200,7 +200,7 @@ struct SettingsScreen: View {
     private var sellerNotesPreview: some View {
         let line = SellerNote.previewLine(state.sellerNotes)
         return VStack(alignment: .leading, spacing: 6) {
-            Kicker("How it ends")
+            Kicker("The last line of every listing")
             VStack(alignment: .leading, spacing: 3) {
                 Text("Good condition, light wear at the cuffs.")
                     .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
