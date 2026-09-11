@@ -177,7 +177,7 @@ export function marketChecks(gens: Generation[]): MarketCheck[] {
     };
     c.cost += g.cost.total;
     c.latency = Math.max(c.latency, g.latency ?? 0);
-    if (g.platform) c.platforms.push(g.platform);
+    if (g.platform && !c.platforms.includes(g.platform)) c.platforms.push(g.platform);
     if (isError(g)) c.errored = true;
     if (g.startTime < c.startTime) c.startTime = g.startTime;
     byTrace.set(g.traceId, c);

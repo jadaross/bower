@@ -7,7 +7,7 @@ vi.mock("@/lib/llm/client", async (importOriginal) => ({
   anthropicClient: () => ({ messages: { create } }),
 }));
 
-const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem, listingUrl, searchActivity } =
+const { askingPriceProvider, buildValuationPrompt, coerceBand, describeItem, listingUrl, mergeBands, searchActivity } =
   await import("./asking-price");
 
 const item: ValuationItem = {
@@ -305,14 +305,14 @@ describe("askingPriceProvider.band", () => {
     create
       .mockResolvedValueOnce(reply("", "pause_turn"))
       .mockResolvedValueOnce(reply(JSON.stringify(band)));
-    const result = await askingPriceProvider.band(item, "vinted", "GB");
+    const result = await askingPriceProvider.band(item, "ebay", "GB");
     expect(create).toHaveBeenCalledTimes(2);
     expect(result.low).toBe(55);
   });
 
   it("gives up rather than resuming forever", async () => {
     create.mockResolvedValue(reply("", "pause_turn"));
-    await expect(askingPriceProvider.band(item, "vinted", "GB")).rejects.toThrow();
+    await expect(askingPriceProvider.band(item, "ebay", "GB")).rejects.toThrow();
     expect(create.mock.calls.length).toBeLessThanOrEqual(5);
   });
 
@@ -347,20 +347,39 @@ describe("in Australia", () => {
     expect(band.currency).toBe("AUD");
   });
 
-  it("searches Vinted's Australian site and, because Vinted ships between the two, the UK one", async () => {
-    const prompt = buildValuationPrompt(item, "vinted", "AU");
-    expect(prompt).toContain("vinted.com.au");
-    expect(prompt).toContain("vinted.co.uk is a comparable for an Australian seller too");
-    expect(listingUrl("https://www.vinted.com.au/items/12345-jacket", "vinted", "AU")).toBeDefined();
-    expect(listingUrl("https://www.vinted.co.uk/items/12345-jacket", "vinted", "AU")).toBeDefined();
+  it("searches Vinted's Australian and UK sites side by side, one search each", async () => {
+    create.mockClear();
     await askingPriceProvider.band(item, "vinted", "AU");
-    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["vinted.com.au", "vinted.co.uk"]);
+    const calls = create.mock.calls.map((c) => c[0]);
+    expect(calls).toHaveLength(2);
+    expect(calls.map((c) => c.tools[0].allowed_domains)).toEqual([["vinted.com.au"], ["vinted.co.uk"]]);
+    // Both are searched from Australia, for an Australian seller, in dollars.
+    for (const c of calls) {
+      expect(c.tools[0].user_location.country).toBe("AU");
+      expect(c.messages[0].content).toContain("Prices are in AUD");
+    }
+    expect(calls[1].messages[0].content).toContain("converted from GBP");
+    expect(listingUrl("https://www.vinted.co.uk/items/12345-jacket", "vinted", "AU")).toBeUndefined();
   });
 
-  it("lets a UK Vinted seller see Australian listings too", async () => {
+  it("gives a UK Vinted seller the Australian corridor too", async () => {
+    create.mockClear();
     await askingPriceProvider.band(item, "vinted", "GB");
-    expect(create.mock.calls.at(-1)![0].tools[0].allowed_domains).toEqual(["vinted.co.uk", "vinted.com.au"]);
+    expect(create.mock.calls.map((c) => c[0].tools[0].allowed_domains)).toEqual([["vinted.co.uk"], ["vinted.com.au"]]);
   });
+
+  it("searches eBay's Australian site alone", async () => {
+    create.mockClear();
+    await askingPriceProvider.band(item, "ebay", "AU");
+    expect(create.mock.calls).toHaveLength(1);
+    expect(create.mock.calls[0][0].tools[0].allowed_domains).toEqual(["ebay.com.au"]);
+  });
+
+  it("defaults the currency to AUD", () => {
+    const band = coerceBand({ low: 20, high: 40, comparables: [] }, "depop", "AU");
+    expect(band.currency).toBe("AUD");
+  });
+
 });
 
 describe("searchActivity", () => {
@@ -386,10 +405,39 @@ describe("searchActivity", () => {
     });
   });
 
-  it("allows a third search when a platform spans two sites", async () => {
-    await askingPriceProvider.band(item, "vinted", "AU");
-    expect(create.mock.calls.at(-1)![0].tools[0].max_uses).toBe(3);
-    await askingPriceProvider.band(item, "ebay", "AU");
-    expect(create.mock.calls.at(-1)![0].tools[0].max_uses).toBe(2);
+});
+
+describe("mergeBands", () => {
+  const comp = (n: number, host = "vinted.com.au") => ({ title: `c${n}`, price: 10 + n, currency: "AUD", platform: "vinted" as const, url: `https://www.${host}/items/${n}-x` });
+  const band = (low: number, high: number, comps: number, confidence: "low" | "medium" | "high" = "medium"): Parameters<typeof mergeBands>[0] => ({
+    low, high, currency: "AUD", confidence, sell_likelihood: "medium", reasoning: `r${low}`, comparables: Array.from({ length: comps }, (_, i) => comp(i)),
+  });
+  const note = "Vinted UK (ships to Australia):";
+
+  it("keeps the home band when home has enough", () => {
+    const m = mergeBands(band(20, 40, 3), band(10, 15, 5), note);
+    expect([m.low, m.high]).toEqual([20, 40]);
+    expect(m.comparables).toHaveLength(5);
+    expect(m.reasoning).toBe("r20");
+  });
+
+  it("uses the corridor band when home found nothing", () => {
+    const m = mergeBands(band(15, 30, 0, "low"), band(22, 38, 4), note);
+    expect([m.low, m.high]).toEqual([22, 38]);
+    expect(m.confidence).toBe("medium");
+    expect(m.reasoning).toBe(`${note} r22`);
+  });
+
+  it("widens a thin home band with the corridor", () => {
+    const m = mergeBands(band(20, 25, 1, "low"), band(15, 40, 3, "high"), note);
+    expect([m.low, m.high]).toEqual([15, 40]);
+    expect(m.confidence).toBe("high");
+    expect(m.comparables[0].title).toBe("c0");
+    expect(m.reasoning).toContain(note);
+  });
+
+  it("ignores an empty corridor", () => {
+    const m = mergeBands(band(20, 25, 1, "low"), band(0, 0, 0), note);
+    expect([m.low, m.high, m.confidence]).toEqual([20, 25, "low"]);
   });
 });

@@ -22,11 +22,22 @@ export interface MarketPresence {
   /** The same shape, written out for the prompt: "https://…/items/<id>-…". */
   itemUrlExample: string;
   /**
-   * Anything the search should know about this platform in this market that
-   * the domains alone do not say — e.g. that buyers here can also buy from
-   * another country's edition, so its listings are comparables too.
+   * Anything the search should know about this site that the domains alone
+   * do not say. Appended to the prompt.
    */
   searchNote?: string;
+  /**
+   * Another market's edition of this platform whose listings are comparables
+   * here too, because the platform ships between the two. Searched in
+   * parallel with the home site and folded in when home is thin.
+   */
+  corridor?: {
+    market: Market;
+    /** Tells that search whose seller it is pricing for, and in what currency. */
+    note: string;
+    /** Prefixes the merged reasoning when corridor listings shaped the band. */
+    reasoningPrefix: string;
+  };
 }
 
 export interface PlatformMetadata {

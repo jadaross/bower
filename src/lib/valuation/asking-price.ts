@@ -1,6 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { Comparable, Platform, PriceBand, ValuationItem } from "@/lib/types";
-import { platformMetadata, presence } from "@/platforms";
+import { platformMetadata, presence, type MarketPresence } from "@/platforms";
 import { MARKETS, type Market } from "@/lib/markets";
 import { MODELS, anthropicClient } from "@/lib/llm/client";
 import { jsonSchemaFormat, parseStructuredContent } from "@/lib/llm/structured";
@@ -19,16 +19,13 @@ import type { ValuationProvider } from "./provider";
  * was allowed to "fall back to other UK marketplaces", and the eBay band came
  * back with five Vinted listings under an eBay heading.
  */
-function webSearchTool(platform: Platform, market: Market): Anthropic.Messages.WebSearchTool20260209 {
-  const domains = presence(platform, market).searchDomains;
+function webSearchTool(site: MarketPresence, market: Market): Anthropic.Messages.WebSearchTool20260209 {
   return {
     type: "web_search_20260209",
     name: "web_search",
-    // Two searches for one site; one more when the platform spans two, so
-    // the second site is not squeezed out by the first.
-    max_uses: domains.length > 1 ? 3 : 2,
+    max_uses: 2,
     user_location: { type: "approximate", country: MARKETS[market].searchCountry },
-    allowed_domains: [...domains],
+    allowed_domains: [...site.searchDomains],
   };
 }
 
@@ -62,9 +59,13 @@ export function searchActivity(contents: Anthropic.Messages.ContentBlock[][]): {
 
 /** A URL that opens one listing on this platform in this market, or undefined. */
 export function listingUrl(url: unknown, platform: Platform, market: Market): string | undefined {
+  return listingUrlOn(url, presence(platform, market));
+}
+
+function listingUrlOn(url: unknown, site: MarketPresence): string | undefined {
   if (typeof url !== "string") return undefined;
   const trimmed = url.trim();
-  return presence(platform, market).itemUrl.test(trimmed) ? trimmed : undefined;
+  return site.itemUrl.test(trimmed) ? trimmed : undefined;
 }
 
 export function describeItem(item: ValuationItem): string {
@@ -73,9 +74,9 @@ export function describeItem(item: ValuationItem): string {
     .join(" ");
 }
 
-export function buildValuationPrompt(item: ValuationItem, platform: Platform, market: Market): string {
+export function buildValuationPrompt(item: ValuationItem, platform: Platform, market: Market, site?: MarketPresence): string {
   const meta = platformMetadata[platform];
-  const here = presence(platform, market);
+  const here = site ?? presence(platform, market);
   const { name: country, currency, symbol } = MARKETS[market];
   return `You are pricing a secondhand clothing item for a seller in the ${country} who is about to list it on ${meta.name}.
 
@@ -125,8 +126,9 @@ interface RawBand {
 
 const CONFIDENCE = new Set(["low", "medium", "high"]);
 
-export function coerceBand(raw: RawBand, platform: Platform, market: Market): PriceBand {
+export function coerceBand(raw: RawBand, platform: Platform, market: Market, site?: MarketPresence): PriceBand {
   const currency = MARKETS[market].currency;
+  const on = site ?? presence(platform, market);
   if (typeof raw.low !== "number" || typeof raw.high !== "number") {
     throw new Error("Valuation response missing a numeric low/high");
   }
@@ -142,7 +144,7 @@ export function coerceBand(raw: RawBand, platform: Platform, market: Market): Pr
         .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
         .filter((c) => typeof c.price === "number" && typeof c.title === "string")
         .flatMap((c): Comparable[] => {
-          const url = listingUrl(c.url, platform, market);
+          const url = listingUrlOn(c.url, on);
           if (!url) return [];
           return [
             {
@@ -186,55 +188,113 @@ const MAX_RESUMES = 3;
  * also makes the model consolidate its tool calls instead of trickling them.
  */
 function request(
-  platform: Platform,
+  site: MarketPresence,
   market: Market
 ): Omit<Anthropic.Messages.MessageCreateParamsNonStreaming, "messages"> {
   return {
     model: MODELS.valuation,
     max_tokens: 4000,
     output_config: { effort: "low", format: jsonSchemaFormat(priceBandSchema) },
-    tools: [webSearchTool(platform, market)],
+    tools: [webSearchTool(site, market)],
+  };
+}
+
+/**
+ * One search of one site. Named for the trace as `valuate:<platform>` for the
+ * seller's own edition and `valuate:<platform>@<market>` for a corridor.
+ */
+async function searchSite(
+  item: ValuationItem,
+  platform: Platform,
+  market: Market,
+  site: MarketPresence,
+  label: string
+): Promise<PriceBand> {
+  const client = anthropicClient();
+  const messages: Anthropic.Messages.MessageParam[] = [
+    { role: "user", content: buildValuationPrompt(item, platform, market, site) },
+  ];
+
+  const generation = beginGeneration({
+    name: label,
+    model: MODELS.valuation,
+    input: { item, platform, market, site: site.searchDomains },
+    modelParameters: { max_tokens: 4000 },
+  });
+
+  try {
+    const params = request(site, market);
+    let response = await client.messages.create({ ...params, messages });
+    const turns = [response.content];
+
+    for (let i = 0; response.stop_reason === "pause_turn" && i < MAX_RESUMES; i++) {
+      messages.push({ role: "assistant", content: response.content });
+      response = await client.messages.create({ ...params, messages });
+      turns.push(response.content);
+    }
+
+    if (response.stop_reason === "refusal") {
+      throw new Error("Valuation request was declined by the model");
+    }
+
+    const band = coerceBand(parseStructuredContent<RawBand>(response.content), platform, market, site);
+    generation?.finish({
+      output: { ...band, search: searchActivity(turns) },
+      usage: { input: response.usage?.input_tokens, output: response.usage?.output_tokens },
+    });
+    return band;
+  } catch (err) {
+    generation?.fail(err);
+    throw err;
+  }
+}
+
+/** Enough comparables to stand on their own; below this the corridor fills in. */
+const ENOUGH = 3;
+
+/**
+ * Fold a corridor search into the home one. Home comparables come first and
+ * the home band stands when it has enough behind it; otherwise the corridor
+ * widens it, or replaces it when home found nothing at all. The corridor
+ * band was asked for in the seller's currency, so the numbers line up.
+ */
+export function mergeBands(home: PriceBand, away: PriceBand, awayNote: string): PriceBand {
+  const comparables = [...home.comparables, ...away.comparables].slice(0, 5);
+  if (home.comparables.length >= ENOUGH || away.comparables.length === 0) {
+    return { ...home, comparables };
+  }
+  if (home.comparables.length === 0) {
+    return { ...away, comparables, reasoning: `${awayNote} ${away.reasoning}`.trim() };
+  }
+  return {
+    ...home,
+    low: Math.min(home.low, away.low),
+    high: Math.max(home.high, away.high),
+    confidence: away.comparables.length >= ENOUGH ? away.confidence : home.confidence,
+    comparables,
+    reasoning: `${home.reasoning} ${awayNote} ${away.reasoning}`.trim(),
   };
 }
 
 export const askingPriceProvider: ValuationProvider = {
   async band(item: ValuationItem, platform: Platform, market: Market): Promise<PriceBand> {
-    const client = anthropicClient();
-    const messages: Anthropic.Messages.MessageParam[] = [
-      { role: "user", content: buildValuationPrompt(item, platform, market) },
-    ];
+    const home = presence(platform, market);
+    const corridor = home.corridor;
+    if (!corridor) return searchSite(item, platform, market, home, `valuate:${platform}`);
 
-    const generation = beginGeneration({
-      name: `valuate:${platform}`,
-      model: MODELS.valuation,
-      input: { item, platform, market },
-      modelParameters: { max_tokens: 4000 },
-    });
-
-    try {
-      const params = request(platform, market);
-      let response = await client.messages.create({ ...params, messages });
-      const turns = [response.content];
-
-      for (let i = 0; response.stop_reason === "pause_turn" && i < MAX_RESUMES; i++) {
-        messages.push({ role: "assistant", content: response.content });
-        response = await client.messages.create({ ...params, messages });
-        turns.push(response.content);
-      }
-
-      if (response.stop_reason === "refusal") {
-        throw new Error("Valuation request was declined by the model");
-      }
-
-      const band = coerceBand(parseStructuredContent<RawBand>(response.content), platform, market);
-      generation?.finish({
-        output: { ...band, search: searchActivity(turns) },
-        usage: { input: response.usage?.input_tokens, output: response.usage?.output_tokens },
-      });
-      return band;
-    } catch (err) {
-      generation?.fail(err);
-      throw err;
+    // Two sites, two searches, side by side — the model runs one query per
+    // call at low effort whatever it is told, so a second site has to be a
+    // second call. The corridor is best-effort: if it fails, home stands.
+    const away = presence(platform, corridor.market);
+    const [homeResult, awayResult] = await Promise.allSettled([
+      searchSite(item, platform, market, home, `valuate:${platform}`),
+      searchSite(item, platform, market, { ...away, searchNote: corridor.note }, `valuate:${platform}@${corridor.market}`),
+    ]);
+    if (homeResult.status === "rejected") {
+      if (awayResult.status === "fulfilled") return { ...awayResult.value, reasoning: `${corridor.note} ${awayResult.value.reasoning}`.trim() };
+      throw homeResult.reason;
     }
+    if (awayResult.status === "rejected") return homeResult.value;
+    return mergeBands(homeResult.value, awayResult.value, corridor.reasoningPrefix);
   },
 };

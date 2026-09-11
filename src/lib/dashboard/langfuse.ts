@@ -139,7 +139,8 @@ function toGeneration(o: RawObservation, io: boolean): Generation {
     projectId: o.projectId,
     name,
     route: routeOf(name),
-    platform: name.startsWith("valuate:") ? name.slice("valuate:".length) : null,
+    // "valuate:vinted@GB" is the corridor half of a Vinted check; it is still Vinted.
+    platform: name.startsWith("valuate:") ? name.slice("valuate:".length).replace(/@.*$/, "") : null,
     startTime: o.startTime,
     endTime: o.endTime,
     level: o.level ?? "DEFAULT",
