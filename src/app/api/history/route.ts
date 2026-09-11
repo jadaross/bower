@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/auth";
-import { listHistory } from "@/lib/history";
+import { clearHistory, listHistory } from "@/lib/history";
 
 export const runtime = "nodejs";
 
@@ -18,6 +18,17 @@ export const GET = withAuth(async (request, user) => {
       before,
     });
     return Response.json({ items });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return Response.json({ error: message }, { status: 500 });
+  }
+});
+
+/** Clears the caller's history. Text only was ever kept, so nothing else to remove. */
+export const DELETE = withAuth(async (_request, user) => {
+  try {
+    await clearHistory(user.token, user.id);
+    return Response.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });

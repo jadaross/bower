@@ -22,20 +22,25 @@ export interface Profile {
   preferredPlatform: Platform;
   /** Opt-in facts about the seller a listing may state. See `seller-notes.ts`. */
   sellerNotes: SellerNote[];
+  /** Generations this month. */
   allowance: AllowanceState;
+  /** Deep researches this month. */
+  searches: AllowanceState;
 }
 
 interface ProfileRow {
   enabled_platforms: Platform[];
   preferred_platform: Platform;
   seller_notes: string[] | null;
-  allowance_used: number;
-  allowance_limit: number | null;
+  reads_used: number;
+  reads_limit: number | null;
+  searches_used: number;
+  searches_limit: number | null;
   allowance_period_start: string;
 }
 
 const SELECT =
-  "enabled_platforms, preferred_platform, seller_notes, allowance_used, allowance_limit, allowance_period_start";
+  "enabled_platforms, preferred_platform, seller_notes, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
 
 function toProfile(row: ProfileRow): Profile {
   const periodStart = new Date(row.allowance_period_start);
@@ -48,11 +53,8 @@ function toProfile(row: ProfileRow): Profile {
     enabledPlatforms: row.enabled_platforms,
     preferredPlatform: row.preferred_platform,
     sellerNotes: SELLER_NOTES.filter((n) => (row.seller_notes ?? []).includes(n)),
-    allowance: {
-      used: row.allowance_used,
-      limit: row.allowance_limit,
-      resetsAt: resets.toISOString(),
-    },
+    allowance: { used: row.reads_used, limit: row.reads_limit, resetsAt: resets.toISOString() },
+    searches: { used: row.searches_used, limit: row.searches_limit, resetsAt: resets.toISOString() },
   };
 }
 

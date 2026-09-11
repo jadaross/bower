@@ -34,7 +34,7 @@ function refundOnError(input: ReadableStream<string>, userId: string): ReadableS
         if (done) controller.close();
         else controller.enqueue(value);
       } catch (err) {
-        await refundAllowance(userId);
+        await refundAllowance(userId, "read");
         if (err instanceof AnalyseRejected) {
           controller.enqueue({ rejected: err.subject });
           controller.close();
@@ -74,12 +74,12 @@ export const POST = withAuth(async (request, user) => {
   // and only after validation, so a malformed request costs nothing.
   let spend;
   try {
-    spend = await spendAllowance(user.id);
+    spend = await spendAllowance(user.id, "read");
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
   }
-  if (!spend.allowed) return allowanceExhausted(spend);
+  if (!spend.allowed) return allowanceExhausted(spend, "read");
 
   const sessionId = request.headers.get("x-bower-session") ?? undefined;
   // From the profile, never the body: a client that could name its own seller
@@ -99,7 +99,7 @@ export const POST = withAuth(async (request, user) => {
       },
     });
   } catch (err) {
-    await refundAllowance(user.id);
+    await refundAllowance(user.id, "read");
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Analysis failed: ${message}` }, { status: 500 });
   }

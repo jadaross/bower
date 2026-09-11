@@ -22,8 +22,10 @@ const {
 const row = {
   enabled_platforms: ["vinted", "depop"],
   preferred_platform: "depop",
-  allowance_used: 4,
-  allowance_limit: 20,
+  reads_used: 4,
+  reads_limit: 20,
+  searches_used: 1,
+  searches_limit: 3,
   allowance_period_start: "2026-08-01T00:00:00+00:00",
 };
 
@@ -42,6 +44,7 @@ describe("getProfile", () => {
       preferredPlatform: "depop",
       sellerNotes: [],
       allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
+      searches: { used: 1, limit: 3, resetsAt: "2026-09-01T00:00:00.000Z" },
     });
   });
 

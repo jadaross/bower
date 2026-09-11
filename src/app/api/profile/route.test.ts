@@ -27,6 +27,7 @@ const profile = {
   preferredPlatform: "depop",
   sellerNotes: [],
   allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
+  searches: { used: 1, limit: 3, resetsAt: "2026-09-01T00:00:00.000Z" },
 };
 
 function get() {
@@ -73,6 +74,7 @@ describe("GET /api/profile", () => {
       preferred_platform: "depop",
       seller_notes: [],
       allowance: { used: 4, limit: 20, resets_at: "2026-09-01T00:00:00.000Z" },
+      searches: { used: 1, limit: 3, resets_at: "2026-09-01T00:00:00.000Z" },
     });
   });
 

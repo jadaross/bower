@@ -106,3 +106,13 @@ export async function listHistory(
   if (error) throw new Error(error.message);
   return (data ?? []) as HistoryItem[];
 }
+
+/**
+ * Clears the caller's whole history. As the caller, so RLS and the delete
+ * policy (migration 0012) scope it to their own rows; `userId` narrows it
+ * again explicitly, belt and braces, as the profile writes do.
+ */
+export async function clearHistory(token: string, userId: string): Promise<void> {
+  const { error } = await userClient(token).from(TABLE).delete().eq("user_id", userId);
+  if (error) throw new Error(error.message);
+}

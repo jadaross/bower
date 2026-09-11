@@ -63,7 +63,7 @@ beforeEach(() => {
 describe("POST /api/analyse — the meter", () => {
   it("reserves one unit before the model is called", async () => {
     await POST(post({ images: [PHOTO], tone: "casual" }));
-    expect(spendAllowance).toHaveBeenCalledWith("test-user-id");
+    expect(spendAllowance).toHaveBeenCalledWith("test-user-id", "read");
     expect(spendAllowance.mock.invocationCallOrder[0]).toBeLessThan(
       analyseListingStream.mock.invocationCallOrder[0]
     );
@@ -87,7 +87,7 @@ describe("POST /api/analyse — the meter", () => {
     analyseListingStream.mockReturnValue(failingStream());
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     await expect(readStringStream(res)).rejects.toThrow();
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
   });
 
   it("refunds a rejected read and tells the client why", async () => {
@@ -102,7 +102,7 @@ describe("POST /api/analyse — the meter", () => {
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     expect(res.status).toBe(200);
     await expect(readStringStream(res)).rejects.toThrow(StreamRejectedError);
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
   });
 
   it("does not refund a read that completed", async () => {

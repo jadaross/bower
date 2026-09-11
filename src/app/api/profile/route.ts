@@ -20,10 +20,17 @@ function body(profile: Profile) {
     enabled_platforms: profile.enabledPlatforms,
     preferred_platform: profile.preferredPlatform,
     seller_notes: profile.sellerNotes,
+    // `allowance` is the generations meter, kept under this name so an older
+    // app still decodes; `searches` is the deep-research meter.
     allowance: {
       used: profile.allowance.used,
       limit: profile.allowance.limit,
       resets_at: profile.allowance.resetsAt,
+    },
+    searches: {
+      used: profile.searches.used,
+      limit: profile.searches.limit,
+      resets_at: profile.searches.resetsAt,
     },
   };
 }

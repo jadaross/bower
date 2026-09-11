@@ -148,12 +148,12 @@ describe("enabled platforms", () => {
 describe("the Allowance meter", () => {
   it("spends a unit for the authenticated caller", async () => {
     await POST(post({ item }));
-    expect(spendAllowance).toHaveBeenCalledWith("test-user-id");
+    expect(spendAllowance).toHaveBeenCalledWith("test-user-id", "search");
   });
 
   it("reports the remaining Allowance alongside the valuation", async () => {
     const body = await (await POST(post({ item }))).json();
-    expect(body.allowance).toEqual({ used: 3, limit: 20, resets_at: "2026-09-01T00:00:00+00:00" });
+    expect(body.searches).toEqual({ used: 3, limit: 20, resets_at: "2026-09-01T00:00:00+00:00" });
   });
 
   it("402s with the reset time when the Allowance is exhausted", async () => {
@@ -162,6 +162,7 @@ describe("the Allowance meter", () => {
     expect(res.status).toBe(402);
     expect(await res.json()).toMatchObject({
       code: "allowance_exhausted",
+      kind: "search",
       allowance: { used: 20, limit: 20, resets_at: "2026-09-01T00:00:00+00:00" },
     });
   });
@@ -189,7 +190,7 @@ describe("the Allowance meter", () => {
   it("refunds the unit when the valuation fails", async () => {
     valuate.mockRejectedValue(new Error("search is down"));
     await POST(post({ item }));
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "search");
   });
 
   it("does not refund when the valuation succeeds", async () => {

@@ -53,12 +53,12 @@ export const POST = withAuth(async (request, user) => {
   // failures above cost nothing because they never get this far.
   let spend;
   try {
-    spend = await spendAllowance(user.id);
+    spend = await spendAllowance(user.id, "search");
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
   }
-  if (!spend.allowed) return allowanceExhausted(spend);
+  if (!spend.allowed) return allowanceExhausted(spend, "search");
 
   try {
     const valuation = await valuate(item, platforms);
@@ -75,11 +75,12 @@ export const POST = withAuth(async (request, user) => {
     return Response.json({
       ...valuation,
       recommendation,
-      allowance: { used: spend.used, limit: spend.limit, resets_at: spend.resetsAt },
+      // The deep-research meter after this spend.
+      searches: { used: spend.used, limit: spend.limit, resets_at: spend.resetsAt },
     });
   } catch (err) {
     // A valuation that failed must not cost the user anything (#9).
-    await refundAllowance(user.id);
+    await refundAllowance(user.id, "search");
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Valuation failed: ${message}` }, { status: 500 });
   }

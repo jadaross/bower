@@ -11,9 +11,12 @@ import { serviceClient } from "@/lib/supabase";
  * translation between that function and an HTTP response.
  */
 
+/** The two meters: a generation ("read") and a deep research ("search"). */
+export type AllowanceKind = "read" | "search";
+
 export interface AllowanceState {
   used: number;
-  /** Credits per month. Null means no limit (the owner's account). */
+  /** Per month. Null means no limit (the owner's account). */
   limit: number | null;
   /** When the period rolls over and the meter goes back to zero. ISO-8601. */
   resetsAt: string;
@@ -34,8 +37,8 @@ interface AllowanceRow {
  * Reserves one unit. Call this BEFORE the work, not after: reserving is what
  * makes the race safe. A caller whose work then fails must call `refund`.
  */
-export async function spendAllowance(userId: string): Promise<SpendResult> {
-  const { data, error } = await serviceClient().rpc("spend_allowance", { p_user_id: userId });
+export async function spendAllowance(userId: string, kind: AllowanceKind): Promise<SpendResult> {
+  const { data, error } = await serviceClient().rpc("spend_allowance", { p_user_id: userId, p_kind: kind });
 
   if (error) throw new Error(`Allowance check failed: ${error.message}`);
 
@@ -45,7 +48,7 @@ export async function spendAllowance(userId: string): Promise<SpendResult> {
   //
   // Cast because the client is untyped: there are no generated database types
   // in the repo, so `rpc` cannot know this function's return shape. The shape
-  // is pinned by `supabase/migrations/0003_allowance_spend_and_refund.sql`.
+  // is pinned by `supabase/migrations/0011_two_meters.sql`.
   const row = (data as AllowanceRow[] | null)?.[0];
   if (!row) throw new Error(`No profile for user ${userId}`);
 
@@ -62,17 +65,20 @@ export async function spendAllowance(userId: string): Promise<SpendResult> {
  * refund must not turn a failed valuation into a second error for the caller,
  * so it is logged rather than thrown. The worst case is one unit lost.
  */
-export async function refundAllowance(userId: string): Promise<void> {
-  const { error } = await serviceClient().rpc("refund_allowance", { p_user_id: userId });
+export async function refundAllowance(userId: string, kind: AllowanceKind): Promise<void> {
+  const { error } = await serviceClient().rpc("refund_allowance", { p_user_id: userId, p_kind: kind });
   if (error) console.error(`Failed to refund an Allowance unit for ${userId}: ${error.message}`);
 }
 
 /** 402 with everything the client needs to explain the wall it just hit. */
-export function allowanceExhausted(state: AllowanceState): Response {
+export function allowanceExhausted(state: AllowanceState, kind: AllowanceKind): Response {
   return Response.json(
     {
-      error: "Your Allowance for this period is used up",
+      error: kind === "read"
+        ? "Your generations for this month are used up"
+        : "Your deep researches for this month are used up",
       code: "allowance_exhausted",
+      kind,
       allowance: { used: state.used, limit: state.limit, resets_at: state.resetsAt },
     },
     { status: 402 }

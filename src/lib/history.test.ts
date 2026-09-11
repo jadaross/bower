@@ -8,14 +8,16 @@ const select = vi.fn(() => ({ order }));
 const insert = vi.fn(() => Promise.resolve({ error: null }));
 const eqUpdate = vi.fn(() => Promise.resolve({ error: null }));
 const update = vi.fn(() => ({ eq: eqUpdate }));
-const from = vi.fn(() => ({ select, insert, update }));
+const eqDelete = vi.fn(() => Promise.resolve({ error: null }));
+const del = vi.fn(() => ({ eq: eqDelete }));
+const from = vi.fn(() => ({ select, insert, update, delete: del }));
 const userClient = vi.fn(() => ({ from }));
 vi.mock("@/lib/supabase", () => ({ userClient }));
 
-const { recordItem, recordValuation, listHistory } = await import("./history");
+const { recordItem, recordValuation, listHistory, clearHistory } = await import("./history");
 
 beforeEach(() => {
-  [limit, order, select, insert, eqUpdate, update, from, userClient].forEach((m) => m.mockClear());
+  [limit, order, select, insert, eqUpdate, update, eqDelete, del, from, userClient].forEach((m) => m.mockClear());
 });
 
 describe("recordItem", () => {
@@ -62,5 +64,19 @@ describe("listHistory", () => {
     expect(order).toHaveBeenCalledWith("created_at", { ascending: false });
     expect(limit).toHaveBeenCalledWith(10);
     expect(rows).toEqual([{ id: "h1", title: "Jacket" }]);
+  });
+});
+
+describe("clearHistory", () => {
+  it("deletes the caller's rows, as the caller, narrowed to their id", async () => {
+    await clearHistory("token-abc", "user-1");
+    expect(userClient).toHaveBeenCalledWith("token-abc");
+    expect(del).toHaveBeenCalled();
+    expect(eqDelete).toHaveBeenCalledWith("user_id", "user-1");
+  });
+
+  it("throws when the delete is refused", async () => {
+    eqDelete.mockResolvedValueOnce({ error: { message: "nope" } });
+    await expect(clearHistory("token-abc", "user-1")).rejects.toThrow("nope");
   });
 });
