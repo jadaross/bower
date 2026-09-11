@@ -68,7 +68,10 @@ struct HistoryScreen: View {
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
             }
             Spacer(minLength: 8)
-            Text(HistoryFormat.price(item)).font(BowerFont.mono(13)).foregroundStyle(theme.text)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(HistoryFormat.price(item)).font(BowerFont.mono(13)).foregroundStyle(theme.text)
+                Text(HistoryFormat.priceKind(item)).font(BowerFont.mono(9)).tracking(0.8).foregroundStyle(theme.muted)
+            }
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
         }
@@ -108,6 +111,8 @@ private struct HistoryDetail: View {
                     }
                 }
 
+                prices
+
                 if let listing = item.listing {
                     listingCard(listing.asPlatformListing)
                 }
@@ -128,10 +133,6 @@ private struct HistoryDetail: View {
                                 .padding(.vertical, 12).padding(.horizontal, 16)
                             }
                         }
-                        if let rec = v.recommendation {
-                            Text("Ask £\(trim(rec.listAt)) on \(rec.platform.name).")
-                                .font(BowerFont.ui(12)).foregroundStyle(theme.muted).padding(.leading, 4)
-                        }
                     }
                 }
             }
@@ -139,6 +140,43 @@ private struct HistoryDetail: View {
         }
         .background(theme.bg.ignoresSafeArea())
         .environment(\.bower, theme)
+    }
+
+    /// What the photos suggested, and, if a search ran, what to ask. The two
+    /// are different things (ADR-0005) and are labelled as such.
+    private var prices: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let rec = item.valuation?.recommendation {
+                VStack(alignment: .leading, spacing: 4) {
+                    Kicker("Ask")
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("£\(trim(rec.listAt))").font(BowerFont.serifUpright(40)).foregroundStyle(theme.text).monospacedDigit()
+                        HStack(spacing: 6) {
+                            Text("on")
+                            Circle().fill(rec.platform.tint).frame(width: 7, height: 7)
+                            Text(rec.platform.name)
+                        }
+                        .font(BowerFont.ui(15)).foregroundStyle(theme.text)
+                    }
+                }
+                if let lo = item.priceMin, let hi = item.priceMax {
+                    Text("Guess from the photos was £\(trim(lo)) to £\(trim(hi)).")
+                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                }
+            } else if let lo = item.priceMin, let hi = item.priceMax {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("GUESS FROM THE PHOTOS")
+                        .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
+                        .foregroundStyle(theme.text)
+                        .padding(.vertical, 3).padding(.horizontal, 7)
+                        .background(theme.pollen.opacity(0.28))
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                    PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32)
+                    Text("No price search was run.")
+                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                }
+            }
+        }
     }
 
     /// The listing as it was first seen — every field, each copyable.
@@ -203,6 +241,13 @@ private struct HistoryDetail: View {
 enum HistoryFormat {
     /// The price shown on a row: the recommendation if a search ran, else the
     /// first searched band, else the photo-only guess.
+    /// What the row's price is: the ask from a search, the searched range, or the guess.
+    static func priceKind(_ item: HistoryItem) -> String {
+        if item.valuation?.recommendation != nil { return "ASK" }
+        if item.valuation?.perPlatform.values.first != nil { return "LISTED" }
+        return "GUESS"
+    }
+
     static func price(_ item: HistoryItem) -> String {
         if let rec = item.valuation?.recommendation { return "£\(Int(rec.listAt.rounded()))" }
         if let band = item.valuation?.perPlatform.values.first {
