@@ -96,8 +96,8 @@ the Valuation, account deletion, 222 tests. Client: eight screens — the dark w
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;
-with photos in, home shows a checklist of the angles not yet covered and pins
-"Write it" to the foot. Local notifications only (`Notifications.swift`): a market
+with photos in, home shows the pile over one line of advice and pins "Write it"
+to the foot (or "View listing", once one is written for those photos). Local notifications only (`Notifications.swift`): a market
 check finishing in the background, the meters resetting, one nudge after a
 quiet week. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,

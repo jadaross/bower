@@ -2,8 +2,8 @@ import SwiftUI
 
 /// How bower works, in five pages. Reachable for ever from the ? on Home;
 /// there is no forced tour. Each page carries one thing to look at, not a
-/// paragraph to read: the two numbers, the four angles, the meter a step
-/// spends, the three platforms.
+/// paragraph to read: the four angles, the meter a step spends, the three
+/// platforms, and — last, once the words mean something — the two numbers.
 struct HelpSheet: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -25,11 +25,6 @@ struct HelpSheet: View {
     private var steps: [Step] {
         let unlimited = state.reads.limit == nil && state.searches.limit == nil
         return [
-            Step(title: "What you get",
-                 lines: unlimited
-                    ? ["This account has no limit on either."]
-                    : ["Free, every month. Both reset on the 1st.", "A way to get more is coming."],
-                 figure: .meters),
             Step(title: "Photograph the piece",
                  lines: ["Take them now or pick what you already have.", "Up to 5 photos. Four angles matter."],
                  figure: .angles),
@@ -42,6 +37,13 @@ struct HelpSheet: View {
             Step(title: "Copy it across",
                  lines: ["Title, description and every form field has its own copy button.", "Bower never posts for you."],
                  figure: .platforms),
+            // Last, so "listing" and "market check" mean something by the time
+            // they are counted.
+            Step(title: "What you get",
+                 lines: unlimited
+                    ? ["This account has no limit on either."]
+                    : ["Free, every month. Both reset on the 1st."],
+                 figure: .meters),
         ]
     }
 

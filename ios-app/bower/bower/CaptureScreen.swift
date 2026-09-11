@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 /// Home. Empty, it is one big place to tap. With photos in, the pile sits
-/// above one sentence of advice; nothing about the advice is a slot, and the
+/// above one line of advice; nothing about the advice is a slot, and the
 /// user may upload whatever they have. Owns its nav, its scroll and its
 /// pinned footer.
 struct CaptureScreen: View {
@@ -206,7 +206,7 @@ struct CaptureScreen: View {
     private var filledContent: some View {
         VStack(alignment: .leading, spacing: 14) {
             pile
-            tipsCard
+            adviceLine
             if importing { preparing }
             if turnedAway { turnedAwayNote }
             if overLimit { overLimitNote }
@@ -215,56 +215,21 @@ struct CaptureScreen: View {
         .padding(.bottom, 16)
     }
 
-    /// The four things worth photographing, as small boxes with an icon and
-    /// a title. Nothing to tap; More opens the fuller Tips sheet.
-    private static let quickTips: [(SuggestedShot, String)] = [
-        (.front, "Whole piece in frame"),
-        (.back, "The back too"),
-        (.tag, "Size tag, flat and in focus"),
-        (.logo, "Brand label, close in"),
-    ]
-
-    private var tipsCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Kicker("Tips")
-                Spacer()
-                Button("More") { showTips = true }
-                    .buttonStyle(.plain)
-                    .font(BowerFont.ui(12, weight: .semibold))
-                    .foregroundStyle(theme.satin)
-            }
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
-                ForEach(Array(Self.quickTips.enumerated()), id: \.offset) { _, tip in
-                    HStack(spacing: 9) {
-                        Image(systemName: tip.0.symbol)
-                            .font(.system(size: 13))
-                            .foregroundStyle(theme.satin)
-                            .frame(width: 30, height: 30)
-                            .background(theme.subtle)
-                            .clipShape(RoundedRectangle(cornerRadius: 9))
-                        Text(tip.1)
-                            .font(BowerFont.ui(12.5, weight: .medium))
-                            .foregroundStyle(theme.text)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(8)
-                    .background(theme.bg)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.line, lineWidth: 0.5))
-                }
-            }
-            Text("Up to 5 photos.")
-                .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+    /// One line of advice under the pile — a caption, not a tool. It never
+    /// reacts to the photos (nothing tags a photo's angle before the read),
+    /// so it says its piece once and lets the pile have the room.
+    private var adviceLine: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text("Front, back, size tag, brand label. Up to 5 photos.")
+                .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Button("Tips") { showTips = true }
+                .buttonStyle(.plain)
+                .font(BowerFont.ui(12.5, weight: .semibold))
+                .foregroundStyle(theme.satin)
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 15)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(theme.card)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(theme.line, lineWidth: 0.5))
+        .padding(.horizontal, 2)
     }
 
     /// Pinned above the tab bar once there is something to price. With a
