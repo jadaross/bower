@@ -93,10 +93,10 @@ export const POST = withAuth(async (request, user) => {
       platform,
       sellerNotes,
       trace: { userId: user.id, route: "/api/analyse", sessionId },
-      // Best-effort: record the analysed item for the user's history (#41).
-      onResult: (result) => {
-        void recordItem(user.token, { userId: user.id, sessionId, listing: result.listing, preferredPlatform: platform });
-      },
+      // Best-effort, but awaited before the stream closes: record the
+      // analysed item for the user's history (#41). See /api/valuate for why.
+      onResult: (result) =>
+        recordItem(user.token, { userId: user.id, sessionId, listing: result.listing, preferredPlatform: platform }),
     });
   } catch (err) {
     await refundAllowance(user.id, "read");

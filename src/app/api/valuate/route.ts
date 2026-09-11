@@ -63,9 +63,12 @@ export const POST = withAuth(async (request, user) => {
   try {
     const valuation = await valuate(item, platforms);
     const recommendation = recommend(valuation);
-    // Best-effort: attach the valuation to the item's history row (#41).
+    // Best-effort, but awaited: attach the valuation to the item's history
+    // row (#41) before the response goes out. Fired-and-forgotten, the write
+    // raced the function being frozen once the response was sent, and market
+    // checks went missing from History about half the time.
     const sessionId = request.headers.get("x-bower-session") ?? undefined;
-    void recordValuation(user.token, sessionId, {
+    await recordValuation(user.token, sessionId, {
       perPlatform: valuation.perPlatform,
       query: valuation.query,
       recommendation,
