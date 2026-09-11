@@ -311,7 +311,7 @@ private struct PriceSection: View {
                     }
                 }
                 .padding(.top, 14)
-                Text("Up to a few minutes. Fine to lock the screen.")
+                Text("Up to a few minutes.")
                     .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                     .padding(.top, 12)
             }
