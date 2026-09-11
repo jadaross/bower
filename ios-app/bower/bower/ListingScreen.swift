@@ -19,8 +19,6 @@ struct ListingScreen: View {
                     .padding(.horizontal, 22)
                 Hairline().padding(.horizontal, 22)
                 ListingSection(model: model)
-                HStack { Spacer(); NewItemButton { state.newItem() }; Spacer() }
-                    .padding(.horizontal, 22)
             }
         }
         .padding(.top, 6)
@@ -477,6 +475,39 @@ private struct ListingSection: View {
 
             card
 
+            // Nudge it — a few one-tap rewrites under a name, before the user is
+            // sent off to post. Tone folded in here; a separate control was
+            // doing the same job.
+            VStack(alignment: .leading, spacing: 9) {
+                HStack {
+                    Kicker("Rewrite it")
+                    Spacer(minLength: 0)
+                    if !model.chips.isEmpty {
+                        Button("Reset") { model.resetChips() }
+                            .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
+                    }
+                }
+                FlowLayout(spacing: 7) {
+                    ForEach([RefinementChip.shorter, .longer, .serious, .casual]) { chip in
+                        let on = model.chips.contains(chip)
+                        Button { model.toggle(chip) } label: {
+                            HStack(spacing: 5) {
+                                if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
+                                Text(chip.label)
+                            }
+                            .font(BowerFont.ui(12.5, weight: .medium))
+                            .foregroundStyle(on ? .white : theme.text)
+                            .padding(.vertical, 8).padding(.horizontal, 13)
+                            .background(on ? theme.satin : theme.card)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(on ? .clear : theme.line, lineWidth: 0.5))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(.top, 2)
+
             // Straight to where it gets posted. A universal link, so the platform's
             // app opens when installed; iOS puts "◀ bower" in the status bar for
             // the way back. Copy first, then this.
@@ -495,37 +526,9 @@ private struct ListingSection: View {
             }
             .simultaneousGesture(TapGesture().onEnded { model.recordFeedback("opened-platform") })
 
-            // Nudge it — a few one-tap rewrites sitting right under the listing.
-            // Tone folded in here; a separate control was doing the same job.
-            HStack(spacing: 7) {
-                if !model.chips.isEmpty {
-                    Button("Reset") { model.resetChips() }
-                        .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
-                }
-                Spacer(minLength: 0)
-            }
-            FlowLayout(spacing: 7) {
-                ForEach([RefinementChip.shorter, .longer, .serious, .casual]) { chip in
-                    let on = model.chips.contains(chip)
-                    Button { model.toggle(chip) } label: {
-                        HStack(spacing: 5) {
-                            if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
-                            Text(chip.label)
-                        }
-                        .font(BowerFont.ui(12.5, weight: .medium))
-                        .foregroundStyle(on ? .white : theme.text)
-                        .padding(.vertical, 8).padding(.horizontal, 13)
-                        .background(on ? theme.satin : theme.card)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(on ? .clear : theme.line, lineWidth: 0.5))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-
             if model.current != nil {
                 HStack(spacing: 12) {
-                    Text("Was this right?").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    Text("How's the listing?").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                     Spacer(minLength: 0)
                     Button { model.thumb(up: true) } label: {
                         Image(systemName: model.thumbed[model.platform] == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
