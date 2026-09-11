@@ -5,7 +5,7 @@
 # number it has already seen. Uses the Apple ID Xcode is signed into, and
 # creates or renews the distribution certificate and profile as needed.
 #
-#   ./scripts/upload.sh          # bump build, archive, upload
+#   ./scripts/upload.sh          # bump build, archive, upload, distribute to every group
 #
 # With "Enable automatic distribution" on the TestFlight group, the build
 # reaches testers the moment it finishes processing — usually minutes.
@@ -70,3 +70,8 @@ cd ../..
 git add ios-app/bower/bower.xcodeproj/project.pbxproj
 git commit -q -m "chore: build $NEXT" && git push -q origin main
 echo "committed and pushed"
+
+# Every build goes to every TestFlight group: internal testers get it the
+# moment it processes; external groups (Friends) need it added and submitted,
+# which scripts/asc.mjs does once App Store Connect has finished processing.
+node scripts/asc.mjs distribute "$NEXT"
