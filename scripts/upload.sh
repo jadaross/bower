@@ -5,7 +5,9 @@
 # number it has already seen. Uses the Apple ID Xcode is signed into, and
 # creates or renews the distribution certificate and profile as needed.
 #
-#   ./scripts/upload.sh          # bump build, archive, upload, distribute to every group
+#   ./scripts/upload.sh                  # bump build, archive, upload, distribute to every group
+#   ./scripts/upload.sh --internal-only  # the same, but the build stops at the internal
+#                                        # testers (Jada); Friends are not sent it
 #
 # With "Enable automatic distribution" on the TestFlight group, the build
 # reaches testers the moment it finishes processing — usually minutes.
@@ -22,6 +24,14 @@
 # Make one at App Store Connect → Users and Access → Integrations → Team Keys,
 # role "App Manager". The .p8 downloads once; keep it outside the repo.
 set -euo pipefail
+
+INTERNAL_ONLY=0
+for arg in "$@"; do
+  case "$arg" in
+    --internal-only) INTERNAL_ONLY=1 ;;
+    *) echo "unknown argument: $arg" >&2; exit 2 ;;
+  esac
+done
 
 # Load the App Store Connect API key ids if present (gitignored), so uploads
 # authenticate with the key instead of a Xcode account session that expires.
@@ -74,4 +84,10 @@ echo "committed and pushed"
 # Every build goes to every TestFlight group: internal testers get it the
 # moment it processes; external groups (Friends) need it added and submitted,
 # which scripts/asc.mjs does once App Store Connect has finished processing.
-node scripts/asc.mjs distribute "$NEXT"
+# With --internal-only that last step is skipped and the build stays with
+# the internal testers until a later run distributes it.
+if [[ "$INTERNAL_ONLY" == 1 ]]; then
+  echo "build $NEXT: internal testers only (--internal-only); run 'node scripts/asc.mjs distribute $NEXT' to send it to Friends"
+else
+  node scripts/asc.mjs distribute "$NEXT"
+fi
