@@ -29,7 +29,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 npm test         # Vitest — 222 tests across the backend
 ```
 
-The iOS app lives in `ios-app/bower/` and builds with Xcode 26 against iOS 26.5.
+The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
 Prefer the XcodeBuildMCP tools; call `session_show_defaults` first. Launch with
 `-bowerStub` to run every screen on fixtures with no network and no sign-in — DEBUG
 only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,

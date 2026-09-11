@@ -167,7 +167,7 @@ the headers have gone. A read costs one, a search costs one, 40 a month.
 
 ## The client
 
-`ios-app/bower/` — SwiftUI, iOS 26.5, one package dependency (supabase-swift,
+`ios-app/bower/` — SwiftUI, iOS 17 and later, one package dependency (supabase-swift,
 Auth product only). Six screens reached through a bottom tab bar — Home (the capture → listing
 flow), History and Profile (platforms, allowance, account); Scout joins it in
 v2. `BowerAPI` is the only thing that touches the network,
