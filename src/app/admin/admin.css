@@ -146,9 +146,17 @@ body:has(> .admin) { background: #fbf7ef !important; }
 .card .sub { color: var(--muted); font-size: 12.5px; margin: -6px 0 10px; }
 
 .kpis { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 14px; }
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; min-width: 0; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; min-width: 0; container-type: inline-size; }
 .stat .label { font-size: 12.5px; color: var(--muted); }
-.stat .value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.15; }
+.stat .value {
+  font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.15;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* A card this narrow (several stats sharing a row, e.g. the Cost page's
+   seven) can't fit a 28px value like "$0.360" without it bleeding into the
+   next card, so the font itself steps down with the card's own width. */
+@container (max-width: 175px) { .stat .value { font-size: 22px; } }
+@container (max-width: 135px) { .stat .value { font-size: 18px; } }
 .stat .value small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
 .stat .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .stat .hint.good { color: var(--good); } .stat .hint.bad { color: var(--bad); } .stat .hint.warn { color: var(--warn); }

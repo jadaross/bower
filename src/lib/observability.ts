@@ -127,18 +127,35 @@ export function scheduleFlush(): void {
 export async function flushObservability(): Promise<void> {
   try {
     await langfuseSpanProcessor?.forceFlush();
-  } catch {
-    // Losing a trace must never surface to the user.
+  } catch (err) {
+    // Losing a trace must never surface to the user, but it must not vanish
+    // without a trace of its own either — see logTracingFailure.
+    logTracingFailure("flushObservability forceFlush — buffered spans were dropped", err);
   }
   try {
     await _scoreClient?.flush();
-  } catch {
-    // Losing a score must never surface to the user.
+  } catch (err) {
+    logTracingFailure("flushObservability score flush — buffered scores were dropped", err);
   }
 }
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+/**
+ * The invariant here is "tracing never breaks the request," not "tracing
+ * failures are invisible." A swallowed failure that leaves no trace of itself
+ * is undiagnosable (see the bower dashboard incident where an analyse call's
+ * generation never reached Langfuse and nothing said why) — so every catch
+ * that would otherwise lose a generation logs first. Never throws itself.
+ */
+function logTracingFailure(where: string, err: unknown): void {
+  try {
+    console.error(`[observability] ${where}: ${errorMessage(err)}`);
+  } catch {
+    /* logging must never be the thing that breaks a request */
+  }
 }
 
 interface GenerationMeta {
@@ -215,6 +232,7 @@ export async function observeParent<T>(
     );
   } catch (err) {
     if (started) throw err;
+    logTracingFailure(`observeParent("${name}") setup`, err);
     return fn();
   }
 }
@@ -240,7 +258,8 @@ export async function observeGeneration<T>(
         { asType: "generation" }
       );
       try { meta.onTraceId?.(generation.traceId); } catch { /* ignore */ }
-    } catch {
+    } catch (err) {
+      logTracingFailure(`observeGeneration("${meta.name}") setup — this generation will not reach Langfuse`, err);
       return run();
     }
 
@@ -290,7 +309,8 @@ export function beginGeneration(meta: GenerationMeta): GenerationHandle | null {
       )
     );
     try { meta.onTraceId?.(generation.traceId); } catch { /* ignore */ }
-  } catch {
+  } catch (err) {
+    logTracingFailure(`beginGeneration("${meta.name}") setup — this generation will not reach Langfuse`, err);
     return null;
   }
 
@@ -299,16 +319,17 @@ export function beginGeneration(meta: GenerationMeta): GenerationHandle | null {
       try {
         generation.update({ output, usageDetails: usageDetails(usage) });
         generation.end();
-      } catch {
-        /* ignore */
+      } catch (err) {
+        logTracingFailure(`beginGeneration("${meta.name}").finish — output/usage lost, generation left unclosed`, err);
+        try { generation.end(); } catch { /* ignore */ }
       }
     },
     fail(err) {
       try {
         generation.update({ level: "ERROR", statusMessage: errorMessage(err) });
         generation.end();
-      } catch {
-        /* ignore */
+      } catch (endErr) {
+        logTracingFailure(`beginGeneration("${meta.name}").fail`, endErr);
       }
     },
   };
