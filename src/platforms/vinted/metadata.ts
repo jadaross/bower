@@ -1,10 +1,11 @@
 import type { PlatformMetadata } from "../types";
 
-// Vinted operates in the UK and much of Europe, and not in Australia.
+// No seller fees anywhere Vinted operates; buyers pay a protection fee at
+// checkout. Australia launched on 1 July 2026 at vinted.com.au, in dollars.
 export const metadata: PlatformMetadata = {
   id: "vinted",
   name: "Vinted",
-  audience: "Europe · resale-first",
+  audience: "Resale-first · UK, Europe, Australia",
   color: "#09b1ba",
   appUrl: "vinted://",
   markets: {
@@ -15,6 +16,14 @@ export const metadata: PlatformMetadata = {
       searchDomains: ["vinted.co.uk"],
       itemUrl: /^https?:\/\/(?:www\.)?vinted\.co\.uk\/items\/\d+/i,
       itemUrlExample: "https://www.vinted.co.uk/items/<id>-<slug>",
+    },
+    AU: {
+      feeLabel: "0%",
+      feePct: 0,
+      webUrl: "https://www.vinted.com.au/",
+      searchDomains: ["vinted.com.au"],
+      itemUrl: /^https?:\/\/(?:www\.)?vinted\.com\.au\/items\/\d+/i,
+      itemUrlExample: "https://www.vinted.com.au/items/<id>-<slug>",
     },
   },
 };

@@ -9,8 +9,7 @@ recommendation copy, `vinted.co.uk` and `ebay.co.uk` were the search domains,
 the web search was told the user was in Great Britain, and the app wrote `£`
 in front of every number. That was correct for every user until the first
 Australian tester signed up — and then it was confidently wrong for them:
-British prices, from British sites, on a platform that does not exist where
-they live.
+British prices, from British sites.
 
 ## Decision
 
@@ -28,9 +27,12 @@ The Market decides four things and nothing else:
    and the allowed domains, per platform per market
    (`src/platforms/*/metadata.ts` → `markets`).
 3. **Fees** — per platform per market, for the display-only net figure.
-4. **Which platforms exist** — Vinted is absent from `AU`. A move to a market
-   drops any Enabled Platform that does not operate there and moves the
-   preference, in one statement; a check constraint refuses drift.
+4. **Which platforms exist** — all three, in both markets, today (Vinted
+   launched in Australia on 1 July 2026 at `vinted.com.au`). The seam is
+   kept: a move to a market drops any Enabled Platform that does not operate
+   there and moves the preference, in one statement. (Migration 0013 first
+   shipped with a constraint that assumed Vinted was not in Australia; 0014
+   drops it.)
 
 The listing prompts do **not** change with the Market. British English suits
 Australian listings, and only the currency sign in the voice rules follows

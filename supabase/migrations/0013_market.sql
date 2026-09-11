@@ -4,9 +4,8 @@
 -- because a client that could name its own market could have an item priced
 -- against the wrong country's listings. See src/lib/markets.ts.
 --
--- Australia is the second market. Vinted does not operate there, so a
--- profile in AU may not have Vinted enabled; setMarket() drops it in the same
--- statement that moves the market, and the constraint refuses any drift.
+-- Australia is the second market. (The constraint below assumed Vinted was
+-- not there; it launched on 1 July 2026, and 0014 drops the constraint.)
 
 create type public.market as enum ('GB', 'AU');
 

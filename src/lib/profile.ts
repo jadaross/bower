@@ -94,9 +94,8 @@ export class InvalidPlatformSet extends Error {}
 
 /**
  * Validates here as well as in the database. The `enabled_platforms_not_empty`
- * and `platforms_available_in_market` check constraints are the real
- * guarantee — this exists so the caller gets a sentence explaining the
- * problem instead of a Postgres constraint name.
+ * check constraint is the real guarantee — this exists so the caller gets a
+ * sentence explaining the problem instead of a Postgres constraint name.
  */
 export function validatePlatformSet(input: unknown, market: Market = DEFAULT_MARKET): Platform[] {
   if (!Array.isArray(input) || input.length === 0) {
@@ -151,10 +150,10 @@ export async function setEnabledPlatforms(
 
 /**
  * Moves the seller to another Market. Platforms that do not operate there are
- * dropped from the Enabled set (Vinted, on a move to Australia) and the
- * preference follows; with nothing left, every platform in the new Market is
- * enabled, so the seller is never left with an empty set. One statement, so
- * the `platforms_available_in_market` constraint holds throughout.
+ * dropped from the Enabled set and the preference follows; with nothing left,
+ * every platform in the new Market is enabled, so the seller is never left
+ * with an empty set. One statement, so the set and the market never disagree.
+ * (Today every platform is in both markets, so nothing is dropped.)
  */
 export async function setMarket(token: string, userId: string, market: Market): Promise<Profile> {
   const current = await getProfile(token);

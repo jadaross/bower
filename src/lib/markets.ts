@@ -10,7 +10,8 @@ import type { Platform } from "@/lib/types";
  * The listing prompts are unchanged across markets (British English suits
  * both). What changes is the money and the searching: currency, the sites
  * the market check is confined to, the fee each platform takes there, and
- * which platforms exist at all — Vinted does not operate in Australia.
+ * which platforms exist at all — every platform bower knows is in both
+ * markets today, but the shape allows for one that is not.
  */
 export type Market = "GB" | "AU";
 
@@ -42,7 +43,7 @@ export const MARKETS: Record<Market, MarketInfo> = {
     currency: "AUD",
     symbol: "$",
     searchCountry: "AU",
-    platforms: ["depop", "ebay"],
+    platforms: ["vinted", "depop", "ebay"],
   },
 };
 

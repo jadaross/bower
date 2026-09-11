@@ -142,8 +142,8 @@ struct PlatformsScreen: View {
 }
 
 /// United Kingdom or Australia. Switching drops any platform that does not
-/// operate in the new market (Vinted, in Australia) — the rows below it
-/// change to match, so nothing is switched on that cannot be priced.
+/// operate in the new market — none today, but the rows below follow the
+/// market so nothing can be switched on that cannot be priced.
 struct MarketPicker: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme

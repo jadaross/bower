@@ -20,10 +20,11 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
 
     /// Fees are display-only. Ranking never uses them — see recommend.ts.
     /// Every platform bower knows is fee-free for a private seller in both
-    /// markets today (eBay UK since Oct 2024; Depop AU since Jul 2026).
+    /// markets today (eBay UK since Oct 2024; Depop AU and Vinted AU since Jul 2026).
     func note(in market: Market) -> String {
         switch (self, market) {
-        case (.vinted, _): "No seller fees · EU buyers"
+        case (.vinted, .GB): "No seller fees · EU buyers"
+        case (.vinted, .AU): "No seller fees · new in Australia"
         case (.depop, .GB): "No seller fees · Gen-Z UK/US"
         case (.depop, .AU): "No seller fees · Gen-Z"
         case (.ebay, .GB): "No seller fees · global reach"
@@ -31,7 +32,8 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         }
     }
 
-    /// Whether the platform operates in the market at all. Vinted does not in Australia.
+    /// Whether the platform operates in the market. All three do in both today;
+    /// the seam stays for one that does not.
     func operates(in market: Market) -> Bool { market.platforms.contains(self) }
 
     /// What the platform calls the tags under a listing. One place, so the
@@ -48,7 +50,8 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     /// iOS then shows "◀ bower" in the status bar to come straight back.
     func sellURL(in market: Market) -> URL {
         switch (self, market) {
-        case (.vinted, _): URL(string: "https://www.vinted.co.uk/items/new")!
+        case (.vinted, .GB): URL(string: "https://www.vinted.co.uk/items/new")!
+        case (.vinted, .AU): URL(string: "https://www.vinted.com.au/items/new")!
         case (.depop, _):  URL(string: "https://www.depop.com/products/create")!
         case (.ebay, .GB): URL(string: "https://www.ebay.co.uk/sl/sell")!
         case (.ebay, .AU): URL(string: "https://www.ebay.com.au/sl/sell")!
@@ -92,7 +95,7 @@ enum Market: String, CaseIterable, Identifiable, Codable {
     var platforms: [Platform] {
         switch self {
         case .GB: [.vinted, .depop, .ebay]
-        case .AU: [.depop, .ebay]
+        case .AU: [.vinted, .depop, .ebay]
         }
     }
 
@@ -338,8 +341,9 @@ final class AppState {
 
     func saveMarket(_ m: Market) async {
         market = m
-        // The server drops any platform that does not operate there and moves
-        // the preference; keep the local set honest until its answer lands.
+        // The server drops any platform that does not operate there (none,
+        // today) and moves the preference; keep the local set honest until its
+        // answer lands.
         enabled = enabled.filter { $0.operates(in: m) }
         if enabled.isEmpty { enabled = Set(m.platforms) }
         if !enabled.contains(preferred), let next = orderedEnabled.first { preferred = next }

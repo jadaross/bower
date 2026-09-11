@@ -347,7 +347,10 @@ describe("in Australia", () => {
     expect(band.currency).toBe("AUD");
   });
 
-  it("refuses to price on a platform that is not there", () => {
-    expect(() => buildValuationPrompt(item, "vinted", "AU")).toThrow(/does not operate in Australia/);
+  it("searches Vinted's Australian site", () => {
+    const prompt = buildValuationPrompt(item, "vinted", "AU");
+    expect(prompt).toContain("vinted.com.au");
+    expect(listingUrl("https://www.vinted.com.au/items/12345-jacket", "vinted", "AU")).toBeDefined();
+    expect(listingUrl("https://www.vinted.co.uk/items/12345-jacket", "vinted", "AU")).toBeUndefined();
   });
 });

@@ -90,10 +90,8 @@ describe("validatePlatformSet", () => {
     expect(validatePlatformSet(["vinted", "vinted"])).toEqual(["vinted"]);
   });
 
-  it("refuses a platform that does not operate in the market", () => {
-    expect(() => validatePlatformSet(["vinted", "depop"], "AU")).toThrow(InvalidPlatformSet);
-    expect(() => validatePlatformSet(["vinted"], "AU")).toThrow(/not available in Australia/);
-    expect(validatePlatformSet(["depop", "ebay"], "AU")).toEqual(["depop", "ebay"]);
+  it("accepts every platform in Australia — Vinted launched there in July 2026", () => {
+    expect(validatePlatformSet(["vinted", "depop", "ebay"], "AU")).toEqual(["vinted", "depop", "ebay"]);
   });
 
   it("rejects an empty set — at least one platform must stay enabled", () => {
@@ -154,23 +152,13 @@ describe("setEnabledPlatforms", () => {
 });
 
 describe("setMarket", () => {
-  it("drops Vinted on a move to Australia and moves the preference off it", async () => {
+  it("keeps the set and the preference on a move to Australia — every platform is there", async () => {
     single.mockResolvedValue({ data: { ...row, enabled_platforms: ["vinted", "ebay"], preferred_platform: "vinted" }, error: null });
     await setMarket("t", "user-1", "AU");
     expect(update).toHaveBeenCalledWith({
       market: "AU",
-      enabled_platforms: ["ebay"],
-      preferred_platform: "ebay",
-    });
-  });
-
-  it("enables every platform in the new market when none of the old ones exist there", async () => {
-    single.mockResolvedValue({ data: { ...row, enabled_platforms: ["vinted"], preferred_platform: "vinted" }, error: null });
-    await setMarket("t", "user-1", "AU");
-    expect(update).toHaveBeenCalledWith({
-      market: "AU",
-      enabled_platforms: ["depop", "ebay"],
-      preferred_platform: "depop",
+      enabled_platforms: ["vinted", "ebay"],
+      preferred_platform: "vinted",
     });
   });
 
