@@ -20,11 +20,13 @@ struct StubAPI: BowerAPIClient {
     func profile() async throws -> ProfileResponse {
         await wait()
         let unlimited = CommandLine.arguments.contains("-bowerUnlimited")
+        // `-bowerSpent`: both meters at their limit, for the zero states.
+        let spent = CommandLine.arguments.contains("-bowerSpent")
         return ProfileResponse(
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
-            allowance: AllowanceState(used: 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
-            searches: AllowanceState(used: 1, limit: unlimited ? nil : 3, resetsAt: "2026-10-01T00:00:00Z")
+            allowance: AllowanceState(used: spent ? 10 : 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: spent ? 3 : 1, limit: unlimited ? nil : 3, resetsAt: "2026-10-01T00:00:00Z")
         )
     }
 

@@ -157,16 +157,11 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
             title: "That's the lot for this month",
-            body: "That's all \(a.limit ?? a.used) listings for this month.\(resetText(a))"
+            body: ["That's all \(a.limit ?? a.used) listings for this month.", a.resetsText].compactMap { $0 }.joined(separator: " ")
         ) {
             Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }
         }
-    }
-
-    private func resetText(_ a: AllowanceState) -> String {
-        guard let iso = a.resetsAt, let date = ISO8601DateFormatter().date(from: iso) else { return "" }
-        return " Resets \(date.formatted(.dateTime.day().month(.wide)))."
     }
 
     // MARK: Shared

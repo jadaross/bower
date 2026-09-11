@@ -275,18 +275,19 @@ struct CaptureScreen: View {
             if state.analysis != nil {
                 BowerButton(title: "View listing") { state.screen = .listing }
                 HStack(spacing: 9) {
-                    BowerButton(title: "Write it again", kind: .secondary) { state.screen = .analysing }
+                    BowerButton(title: canSpend ? "Write it again" : "No listings left", kind: .secondary, disabled: !canSpend) { state.screen = .analysing }
                     clearButton
                 }
-                Text("Writing it again uses another listing.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                if let note = costNote(again: true) { costLine(note) }
             } else {
-                BowerButton(title: "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")") { state.screen = .analysing }
+                BowerButton(title: canSpend ? "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")" : "No listings left",
+                            disabled: !canSpend) { state.screen = .analysing }
                 HStack(spacing: 9) {
                     BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
                                 kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
                     clearButton
                 }
+                if let note = costNote(again: false) { costLine(note) }
             }
         }
         .padding(.horizontal, 22)
@@ -294,6 +295,26 @@ struct CaptureScreen: View {
         .padding(.bottom, 10)
         .background(theme.chrome)
         .overlay(alignment: .top) { Hairline() }
+    }
+
+    private var canSpend: Bool { state.reads.canSpend }
+
+    /// What Write it spends, in the words the market check already uses under
+    /// its own button. Nothing on an account with no limit.
+    private func costNote(again: Bool) -> String? {
+        let reads = state.reads
+        guard let left = reads.remaining else { return nil }
+        if left == 0 {
+            return ["All \(reads.limit ?? reads.used) listings are used this month.", reads.resetsText].compactMap { $0 }.joined(separator: " ")
+        }
+        return "\(again ? "Writing it again uses" : "Uses") 1 of your \(left) listing\(left == 1 ? "" : "s")."
+    }
+
+    private func costLine(_ text: String) -> some View {
+        Text(text)
+            .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
     }
 
     private var clearButton: some View {

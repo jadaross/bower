@@ -32,7 +32,8 @@ The iOS app lives in `ios-app/bower/` and builds with Xcode 26 against iOS 26.5.
 Prefer the XcodeBuildMCP tools; call `session_show_defaults` first. Launch with
 `-bowerStub` to run every screen on fixtures with no network and no sign-in — DEBUG
 only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,
-`platforms`, …) to open on one of the one-time pages instead of Home.
+`platforms`, …) to open on one of the one-time pages instead of Home; `-bowerUnlimited`
+for an account with no limits, `-bowerSpent` for both meters at zero.
 
 ## Environment
 

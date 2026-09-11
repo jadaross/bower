@@ -185,6 +185,14 @@ enum SuggestedShot: String, CaseIterable, Identifiable {
     }
 }
 
+extension AllowanceState {
+    /// "Resets 1 October", or nothing when the server gave no date.
+    var resetsText: String? {
+        guard let iso = resetsAt, let date = ISO8601DateFormatter().date(from: iso) else { return nil }
+        return "Resets \(date.formatted(.dateTime.day().month(.wide)))."
+    }
+}
+
 // MARK: - Navigation
 
 /// Confirm was folded into `listing` — correction happens there under
@@ -230,7 +238,10 @@ final class AppState {
     /// the hardcoded defaults until Settings is opened — which read as "it
     /// forgot what I chose".
     func loadProfileIfSignedIn() async {
-        guard session.hasSession else { return }
+        // The stub has no session but does have a profile, and Home's cost
+        // line reads from it; without this the fixture meters only ever
+        // reached Profile.
+        guard session.hasSession || api is StubAPI else { return }
         await loadProfile()
     }
 
