@@ -4,7 +4,7 @@ import { MODELS, anthropicClient } from "./client";
 import { parseAnalysisResult } from "./analyse-parse";
 import { jsonSchemaFormat } from "./structured";
 import { analysisResultSchema } from "./schemas";
-import { beginGeneration, observeGeneration, type TraceContext } from "@/lib/observability";
+import { beginGeneration, flushObservability, observeGeneration, type TraceContext } from "@/lib/observability";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
 import { DEFAULT_MARKET, MARKETS, type Market } from "@/lib/markets";
 export { parseAnalysisResult };
@@ -314,6 +314,12 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
                   stream.controller.abort();
                   generation?.finish({ output: JSON.stringify({ rejected: subject }), usage: { input: inputTokens } });
                   generation = null;
+                  // Flushed here, not left to the request's after()-scheduled
+                  // flush: that fires as soon as the route handler returns the
+                  // stream, which for a streaming response is long before this
+                  // point, and this generation must not depend on the platform
+                  // keeping the function alive afterwards.
+                  await flushObservability();
                   throw new AnalyseRejected(subject);
                 }
               }
@@ -334,6 +340,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
         if (stopReason === "refusal") {
           generation?.finish({ output: JSON.stringify({ rejected: "refused" }), usage: { input: inputTokens, output: outputTokens } });
           generation = null;
+          await flushObservability(); // see the rejection branch above
           throw new AnalyseRejected("refused");
         }
         const parsed = parseAnalysisResult(buffer);
@@ -342,9 +349,11 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
           output: JSON.stringify({ ...parsed, trace_id: analyseTraceId }),
           usage: { input: inputTokens, output: outputTokens },
         });
+        await flushObservability(); // see the rejection branch above
         controller.close();
       } catch (err) {
         generation?.fail(err);
+        await flushObservability(); // see the rejection branch above
         controller.error(err);
       }
     },
