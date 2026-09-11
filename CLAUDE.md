@@ -9,8 +9,9 @@ where to post it, and what to ask for it.
 
 It is **an iOS app with a headless backend**. There is no web UI — the Next.js app
 exists for its API routes and its deployment story on Vercel, plus one legal page
-(`/privacy`) that App Store Connect requires. If you open this repo expecting pages,
-see `docs/adr/0002-headless-nextjs-api-on-vercel.md`.
+(`/privacy`) that App Store Connect requires and the owner's dashboard (`/admin`,
+below). If you open this repo expecting pages, see
+`docs/adr/0002-headless-nextjs-api-on-vercel.md`.
 
 Read `CONTEXT.md` for the domain vocabulary, `ARCHITECTURE.md` for the call flow and
 what each model call costs, and `docs/adr/` for why things are the way they are before
@@ -68,6 +69,18 @@ the seller. See `docs/research/what-sells-terminology.md` for why.
 `/api/valuate` reads the Enabled Platforms from the caller's profile — never
 from the request body. A client that could name its own platforms could ask for
 work it had not enabled.
+
+### The owner's dashboard
+
+`/admin` is a password-gated (`DASHBOARD_PASSWORD`), server-rendered read of Supabase
+(service role) and Langfuse (REST, the project keys) — six tabs: Overview, People,
+Items & photos, Feedback, Cost, Health. No client JS; charts are inline SVG in the
+app's palette. `src/lib/dashboard/metrics.ts` holds every number as a pure function
+over the fetched data and is the tested part; `data.ts` fetches and caches for a
+minute; `langfuse.ts`/`supabase.ts` are the read clients. It reads the `production`
+Langfuse environment and leaves the owner's account out unless `?me=1`. A *listing*
+is one non-rejected analyse; a *market check* is one valuate trace, whatever it
+fanned out to.
 
 ### Key files
 
