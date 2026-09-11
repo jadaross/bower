@@ -66,16 +66,6 @@ struct AnalysingScreen: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(minHeight: 130, alignment: .top)
                 .padding(.top, 12)
-
-                HStack(spacing: 4) {
-                    ForEach(0..<Self.stages.count, id: \.self) { n in
-                        Capsule()
-                            .fill(n <= stage ? theme.sheen : .white.opacity(0.15))
-                            .frame(height: 2)
-                    }
-                }
-                .padding(.top, 8)
-                .animation(.easeOut(duration: 0.4), value: stage)
             }
         }
         .padding(.horizontal, 30)
@@ -157,7 +147,7 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
             title: "That's the lot for this month",
-            body: ["That's all \(a.limit ?? a.used) listings for this month.", a.resetsText].compactMap { $0 }.joined(separator: " ")
+            body: ["All \(a.limit ?? a.used) listings are used.", a.resetsText].compactMap { $0 }.joined(separator: " ")
         ) {
             Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }

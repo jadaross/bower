@@ -296,9 +296,9 @@ private struct PriceSection: View {
     }
 
     private var deepResearchNote: String {
-        let what = "Searches live listings for what this is actually going for."
+        let what = "Searches live listings for what this is actually going for. Takes a minute or two."
         guard let left = state.searches.remaining else { return what + " Uses 1 market check." }
-        return left > 0 ? what + " Uses 1 of your \(left) market checks." : what
+        return left > 0 ? what + " Uses 1 of your \(left) market check\(left == 1 ? "" : "s")." : what
     }
 
     // One row per platform being read. The valuation comes back all at once,
@@ -327,9 +327,6 @@ private struct PriceSection: View {
                     }
                 }
                 .padding(.top, 14)
-                Text("Up to a few minutes.")
-                    .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
-                    .padding(.top, 12)
             }
         }
     }

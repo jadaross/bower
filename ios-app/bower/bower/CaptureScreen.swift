@@ -88,8 +88,8 @@ struct CaptureScreen: View {
             Task { await importLibrary(items) }
         }
         .confirmationDialog(pendingShot?.label ?? "Add a photo", isPresented: $showSheet, titleVisibility: pendingShot == nil ? .hidden : .visible) {
-            Button("Take Photo") { openCamera() }
-            Button(pendingShot == nil ? "Select Multiple from Library" : "Choose from Library") { showLibrary = true }
+            Button("Take a photo") { openCamera() }
+            Button("Choose from library") { showLibrary = true }
             Button("Cancel", role: .cancel) { pendingShot = nil }
         } message: {
             if let hint = pendingShot?.hint { Text(hint) }

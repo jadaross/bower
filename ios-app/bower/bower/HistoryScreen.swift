@@ -48,15 +48,22 @@ struct HistoryScreen: View {
     /// platform it was written for is on the card, not hidden in a dot.
     private func list(_ items: [HistoryItem]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Kicker("\(items.count) item\(items.count == 1 ? "" : "s") · text only, no photos")
+            Kicker("\(items.count) item\(items.count == 1 ? "" : "s")")
             ForEach(items) { item in
                 Button { selected = item } label: { card(item) }
                     .buttonStyle(.plain)
             }
-            BowerButton(title: clearing ? "Clearing…" : "Clear history", kind: .danger, disabled: clearing) {
-                confirmClear = true
+            VStack(spacing: 14) {
+                Text("Text only. Bower keeps no photos.")
+                    .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                Button(clearing ? "Clearing…" : "Clear history") { confirmClear = true }
+                    .buttonStyle(.plain)
+                    .font(BowerFont.ui(13, weight: .medium))
+                    .foregroundStyle(theme.coral)
+                    .disabled(clearing)
             }
-            .padding(.top, 8)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 10)
         }
         .confirmationDialog("Clear your history?", isPresented: $confirmClear, titleVisibility: .visible) {
             Button("Clear history", role: .destructive) { Task { await clear() } }
