@@ -16,6 +16,8 @@ titled "App Store submission — human steps".
 | Age rating: every answer "none" → 4+ | `scripts/asc-metadata.mjs` | same |
 | Content rights: no third-party content | same | same |
 | Six placeholder 6.9" screenshots from the stub | `screenshots/` | `node scripts/asc-screenshots.mjs` — **to be replaced by the designed set** |
+| Availability: United Kingdom only, new territories off | ASC → Pricing and Availability | `appAvailabilities` v2 takes all 175 territories in one request; see #55 for widening to IE + AU |
+| App Privacy label: Email, Photos, User ID, Other User Content, Product Interaction, Performance Data — all linked, none tracking | ASC → App Privacy (browser only, done 11 Sep) | matches `PrivacyInfo.xcprivacy` from build 35 |
 
 ## In the build (from build 35)
 
@@ -37,26 +39,18 @@ titled "App Store submission — human steps".
    in `screenshots/`; export at 1320×2868 PNG; drop them in that folder in
    order and run `node scripts/asc-screenshots.mjs`, or upload in ASC by hand.
    The six placeholders currently on the record are the raw captures.
-3. **App Privacy (the "nutrition label")** — ASC → bower → App Privacy.
-   Declare, all *linked to the user*, none *used for tracking*:
-   - Contact Info → **Email Address** — App Functionality
-   - **Photos or Videos** — App Functionality (transmitted, never stored; declare anyway)
-   - Identifiers → **User ID** — App Functionality, Analytics
-   - User Content → **Other User Content** (listing text, item history) — App Functionality
-   - Usage Data → **Product Interaction** (thumbs, copies, chips, notes) — Analytics, App Functionality
-   - Diagnostics → **Performance Data** (call latency in Langfuse) — Analytics
-   Must match `PrivacyInfo.xcprivacy`; it does from build 35.
-4. **Pricing and Availability.** Free for now (see *If pricing changes*), and
-   the territories — UK-only is honest for v1: the platforms, prices and copy
-   are all UK. **Pricing decision still open.**
-5. **Review contact.** Set `ASC_CONTACT_FIRST`, `ASC_CONTACT_LAST`,
+3. **Pricing.** Nothing is chosen yet, and a price (even Free) is required
+   before submission; the UK availability row shows `CANNOT_SELL` until it is.
+   Free is one API call (`appPriceSchedules` with the GBR £0 price point) when
+   the decision is made. **Decision still open** — see *If pricing changes*.
+4. **Review contact.** Set `ASC_CONTACT_FIRST`, `ASC_CONTACT_LAST`,
    `ASC_CONTACT_EMAIL`, `ASC_CONTACT_PHONE` in `.asc-key.env` and re-run
    `node scripts/asc-metadata.mjs`; ASC requires a phone number. This also
    writes the review notes from `metadata.json`.
-6. **Agreements.** Business → Agreements: the free-app agreement is what
+5. **Agreements.** Business → Agreements: the free-app agreement is what
    TestFlight already runs on. Any paid tier needs the Paid Apps agreement,
    bank and tax forms, before submission.
-7. **Read the listing once in ASC.** The copy in `metadata.json` is a draft in
+6. **Read the listing once in ASC.** The copy in `metadata.json` is a draft in
    bower's voice. Edit the file and re-run rather than editing in the browser,
    or the two drift.
 
