@@ -345,6 +345,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Bower;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Bower reads the photos you take to work out what the item is. Photos are never stored.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Bower reads the photos you choose to work out what the item is. Photos are never stored.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -383,6 +384,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Bower;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Bower reads the photos you take to work out what the item is. Photos are never stored.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Bower reads the photos you choose to work out what the item is. Photos are never stored.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

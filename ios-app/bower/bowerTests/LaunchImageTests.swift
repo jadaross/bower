@@ -48,11 +48,12 @@ struct LaunchImageTests {
 
         let satin = Color(hex: 0x2B3AA8), paper = Color(hex: 0xF5EFE3), pollen = Color(hex: 0xE8B547)
         let avenue = Color(hex: 0x171A2E), sheen = Color(hex: 0x7BA9E8)
-        // The mark at 70% of the tile, as the design's 84-in-120 icon has it.
+        // The mark box at 88% of the tile: the tag itself is half the box wide, so
+        // a smaller box read as a small icon.
         let icons: [(String, AnyView)] = [
-            ("icon-light.png", AnyView(ZStack { satin; Arch(size: 717, stroke: paper, dot: pollen) })),
-            ("icon-dark.png", AnyView(ZStack { avenue; Arch(size: 717, stroke: sheen, dot: pollen) })),
-            ("icon-tinted.png", AnyView(ZStack { Color.black; Arch(size: 717, stroke: .white, dot: .black) })),
+            ("icon-light.png", AnyView(ZStack { satin; Arch(size: 900, stroke: paper, dot: pollen).offset(y: -27) })),
+            ("icon-dark.png", AnyView(ZStack { avenue; Arch(size: 900, stroke: sheen, dot: pollen).offset(y: -27) })),
+            ("icon-tinted.png", AnyView(ZStack { Color.black; Arch(size: 900, stroke: .white, dot: .black).offset(y: -27) })),
         ]
         for (name, view) in icons {
             let renderer = ImageRenderer(content: view.frame(width: 1024, height: 1024))
