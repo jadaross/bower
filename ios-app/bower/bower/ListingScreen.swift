@@ -595,7 +595,7 @@ private struct ListingSection: View {
                                     Text(f.label).font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                                     Spacer()
                                     Text(f.value).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.trailing)
-                                    CopyButton(text: f.value, done: "Copied", onCopy: { model.recordFeedback("copied") })
+                                    CopyButton(text: f.value, onCopy: { model.recordFeedback("copied") })
                                 }
                                 .padding(.vertical, 6)
                                 Hairline()
@@ -706,14 +706,10 @@ private struct EditBox: View {
     }
 }
 
-/// "In the bower" is what the app says when something has been copied. The
-/// label flips to it in moss with a haptic, and holds long enough to be seen.
-/// Rows with no room for the phrase — the form fields, where a value sits
-/// beside the button — say "Copied" instead.
+/// Copy, then "Copied" for a beat. Both labels are laid out and one is
+/// shown, so the button never changes size or shifts its row.
 struct CopyButton: View {
     let text: String
-    var label: String = "Copy"
-    var done: String = "In the bower"
     var big: Bool = false
     var onCopy: (() -> Void)? = nil
     @Environment(\.bower) private var theme
@@ -726,19 +722,26 @@ struct CopyButton: View {
             copied = true
             Task { try? await Task.sleep(for: .seconds(1.6)); copied = false }
         } label: {
-            HStack(spacing: 5) {
-                Image(systemName: copied ? "checkmark" : "doc.on.doc").font(.system(size: 10, weight: .semibold))
-                Text(copied ? done : label)
+            ZStack {
+                face("doc.on.doc", "Copy").opacity(copied ? 0 : 1)
+                face("checkmark", "Copied").opacity(copied ? 1 : 0)
             }
             .font(BowerFont.ui(big ? 12 : 11, weight: .semibold))
             .foregroundStyle(copied ? theme.moss : theme.muted)
             .padding(.vertical, big ? 7 : 4).padding(.horizontal, big ? 12 : 6)
-            .background(copied ? theme.moss.opacity(0.1) : (big ? theme.subtle : .clear))
+            .background(big ? theme.subtle : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.success, trigger: copied) { _, now in now }
         .animation(.easeOut(duration: 0.18), value: copied)
+    }
+
+    private func face(_ icon: String, _ label: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon).font(.system(size: 10, weight: .semibold))
+            Text(label)
+        }
     }
 }
 

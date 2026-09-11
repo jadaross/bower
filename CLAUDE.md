@@ -172,8 +172,9 @@ it everywhere; the launch image and the app icon are rendered from that view by
 moved from `#3b5cff` to the deeper `#2B3AA8`, so the bowerbird-prizes-blue reasoning
 behind the name still holds.
 
-One thing the app says in its own voice, and should keep saying: copy confirmations
-read **"In the bower"**. The analyse action is plainly **"Write it"** (it spends a *listing*)
+Copy confirmations read plainly **"Copied"**, at the same size as the button so the row
+never shifts ("In the bower" was tried and retired — it moved). The analyse action is
+plainly **"Write it"** (it spends a *listing*)
 and the live price search is **"Check the market"** (a *market check*); the photo-only price is an
 *estimate*, never a guess. "Suss it out" was charming once and vague every time after;
 the verb carries the meaning and the serif title carries the voice.
