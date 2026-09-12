@@ -27,6 +27,8 @@ protocol BowerAPIClient: Sendable {
     /// The seller's opt-in notes. The prompts read these from the profile, so
     /// this is the only way a listing ever says "smoke-free".
     func setSellerNotes(_ notes: [SellerNote]) async throws -> ProfileResponse
+    /// What to call them, set once at "introduce yourself". Always sent together.
+    func setName(firstName: String, lastName: String) async throws -> ProfileResponse
     /// Photos in, Neutral Listing out. Streams, and assembles before returning —
     /// the wire format is a JSON document delivered in text fragments. Three
     /// things are surfaced mid-flight, each a real event on the wire (see
@@ -216,6 +218,12 @@ struct BowerAPI: BowerAPIClient {
         struct Body: Encodable { let sellerNotes: [SellerNote] }
         return try await send("/api/profile", method: "PATCH",
                               body: Body(sellerNotes: notes), as: ProfileResponse.self)
+    }
+
+    func setName(firstName: String, lastName: String) async throws -> ProfileResponse {
+        struct Body: Encodable { let firstName: String; let lastName: String }
+        return try await send("/api/profile", method: "PATCH",
+                              body: Body(firstName: firstName, lastName: lastName), as: ProfileResponse.self)
     }
 
     func history() async throws -> [HistoryItem] {

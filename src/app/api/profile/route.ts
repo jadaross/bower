@@ -2,12 +2,15 @@ import { withAuth } from "@/lib/auth";
 import { serviceClient } from "@/lib/supabase";
 import {
   getProfile,
+  InvalidName,
   InvalidPlatformSet,
   InvalidPreferredPlatform,
   setEnabledPlatforms,
   setMarket,
+  setName,
   setPreferredPlatform,
   setSellerNotes,
+  validateName,
   validatePlatformSet,
   validatePreferredPlatform,
 } from "@/lib/profile";
@@ -23,6 +26,8 @@ function body(profile: Profile) {
     enabled_platforms: profile.enabledPlatforms,
     preferred_platform: profile.preferredPlatform,
     seller_notes: profile.sellerNotes,
+    first_name: profile.firstName,
+    last_name: profile.lastName,
     // `allowance` is the generations meter, kept under this name so an older
     // app still decodes; `searches` is the deep-research meter.
     allowance: {
@@ -56,6 +61,8 @@ interface PatchBody {
   enabled_platforms?: unknown;
   preferred_platform?: unknown;
   seller_notes?: unknown;
+  first_name?: unknown;
+  last_name?: unknown;
 }
 
 /**
@@ -76,16 +83,42 @@ export const PATCH = withAuth(async (request, user) => {
     patch.market === undefined &&
     patch.enabled_platforms === undefined &&
     patch.preferred_platform === undefined &&
-    patch.seller_notes === undefined
+    patch.seller_notes === undefined &&
+    patch.first_name === undefined &&
+    patch.last_name === undefined
   ) {
     return Response.json(
-      { error: "market, enabled_platforms, preferred_platform or seller_notes is required" },
+      { error: "market, enabled_platforms, preferred_platform, seller_notes, or first_name and last_name is required" },
       { status: 400 }
     );
   }
 
+  if (
+    (patch.first_name === undefined) !== (patch.last_name === undefined)
+  ) {
+    return Response.json({ error: "first_name and last_name must be sent together" }, { status: 400 });
+  }
+
   try {
     let profile: Profile;
+
+    // "Introduce yourself" only ever sends this alone.
+    if (patch.first_name !== undefined && patch.last_name !== undefined) {
+      profile = await setName(
+        user.token,
+        user.id,
+        validateName(patch.first_name, "First name"),
+        validateName(patch.last_name, "Last name")
+      );
+      if (
+        patch.market === undefined &&
+        patch.enabled_platforms === undefined &&
+        patch.preferred_platform === undefined &&
+        patch.seller_notes === undefined
+      ) {
+        return Response.json(body(profile));
+      }
+    }
 
     if (patch.market !== undefined) {
       profile = await setMarket(user.token, user.id, validateMarket(patch.market));
@@ -116,7 +149,8 @@ export const PATCH = withAuth(async (request, user) => {
       err instanceof InvalidPlatformSet ||
       err instanceof InvalidPreferredPlatform ||
       err instanceof InvalidSellerNotes ||
-      err instanceof InvalidMarket
+      err instanceof InvalidMarket ||
+      err instanceof InvalidName
     ) {
       return Response.json({ error: err.message }, { status: 400 });
     }

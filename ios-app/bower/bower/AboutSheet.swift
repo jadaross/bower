@@ -26,9 +26,10 @@ struct AboutSheet: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 4)
 
-            VStack(alignment: .leading, spacing: 12) {
-                Text("The satin bowerbird is an Australian bird that collects things. Blue things, mostly: bottle tops, pegs, feathers. It arranges them in front of its bower until the arrangement is right.")
-                Text("bower does that for the clothes you're selling. Photograph a piece and it gathers what matters, the brand, the size, the condition, what the same thing is going for, and arranges it into a listing for Vinted, Depop or eBay.")
+            VStack(alignment: .leading, spacing: 16) {
+                Text(BowerOrigin.bowerbird)
+                BowerbirdDots()
+                Text(BowerOrigin.theStage)
                 Text("It exists because writing the listing was the bit that stopped a wardrobe clear-out ever getting finished.")
             }
             .font(BowerFont.ui(14.5))

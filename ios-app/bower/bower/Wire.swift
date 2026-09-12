@@ -241,6 +241,10 @@ struct ProfileResponse: Codable, Sendable {
     let preferredPlatform: Platform
     /// Raw wire values; `SellerNote(rawValue:)` drops any the app does not know.
     var sellerNotes: [String] = []
+    /// What they told bower to call them, from "introduce yourself". The app
+    /// greets with `firstName` alone; both are nil until they do.
+    var firstName: String? = nil
+    var lastName: String? = nil
     /// Generations this month. Under the old name on the wire.
     let allowance: AllowanceState
     /// Deep researches this month. Optional so a stub or older server decodes.

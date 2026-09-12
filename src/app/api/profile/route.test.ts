@@ -6,12 +6,14 @@ const getProfile = vi.fn();
 const setEnabledPlatforms = vi.fn();
 const setPreferredPlatform = vi.fn();
 const setSellerNotes = vi.fn();
+const setName = vi.fn();
 vi.mock("@/lib/profile", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/profile")>()),
   getProfile,
   setEnabledPlatforms,
   setPreferredPlatform,
   setSellerNotes,
+  setName,
 }));
 
 const deleteUser = vi.fn();
@@ -26,6 +28,8 @@ const profile = {
   enabledPlatforms: ["vinted", "depop"],
   preferredPlatform: "depop",
   sellerNotes: [],
+  firstName: null,
+  lastName: null,
   allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
   searches: { used: 1, limit: 3, resetsAt: "2026-09-01T00:00:00.000Z" },
 };
@@ -63,6 +67,8 @@ beforeEach(() => {
   }));
   setSellerNotes.mockReset();
   setSellerNotes.mockImplementation(async (_t, _u, notes) => ({ ...profile, sellerNotes: notes }));
+  setName.mockReset();
+  setName.mockImplementation(async (_t, _u, firstName, lastName) => ({ ...profile, firstName, lastName }));
 });
 
 describe("GET /api/profile", () => {
@@ -73,6 +79,8 @@ describe("GET /api/profile", () => {
       enabled_platforms: ["vinted", "depop"],
       preferred_platform: "depop",
       seller_notes: [],
+      first_name: null,
+      last_name: null,
       allowance: { used: 4, limit: 20, resets_at: "2026-09-01T00:00:00.000Z" },
       searches: { used: 1, limit: 3, resets_at: "2026-09-01T00:00:00.000Z" },
     });
@@ -184,6 +192,25 @@ describe("PATCH /api/profile", () => {
   it("500s when the write is refused", async () => {
     setEnabledPlatforms.mockRejectedValue(new Error("permission denied"));
     expect((await PATCH(patch({ enabled_platforms: ["vinted"] }))).status).toBe(500);
+  });
+
+  it("updates the first and last name together, trimmed", async () => {
+    const res = await PATCH(patch({ first_name: "  Jada  ", last_name: "  Ross  " }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ first_name: "Jada", last_name: "Ross" });
+    expect(setName).toHaveBeenCalledWith("test-access-token", "test-user-id", "Jada", "Ross");
+  });
+
+  it("400s on an empty name", async () => {
+    const res = await PATCH(patch({ first_name: "   ", last_name: "Ross" }));
+    expect(res.status).toBe(400);
+    expect(setName).not.toHaveBeenCalled();
+  });
+
+  it("400s when only one of first_name / last_name is sent", async () => {
+    const res = await PATCH(patch({ first_name: "Jada" }));
+    expect(res.status).toBe(400);
+    expect(setName).not.toHaveBeenCalled();
   });
 });
 

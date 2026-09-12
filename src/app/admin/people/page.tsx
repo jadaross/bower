@@ -19,7 +19,7 @@ export default async function People({ searchParams }: { searchParams: Promise<Q
   return (
     <Shell tab="people" q={q} data={data} badges={badges}>
       <h1>Who&rsquo;s using it</h1>
-      <p>Everyone with an account, newest activity first. Names are the part of the email before the @; &ldquo;hidden email&rdquo; is Apple&rsquo;s Hide My Email relay, so that person chose not to share it.</p>
+      <p>Everyone with an account, newest activity first. A name is what they told bower at &ldquo;introduce yourself&rdquo;; without one it falls back to the part of the email before the @. &ldquo;hidden email&rdquo; is Apple&rsquo;s Hide My Email relay, so that person chose not to share it.</p>
 
       <div className="kpis">
         <Stat label="Accounts" value={num(s.accounts)} hint={`${s.newAccounts} joined in this range`} />

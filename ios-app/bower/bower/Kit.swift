@@ -319,3 +319,28 @@ struct Hairline: View {
     @Environment(\.bower) private var theme
     var body: some View { Rectangle().fill(theme.line).frame(height: 0.5) }
 }
+
+// MARK: - Why bower
+
+/// The story behind the name, shared between the one-time "why bower" onboarding
+/// page and the About sheet behind a tap on the mark, so it reads the same
+/// wherever it turns up.
+enum BowerOrigin {
+    static let bowerbird =
+        "A female bowerbird doesn't build a nest. She builds a bower, a small stage cleared and dressed with whatever she can find, arranged just so. She's fussy about the arrangement, and fussiest of all about blue: bottle caps, berries, feathers, anything rare enough to be worth showing off."
+    static let theStage =
+        "The clothes are the same either way. Bower just builds the stage: the brand, the size, the price, the words, so what you already own gets a proper look."
+}
+
+/// Three blues, smallest to largest, the shiny things a bowerbird would prize.
+struct BowerbirdDots: View {
+    @Environment(\.bower) private var theme
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Circle().fill(theme.shell).frame(width: 14, height: 14)
+            Circle().fill(theme.sheen).frame(width: 20, height: 20)
+            Circle().fill(theme.satin).frame(width: 28, height: 28)
+        }
+    }
+}

@@ -137,7 +137,7 @@ struct RootView: View {
     /// the height above it. The rest are lists and read from the top.
     private var fillsHeight: Bool {
         switch state.screen {
-        case .how, .platforms: return true
+        case .introduce, .whyBower, .how, .platforms: return true
         default: return false
         }
     }
@@ -170,6 +170,18 @@ struct RootView: View {
         switch state.screen {
         case .signin, .analysing:
             EmptyView()
+        case .introduce:
+            BowerNav(title: "Welcome") {
+                EmptyView()
+            } trailing: {
+                Text("1 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+            }
+        case .whyBower:
+            BowerNav(title: "Welcome") {
+                BackButton(label: "Back") { state.screen = .introduce }
+            } trailing: {
+                Text("2 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+            }
         case .how:
             BowerNav(title: "Set up") {
                 EmptyView()
@@ -200,6 +212,8 @@ struct RootView: View {
     @ViewBuilder private func body(for screen: Screen) -> some View {
         switch screen {
         case .signin:    SignInScreen()
+        case .introduce: IntroduceScreen()
+        case .whyBower:  WhyBowerScreen()
         case .how:       HowScreen()
         case .platforms: PlatformsScreen()
         case .capture:   CaptureScreen()

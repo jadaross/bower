@@ -14,15 +14,20 @@ vi.mock("@/lib/supabase", () => ({ userClient }));
 const {
   getEnabledPlatforms,
   getProfile,
+  InvalidName,
   InvalidPlatformSet,
   setEnabledPlatforms,
   setMarket,
+  setName,
+  validateName,
   validatePlatformSet,
 } = await import("./profile");
 
 const row = {
   enabled_platforms: ["vinted", "depop"],
   preferred_platform: "depop",
+  first_name: null,
+  last_name: null,
   reads_used: 4,
   reads_limit: 20,
   searches_used: 1,
@@ -45,6 +50,8 @@ describe("getProfile", () => {
       enabledPlatforms: ["vinted", "depop"],
       preferredPlatform: "depop",
       sellerNotes: [],
+      firstName: null,
+      lastName: null,
       allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
       searches: { used: 1, limit: 3, resetsAt: "2026-09-01T00:00:00.000Z" },
     });
@@ -170,5 +177,46 @@ describe("setMarket", () => {
       enabled_platforms: ["depop", "ebay"],
       preferred_platform: "ebay",
     });
+  });
+});
+
+describe("validateName", () => {
+  it("trims whitespace", () => {
+    expect(validateName("  Jada  ")).toBe("Jada");
+  });
+
+  it("rejects an empty name", () => {
+    expect(() => validateName("   ")).toThrow(InvalidName);
+  });
+
+  it("rejects a non-string", () => {
+    expect(() => validateName(42)).toThrow(InvalidName);
+  });
+
+  it("rejects a name over 60 characters", () => {
+    expect(() => validateName("a".repeat(61))).toThrow(InvalidName);
+  });
+
+  it("names the field in the error, defaulting to first name", () => {
+    expect(() => validateName("")).toThrow(/First name/);
+    expect(() => validateName("", "Last name")).toThrow(/Last name/);
+  });
+});
+
+describe("setName", () => {
+  it("writes the trimmed first and last name and returns the profile as stored", async () => {
+    single.mockResolvedValue({ data: { ...row, first_name: "Jada", last_name: "Ross" }, error: null });
+    expect(await setName("t", "user-1", "Jada", "Ross")).toMatchObject({ firstName: "Jada", lastName: "Ross" });
+    expect(update).toHaveBeenCalledWith({ first_name: "Jada", last_name: "Ross" });
+  });
+
+  it("narrows the update to the caller's own row", async () => {
+    await setName("t", "user-1", "Jada", "Ross");
+    expect(eq).toHaveBeenCalledWith("id", "user-1");
+  });
+
+  it("throws when the write is refused", async () => {
+    single.mockResolvedValue({ data: null, error: { message: "permission denied" } });
+    await expect(setName("t", "user-1", "Jada", "Ross")).rejects.toThrow(/permission denied/);
   });
 });

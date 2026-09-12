@@ -273,10 +273,13 @@ extension AllowanceState {
 // MARK: - Navigation
 
 /// Confirm was folded into `listing` — correction happens there under
-/// "Not right?" rather than as a stop of its own. `how` is the one-time
-/// "what bower does" page between sign-in and the platforms question.
+/// "Not right?" rather than as a stop of its own. `introduce` and `whyBower`
+/// are the two one-time pages ahead of `how`, gated by `hasIntroduced` rather
+/// than `onboardingComplete` so they show for existing accounts too, once,
+/// the first time they open the app after this shipped. `how` is the one-time
+/// "what bower does" page between them and the platforms question.
 enum Screen: String, Hashable {
-    case signin, how, platforms, capture, analysing, listing, settings, history
+    case signin, introduce, whyBower, how, platforms, capture, analysing, listing, settings, history
 }
 
 // MARK: - App state
@@ -297,17 +300,27 @@ final class AppState {
         set { UserDefaults.standard.set(newValue, forKey: "onboardingComplete") }
     }
 
+    /// Whether "introduce yourself" and "why bower" have been shown on this
+    /// device. Separate from `onboardingComplete` and false for everyone —
+    /// new accounts and existing ones alike — so shipping these two pages
+    /// puts them in front of an account that finished onboarding long ago,
+    /// the first time it opens the app after the update.
+    var hasIntroduced: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasIntroduced") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasIntroduced") }
+    }
+
     init(session: SupabaseSession, api: any BowerAPIClient) {
         self.session = session
         self.api = api
-        screen = session.hasSession ? (onboardingComplete ? .capture : .how) : .signin
+        screen = session.hasSession ? (hasIntroduced ? (onboardingComplete ? .capture : .how) : .introduce) : .signin
     }
 
     /// After sign-in: pull the profile so Enabled Platforms and the allowance
     /// are the server's truth, then route past onboarding if it is done.
     func didSignIn() async {
         await loadProfile()
-        screen = onboardingComplete ? .capture : .how
+        screen = hasIntroduced ? (onboardingComplete ? .capture : .how) : .introduce
     }
 
     /// Called once at launch. A returning user's Enabled Platforms, Preferred
@@ -356,8 +369,16 @@ final class AppState {
         enabled = Set(p.enabledPlatforms)
         preferred = p.preferredPlatform
         sellerNotes = Set(p.sellerNotes.compactMap(SellerNote.init(rawValue:)))
+        if let f = p.firstName { firstName = f }
+        if let l = p.lastName { lastName = l }
         reads = p.allowance
         if let s = p.searches { searches = s }
+    }
+
+    /// Saved once, from "introduce yourself". Best effort, like the other
+    /// profile writes — the local value already stands.
+    func saveName() async {
+        if let p = try? await api.setName(firstName: firstName, lastName: lastName) { apply(p) }
     }
 
     func savePlatforms() async {
@@ -387,6 +408,8 @@ final class AppState {
         try await api.deleteAccount()
         await session.signOut()
         onboardingComplete = false
+        hasIntroduced = false
+        firstName = ""; lastName = ""
         photos = []; analysis = nil
         screen = .signin
     }
@@ -412,6 +435,12 @@ final class AppState {
 
     /// What every listing may say about the seller. Off by default.
     var sellerNotes: Set<SellerNote> = []
+
+    /// What they told bower to call them, at "introduce yourself". The app
+    /// greets with `firstName` alone; `lastName` exists for the owner's
+    /// dashboard, never shown in the app itself.
+    var firstName: String = ""
+    var lastName: String = ""
 
     /// Any change to the pile — a photo added, removed, or the lot cleared —
     /// drops the listing written for it, so Home never offers "View listing"

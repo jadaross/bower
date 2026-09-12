@@ -192,6 +192,7 @@ export function labelFor(accounts: Account[], userId: string | null): string {
   const a = accounts.find((x) => x.id === userId);
   if (!a) return `deleted · ${userId.slice(0, 6)}`;
   if (a.isOwner) return "you";
+  if (a.firstName) return [a.firstName, a.lastName].filter(Boolean).join(" ");
   if (!a.email) return `no email · ${userId.slice(0, 6)}`;
   if (a.hidesEmail) return `hidden email · ${a.email.split("@")[0].slice(0, 8)}`;
   return a.email.split("@")[0];

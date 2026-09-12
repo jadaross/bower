@@ -13,6 +13,9 @@ export interface Account {
   email: string | null;
   /** Sign in with Apple's Hide My Email hands us a relay address, not theirs. */
   hidesEmail: boolean;
+  /** What they told bower to call them, from "introduce yourself". Null until they do. */
+  firstName: string | null;
+  lastName: string | null;
   createdAt: string;
   lastSignInAt: string | null;
   /** Where they sell: GB or AU. */
@@ -77,6 +80,8 @@ export async function fetchAccounts(): Promise<Account[]> {
       id: u.id,
       email,
       hidesEmail: !!email && email.endsWith("@privaterelay.appleid.com"),
+      firstName: (p?.first_name as string | null | undefined) ?? null,
+      lastName: (p?.last_name as string | null | undefined) ?? null,
       createdAt: u.created_at,
       lastSignInAt: u.last_sign_in_at ?? null,
       market: (p?.market as string | undefined) ?? "GB",

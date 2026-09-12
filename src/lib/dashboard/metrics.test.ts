@@ -27,6 +27,8 @@ function account(over: Partial<Account>): Account {
     id: FRIEND,
     email: "sam@example.com",
     hidesEmail: false,
+    firstName: null,
+    lastName: null,
     createdAt: "2026-09-10T10:00:00.000Z",
     lastSignInAt: null,
     market: "GB",
@@ -133,6 +135,16 @@ describe("labelFor", () => {
     expect(labelFor(accounts, OWNER)).toBe("you");
     expect(labelFor(accounts, "r")).toBe("hidden email · abc123xy");
     expect(labelFor(accounts, "gone-000000")).toMatch(/^deleted/);
+  });
+
+  it("prefers the full name from 'introduce yourself' over the email", () => {
+    const accounts = [account({ firstName: "Jada", lastName: "Ross" })];
+    expect(labelFor(accounts, FRIEND)).toBe("Jada Ross");
+  });
+
+  it("falls back to just the first name when there is no last name yet", () => {
+    const accounts = [account({ firstName: "Jada", lastName: null })];
+    expect(labelFor(accounts, FRIEND)).toBe("Jada");
   });
 });
 

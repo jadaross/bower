@@ -25,6 +25,11 @@ export interface Profile {
   preferredPlatform: Platform;
   /** Opt-in facts about the seller a listing may state. See `seller-notes.ts`. */
   sellerNotes: SellerNote[];
+  /** What the seller told bower to call them, from "introduce yourself". The
+   *  app greets with this alone; both are null until they do. */
+  firstName: string | null;
+  /** Collected alongside `firstName`. Shown in the owner's dashboard, never in the app. */
+  lastName: string | null;
   /** Generations this month. */
   allowance: AllowanceState;
   /** Deep researches this month. */
@@ -36,6 +41,8 @@ interface ProfileRow {
   enabled_platforms: Platform[];
   preferred_platform: Platform;
   seller_notes: string[] | null;
+  first_name: string | null;
+  last_name: string | null;
   reads_used: number;
   reads_limit: number | null;
   searches_used: number;
@@ -44,7 +51,7 @@ interface ProfileRow {
 }
 
 const SELECT =
-  "market, enabled_platforms, preferred_platform, seller_notes, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
+  "market, enabled_platforms, preferred_platform, seller_notes, first_name, last_name, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
 
 function toProfile(row: ProfileRow): Profile {
   const periodStart = new Date(row.allowance_period_start);
@@ -58,6 +65,8 @@ function toProfile(row: ProfileRow): Profile {
     enabledPlatforms: row.enabled_platforms,
     preferredPlatform: row.preferred_platform,
     sellerNotes: SELLER_NOTES.filter((n) => (row.seller_notes ?? []).includes(n)),
+    firstName: row.first_name,
+    lastName: row.last_name,
     allowance: { used: row.reads_used, limit: row.reads_limit, resetsAt: resets.toISOString() },
     searches: { used: row.searches_used, limit: row.searches_limit, resetsAt: resets.toISOString() },
   };
@@ -220,4 +229,39 @@ export async function setSellerNotes(
 /** The caller's seller notes, for the listing prompts. Empty when none are on. */
 export async function getSellerNotes(token: string): Promise<SellerNote[]> {
   return (await getProfile(token)).sellerNotes;
+}
+
+export class InvalidName extends Error {}
+
+/** Trimmed, non-empty, and short enough to show back anywhere a name fits. */
+export function validateName(input: unknown, field: "First name" | "Last name" = "First name"): string {
+  if (typeof input !== "string") {
+    throw new InvalidName(`${field} must be a string`);
+  }
+  const trimmed = input.trim();
+  if (trimmed.length === 0) {
+    throw new InvalidName(`${field} cannot be empty`);
+  }
+  if (trimmed.length > 60) {
+    throw new InvalidName(`${field} is too long`);
+  }
+  return trimmed;
+}
+
+/** Always written together — "introduce yourself" is the only writer, and asks for both. */
+export async function setName(
+  token: string,
+  userId: string,
+  firstName: string,
+  lastName: string
+): Promise<Profile> {
+  const { data, error } = await userClient(token)
+    .from("profiles")
+    .update({ first_name: firstName, last_name: lastName })
+    .eq("id", userId)
+    .select(SELECT)
+    .single();
+
+  if (error) throw new Error(`Could not update name: ${error.message}`);
+  return toProfile(data as ProfileRow);
 }
