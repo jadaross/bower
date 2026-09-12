@@ -185,6 +185,11 @@ table.t td.nw { white-space: nowrap; }
 .chart .slot:hover .mark { opacity: 0.75; }
 .chart .slot:hover .cap { fill: var(--text); }
 .chart .cap { font-size: 10.5px; fill: transparent; }
+.chart .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .line.dashed { stroke-dasharray: 4 4; stroke-width: 1.5; }
+.chart circle.mark { stroke: var(--card); stroke-width: 2; }
+.chart .target { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 2 4; }
+.legend i.dash { height: 2px; border-radius: 1px; vertical-align: 3px; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin: 8px 0 0; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
 
@@ -200,7 +205,7 @@ table.t td.nw { white-space: nowrap; }
 .meter .fill { height: 100%; background: var(--accent); border-radius: 3px; }
 .meter .fill.warn { background: var(--pollen); } .meter .fill.full { background: var(--coral); }
 
-.heat { display: grid; grid-template-columns: 36px repeat(24, 1fr); gap: 2px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.heat { max-width: 760px; display: grid; grid-template-columns: 36px repeat(24, 1fr); gap: 2px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
 .heat .cell { aspect-ratio: 1; border-radius: 3px; background: var(--seq-1); }
 .heat .cell[data-l="1"] { background: var(--seq-2); } .heat .cell[data-l="2"] { background: var(--seq-3); }
 .heat .cell[data-l="3"] { background: var(--seq-4); } .heat .cell[data-l="4"] { background: var(--seq-5); }
@@ -251,3 +256,9 @@ blockquote.note {
 }
 .signin .err { color: var(--bad); font-size: 13px; margin: 12px 0 0; }
 .signin .why { color: var(--muted); font-size: 12.5px; margin: 14px 0 0; }
+
+/* ── Speed ──────────────────────────────────────────────────────────────── */
+table.t td.spread { padding-top: 6px; padding-bottom: 6px; }
+.spread-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 22px; }
+.spread-bars .b { display: flex; align-items: flex-end; width: 9px; height: 100%; background: var(--subtle); border-radius: 2px; }
+.spread-bars .b > span { display: block; width: 100%; border-radius: 2px; min-height: 0; }

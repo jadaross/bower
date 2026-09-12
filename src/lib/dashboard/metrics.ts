@@ -835,6 +835,145 @@ export function healthStats(data: DashboardData): HealthStats {
   };
 }
 
+// ── Speed ──────────────────────────────────────────────────────────────────
+
+/**
+ * What a person waits on, rather than what the model did. A market check is
+ * one task however many platforms it fanned out to, and its wait is the
+ * slowest of them. Rejected reads stop early and errors never finish, so
+ * neither counts as a wait.
+ */
+export type Task = "read" | "check" | "switch" | "chips";
+
+export const TASKS: { task: Task; label: string; what: string; target: number; edges: number[] }[] = [
+  { task: "read", label: "The read", what: "photos to a written listing", target: 20, edges: [5, 10, 15, 20, 30] },
+  { task: "check", label: "A market check", what: "every enabled platform, the slowest one", target: 120, edges: [30, 60, 90, 120, 180] },
+  { task: "switch", label: "A switch", what: "another platform or tone", target: 15, edges: [3, 6, 9, 12, 15] },
+  { task: "chips", label: "Chips", what: "a rewrite from the chips tapped", target: 15, edges: [3, 6, 9, 12, 15] },
+];
+
+export interface Bucket {
+  label: string;
+  count: number;
+}
+
+export interface TaskSpeed {
+  task: Task;
+  label: string;
+  what: string;
+  n: number;
+  p50: number | null;
+  p95: number | null;
+  max: number | null;
+  /** Seconds a person should not have to wait beyond. */
+  target: number;
+  /** How many waits went past the target. */
+  over: number;
+  buckets: Bucket[];
+}
+
+export interface Wait {
+  at: string;
+  task: Task;
+  who: string;
+  userId: string | null;
+  sessionId: string | null;
+  seconds: number;
+  traceId: string;
+  /** For a check, the platform that held it up. */
+  detail: string | null;
+}
+
+export interface SpeedStats {
+  tasks: TaskSpeed[];
+  /** Per day, per task: the typical and the slow wait. Null on days with none. */
+  byDay: { day: string; typical: Record<Task, number | null>; slow: Record<Task, number | null> }[];
+  /** Per platform in a market check: how long it took, and how often it was the one holding the check up. */
+  checkByPlatform: { platform: string; n: number; p50: number | null; p95: number | null; heldUp: number }[];
+  checks: number;
+  readByPhotos: { photos: number; n: number; p50: number | null; p95: number | null }[];
+  slowest: Wait[];
+}
+
+function stats(values: number[]): { p50: number | null; p95: number | null; max: number | null } {
+  const sorted = [...values].sort((a, b) => a - b);
+  return { p50: percentile(sorted, 50), p95: percentile(sorted, 95), max: sorted.at(-1) ?? null };
+}
+
+/** Bucket waits by the task's edges; the last bucket is everything past the final edge. */
+export function bucketise(values: number[], edges: number[]): Bucket[] {
+  const labels = edges.map((e, i) => (i === 0 ? `under ${e}s` : `${edges[i - 1]}–${e}s`)).concat(`over ${edges.at(-1)}s`);
+  const counts = new Array<number>(labels.length).fill(0);
+  for (const v of values) {
+    const i = edges.findIndex((e) => v < e);
+    counts[i === -1 ? edges.length : i]++;
+  }
+  return labels.map((label, i) => ({ label, count: counts[i] }));
+}
+
+/** Every wait in the range, one per task instance. */
+export function waits(data: DashboardData): Wait[] {
+  const out: Wait[] = [];
+  const who = (userId: string | null) => labelFor(data.accounts, userId);
+  for (const g of data.generations) {
+    if (g.route === "valuate" || isError(g) || g.latency === null) continue;
+    if (g.route === "analyse" && !isListing(g)) continue;
+    const task: Task = g.route === "analyse" ? "read" : g.route === "format" ? "switch" : "chips";
+    out.push({ at: g.startTime, task, who: who(g.userId), userId: g.userId, sessionId: g.sessionId, seconds: g.latency, traceId: g.traceId, detail: null });
+  }
+  const slowestPlatform = new Map<string, { platform: string | null; latency: number }>();
+  for (const g of data.generations) {
+    if (g.route !== "valuate" || g.latency === null) continue;
+    const best = slowestPlatform.get(g.traceId);
+    if (!best || best.latency < g.latency) slowestPlatform.set(g.traceId, { platform: g.platform, latency: g.latency });
+  }
+  for (const c of marketChecks(data.generations)) {
+    if (c.errored || c.latency <= 0) continue;
+    out.push({ at: c.startTime, task: "check", who: who(c.userId), userId: c.userId, sessionId: c.sessionId, seconds: c.latency, traceId: c.traceId, detail: slowestPlatform.get(c.traceId)?.platform ?? null });
+  }
+  return out;
+}
+
+export function speedStats(data: DashboardData): SpeedStats {
+  const all = waits(data);
+  const gens = data.generations;
+
+  const tasks = TASKS.map((t) => {
+    const secs = all.filter((w) => w.task === t.task).map((w) => w.seconds);
+    return { ...t, n: secs.length, ...stats(secs), over: secs.filter((s) => s > t.target).length, buckets: bucketise(secs, t.edges) };
+  });
+
+  const days = dayKeys(data);
+  const perDay = new Map<string, Record<Task, number[]>>(days.map((d) => [d, { read: [], check: [], switch: [], chips: [] }]));
+  for (const w of all) perDay.get(dayKey(w.at))?.[w.task].push(w.seconds);
+  const byDay = days.map((day) => {
+    const d = perDay.get(day)!;
+    const pick = (p: 50 | 95) => (task: Task) => percentile([...d[task]].sort((a, b) => a - b), p);
+    const typical = Object.fromEntries(TASKS.map((t) => [t.task, pick(50)(t.task)])) as Record<Task, number | null>;
+    const slow = Object.fromEntries(TASKS.map((t) => [t.task, pick(95)(t.task)])) as Record<Task, number | null>;
+    return { day, typical, slow };
+  });
+
+  const checks = all.filter((w) => w.task === "check");
+  const heldUp = countBy(checks, (w) => w.detail, 100);
+  const checkByPlatform = [...groupBy(gens.filter((g) => g.route === "valuate" && g.platform && !isError(g) && g.latency !== null), (g) => g.platform!)]
+    .map(([platform, gs]) => ({ platform, n: gs.length, ...stats(gs.map((g) => g.latency!)), heldUp: heldUp.find((h) => h.label === platform)?.count ?? 0 }))
+    .sort((a, b) => (b.p50 ?? 0) - (a.p50 ?? 0));
+
+  const readByPhotos = [...groupBy(gens.filter((g) => isListing(g) && g.latency !== null && photoCountOf(g) !== null), (g) => String(photoCountOf(g)))]
+    .map(([photos, gs]) => ({ photos: Number(photos), n: gs.length, ...stats(gs.map((g) => g.latency!)) }))
+    .sort((a, b) => a.photos - b.photos);
+
+  return {
+    tasks,
+    byDay,
+    checkByPlatform,
+    checks: checks.length,
+    readByPhotos,
+    slowest: [...all].sort((a, b) => b.seconds - a.seconds).slice(0, 12),
+  };
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 export function groupBy<T>(items: T[], key: (t: T) => string): Map<string, T[]> {

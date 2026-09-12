@@ -15,6 +15,7 @@ export const TABS = [
   { id: "items", href: "/admin/items", label: "Items & photos" },
   { id: "feedback", href: "/admin/feedback", label: "Feedback" },
   { id: "cost", href: "/admin/cost", label: "Cost" },
+  { id: "speed", href: "/admin/speed", label: "Speed" },
   { id: "health", href: "/admin/health", label: "Health" },
 ] as const;
 

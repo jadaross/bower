@@ -15,6 +15,9 @@ import {
   rangeFor,
   recentEvents,
   rejectionOf,
+  speedStats,
+  bucketise,
+  waits,
   summary,
   type DashboardData,
 } from "./metrics";
@@ -300,5 +303,57 @@ describe("healthStats", () => {
     expect(h.errors).toBe(1);
     expect(h.errorList[0].message).toBe("overloaded");
     expect(h.latency.find((l) => l.route === "analyse")?.p50).toBe(4);
+  });
+});
+
+describe("speedStats", () => {
+  it("buckets waits by the task's edges, with everything past the last edge in one bucket", () => {
+    expect(bucketise([1, 5, 7, 40], [5, 10, 15, 20, 30])).toEqual([
+      { label: "under 5s", count: 1 },
+      { label: "5–10s", count: 2 },
+      { label: "10–15s", count: 0 },
+      { label: "15–20s", count: 0 },
+      { label: "20–30s", count: 0 },
+      { label: "over 30s", count: 1 },
+    ]);
+  });
+
+  it("counts a market check as one wait, the slowest platform, and skips rejections and errors", () => {
+    const d = data({
+      generations: [
+        gen({ latency: 8, input: { photoCount: 3 } }),
+        gen({ latency: 14, input: { photoCount: 5 } }),
+        gen({ latency: 1, output: { rejected: "not_clothing" } }),
+        gen({ latency: 30, level: "ERROR" }),
+        gen({ name: "valuate:vinted", traceId: "T1", latency: 40 }),
+        gen({ name: "valuate:depop", traceId: "T1", latency: 95 }),
+        gen({ name: "valuate:vinted", traceId: "T2", latency: 50 }),
+        gen({ name: "valuate:depop", traceId: "T2", latency: 20 }),
+        gen({ name: "format", latency: 6 }),
+        gen({ name: "refine", latency: 4 }),
+      ],
+    });
+    const all = waits(d);
+    expect(all.filter((w) => w.task === "read").map((w) => w.seconds).sort()).toEqual([14, 8]);
+    const checks = all.filter((w) => w.task === "check").sort((a, b) => a.seconds - b.seconds);
+    expect(checks.map((w) => [w.seconds, w.detail])).toEqual([[50, "vinted"], [95, "depop"]]);
+
+    const s = speedStats(d);
+    const read = s.tasks.find((t) => t.task === "read")!;
+    expect(read.n).toBe(2);
+    expect(read.p50).toBe(8);
+    expect(read.max).toBe(14);
+    expect(read.over).toBe(0);
+    const check = s.tasks.find((t) => t.task === "check")!;
+    expect(check.n).toBe(2);
+    expect(check.max).toBe(95);
+    expect(s.checks).toBe(2);
+    expect(s.checkByPlatform.map((p) => [p.platform, p.n, p.heldUp])).toEqual([["vinted", 2, 1], ["depop", 2, 1]]);
+    expect(s.readByPhotos.map((r) => [r.photos, r.p50])).toEqual([[3, 8], [5, 14]]);
+    expect(s.slowest[0]).toMatchObject({ task: "check", seconds: 95, traceId: "T1" });
+    const day = s.byDay.find((r) => r.day === "2026-09-11")!;
+    expect(day.typical.read).toBe(8);
+    expect(day.slow.check).toBe(95);
+    expect(s.byDay.find((r) => r.day === "2026-09-10")!.typical.read).toBeNull();
   });
 });

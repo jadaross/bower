@@ -26,7 +26,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 ```
 
 ```bash
-npm test         # Vitest — 222 tests across the backend
+npm test         # Vitest — 332 tests across the backend
 ```
 
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
@@ -73,8 +73,8 @@ work it had not enabled.
 ### The owner's dashboard
 
 `/admin` is a password-gated (`DASHBOARD_PASSWORD`), server-rendered read of Supabase
-(service role) and Langfuse (REST, the project keys) — six tabs: Overview, People,
-Items & photos, Feedback, Cost, Health. No client JS; charts are inline SVG in the
+(service role) and Langfuse (REST, the project keys) — seven tabs: Overview, People,
+Items & photos, Feedback, Cost, Speed, Health. No client JS; charts are inline SVG in the
 app's palette. `src/lib/dashboard/metrics.ts` holds every number as a pure function
 over the fetched data and is the tested part; `data.ts` fetches and caches for a
 minute; `langfuse.ts`/`supabase.ts` are the read clients. It reads the `production`
@@ -106,7 +106,7 @@ fanned out to.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 222 tests. Client: eight screens — the dark welcome
+the Valuation, account deletion, 332 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;

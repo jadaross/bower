@@ -117,6 +117,106 @@ export function Columns({ days, series, stacked = true, format = (v) => `${v}`, 
   );
 }
 
+export interface LineSeries {
+  key: string;
+  label: string;
+  color: string;
+  /** Null where there is nothing that day; the line breaks there. */
+  values: (number | null)[];
+  dashed?: boolean;
+}
+
+interface LinesProps {
+  days: string[];
+  series: LineSeries[];
+  format?: (v: number) => string;
+  height?: number;
+  /** A horizontal reference, e.g. the wait a person should not go past. */
+  target?: { value: number; label: string };
+}
+
+/** Daily lines with a marker at every real point. Gaps where a day had nothing. */
+export function Lines({ days, series, format = (v) => `${v}`, height = 160, target }: LinesProps) {
+  const W = 720;
+  const padL = 34;
+  const padR = 6;
+  const padT = 8;
+  const padB = 22;
+  const plotW = W - padL - padR;
+  const plotH = height - padT - padB;
+  const n = Math.max(days.length, 1);
+  const present = series.flatMap((s) => s.values.filter((v): v is number => v !== null));
+  const max = niceMax(Math.max(...present, target?.value ?? 0, 0));
+  const slot = plotW / n;
+  const x = (i: number) => padL + slot * i + slot / 2;
+  const y = (v: number) => padT + plotH - (v / max) * plotH;
+  const ticks = [0, max / 2, max];
+  const labelEvery = Math.ceil(n / 8);
+
+  const pathFor = (values: (number | null)[]) => {
+    let d = "";
+    let pen = false;
+    values.forEach((v, i) => {
+      if (v === null) { pen = false; return; }
+      d += `${pen ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)} `;
+      pen = true;
+    });
+    return d;
+  };
+
+  return (
+    <div>
+      <svg className="chart" viewBox={`0 0 ${W} ${height}`} role="img" aria-label="Daily lines">
+        {ticks.map((t) => (
+          <g key={t}>
+            <line className="grid-line" x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} />
+            <text x={padL - 6} y={y(t) + 3.5} textAnchor="end">{format(t)}</text>
+          </g>
+        ))}
+        {target && (
+          <g>
+            <line className="target" x1={padL} x2={W - padR} y1={y(target.value)} y2={y(target.value)} />
+            {!ticks.includes(target.value) && <text x={W - padR} y={y(target.value) - 4} textAnchor="end">{target.label}</text>}
+          </g>
+        )}
+        {series.map((s) => (
+          <path key={s.key} className={`line${s.dashed ? " dashed" : ""}`} d={pathFor(s.values)} stroke={`var(${s.color})`} />
+        ))}
+        {days.map((day, i) => {
+          const pts = series.map((s) => [s, s.values[i]] as const).filter((p): p is readonly [LineSeries, number] => p[1] !== null);
+          const tip = pts.length ? `${dayLabel(day)}\n${pts.map(([s, v]) => `${s.label}: ${format(v)}`).join("\n")}` : `${dayLabel(day)}\nnothing`;
+          return (
+            <g key={day} className="slot">
+              <title>{tip}</title>
+              <rect x={padL + slot * i} y={padT} width={slot} height={plotH} fill="transparent" />
+              {pts.map(([s, v]) => <circle key={s.key} className="mark" cx={x(i)} cy={y(v)} r={4} fill={`var(${s.color})`} />)}
+              {i % labelEvery === 0 && <text x={x(i)} y={height - 6} textAnchor="middle">{dayLabel(day)}</text>}
+            </g>
+          );
+        })}
+      </svg>
+      {series.length > 1 && (
+        <div className="legend">
+          {series.map((s) => <span key={s.key}><i className={s.dashed ? "dash" : ""} style={{ background: `var(${s.color})` }} />{s.label}</span>)}
+        </div>
+      )}
+      <details className="tableview">
+        <summary>Table</summary>
+        <div className="tablewrap">
+          <table className="t">
+            <thead><tr><th>Day</th>{series.map((s) => <th key={s.key} className="num">{s.label}</th>)}</tr></thead>
+            <tbody>
+              {days.map((d, i) => (
+                <tr key={d}><td>{dayLabel(d)}</td>{series.map((s) => <td key={s.key} className="num">{s.values[i] === null ? "—" : format(s.values[i]!)}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  );
+}
+
 interface BarsProps {
   items: { label: string; count: number; hint?: string }[];
   format?: (v: number) => string;
