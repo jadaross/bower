@@ -117,8 +117,9 @@ quiet week. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
 
-**Waiting on:** an App Store Connect record and the first archive (#33) — human
-steps in Xcode. The ladder above v1 is ordered in #29.
+**Waiting on:** the human steps in #54 (support email, screenshots, review contact).
+What comes next, in order, is `docs/roadmap.md`; the free tier, the price of Plus,
+running costs and break-even are ADR-0010.
 
 Two decisions that shape the client and are easy to undo by accident: sign-in is
 **Apple only** (a second method without account linking creates two accounts —

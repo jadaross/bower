@@ -279,6 +279,10 @@ in this repo.
 
 ## 7. Recommendation
 
+> **Decided 2026-09-12 in [ADR-0010](../adr/0010-free-tier-and-plus.md)**, on a
+> cost basis the valuation spike changed (Haiku on eBay and Vinted, not
+> `max_uses: 1`). Where this section and the ADR differ, the ADR wins.
+
 **Prerequisite, not optional: pull cost levers 1 and 2 in §7.6 before the paywall
 ships.** Search the Preferred Platform by default, one web search per platform. With
 that done a search is ~$0.11–0.19; without it £4.99 does not work at any allowance
