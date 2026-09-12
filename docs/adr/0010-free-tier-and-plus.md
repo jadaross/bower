@@ -193,6 +193,50 @@ against a £1–3 cost per install; growth has to be organic (TikTok, the seller
 subreddits, France). And the UK storefront for this category tops out at ~40
 ratings today; "Wishful" is a multi-market number by construction.
 
+## Standing mode: never a negative month
+
+Decided 12 September 2026: bower is not being marketed. It goes on the App
+Store and sits there, and **the monthly run-rate must not go negative** once
+the first couple of months are past. That rules the design more than the
+growth tables above do.
+
+With no marketing, usage cost is not the risk: every user's cost is bounded by
+their meter (a free user at most 28p a month at 9p a check, a light subscriber
+about 22p against £3.46 in). The risk is a fixed bill with too few subscribers
+to cover it. So:
+
+| Cost | Standing mode | Why |
+|---|---|---|
+| Apple Developer Program | £79 a year, sunk | Paid whether or not bower earns |
+| Vercel Pro | **£14.80 a month — the one bill** | Hobby is non-commercial; Plus makes the API commercial |
+| Supabase | Free | Text-only history; accept no backups. A weekly cron ping from Vercel stops the project pausing when nobody is using it |
+| Langfuse | Hobby, free | Well within the free allowance at this volume |
+| Domain | none | The `.vercel.app` URL and a Gmail support address are enough |
+| Anthropic | usage, **with a monthly spend limit set in the console** | The hard ceiling on the only bill that scales. Start it at £30 |
+
+Break-even in standing mode, light usage, ~30 organic installs a month costing
+about £2 in free-tier usage:
+
+| | £4.99 | £5.99 |
+|---|---|---|
+| Net per light subscriber a month | £3.24 | £3.94 |
+| Subscribers to cover Vercel and the free users (£17) | **6** | **5** |
+| Subscribers to cover Apple's fee as well (£23.40) | 8 | 6 |
+
+Holding 6 subscribers at 2% conversion and 14% churn needs about 40 installs a
+month arriving on their own. That is plausible for a UK App Store listing in
+this category but not certain, so the fallback is decided now rather than
+later: **if after six months there are fewer than 5 subscribers, move the five
+API routes off Vercel** to a host whose free tier permits commercial use
+(Supabase Edge Functions or Cloudflare Workers; the routes are plain
+TypeScript on the Anthropic SDK and port cleanly), leaving the dashboard on
+Vercel Hobby. Fixed cost is then £0 and a negative month is impossible by
+construction. The annual plan and the £5.99 price both move the bar down and
+should be in from launch in this mode.
+
+Cash, not profit: Apple pays out once the balance passes its minimum (about
+$150 ⚠️), so at 6 subscribers the money arrives every few months, not monthly.
+
 ## Consequences
 
 - `docs/roadmap.md` puts market check v2 first, then Plus, then the App Store
