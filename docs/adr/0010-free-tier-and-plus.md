@@ -27,7 +27,7 @@ puts it first.
 - Chips and platform switching stay free, **and the app says so** — users meter
   themselves anxiously and stop exploring when they think a switch costs.
 - The meters already exist (`reads_limit`, `searches_limit`, migration 0011).
-  Launch **1.0 free at these numbers**, so 1.1 only ever adds. Never take an
+  These are the numbers from the first App Store build. Never take an
   allowance away from people who have it.
 
 ### bower Plus — £4.99 a month
@@ -51,6 +51,15 @@ puts it first.
 
 The paywall copy sells **the price and the two-second read**, never "AI
 descriptions" — sellers do not value those and buyers distrust them.
+
+### Plus ships in 1.0
+
+bower does not go to the App Store until Plus is in the build. A free launch
+with a paywall to follow means either cutting an allowance later or carrying
+every install as pure cost with nowhere to send the people who hit the wall;
+the competitor research says billing surprises are what kill ratings, so the
+purchase flow gets one launch and one review. TestFlight keeps the 10-and-3
+meters until then.
 
 ## Unit costs
 
@@ -131,17 +140,17 @@ is generous by design, and the 90-day review should look at it with real numbers
 
 ## Year one
 
-A month-by-month model (2% conversion, 14% monthly churn, Plus from month 2,
-Supabase Pro from month 3, Apple paying five weeks after month end, £12 for a
+A month-by-month model (2% conversion, 14% monthly churn, Plus from launch,
+Supabase Pro from month 2, Apple paying five weeks after month end, £12 for a
 domain). "Cash" is what has actually left or reached the bank by month 12;
 "earned" counts what Apple still owes.
 
 | Scenario | Installs, year | Subscribers at m12 | Earned, year | Cash at m12 | Apple still owes |
 |---|---|---|---|---|---|
-| Quiet — 100 a month, no marketing | 1,200 | 12 | −£430 | −£520 | £80 |
-| Works — 200 a month, +20% a month | 7,900 | 103 | −£460 | −£1,120 | £650 |
-| Wishful — 300 a month, +35%, France in | 30,600 | 447 | −£980 | −£3,680 | £2,690 |
-| Same three, all-Haiku check | | | −£300 / **+£240** / **+£1,430** | −£400 / −£430 / −£1,280 | |
+| Quiet — 100 a month, no marketing | 1,200 | 12 | −£420 | −£520 | £80 |
+| Works — 200 a month, +20% a month | 7,900 | 104 | −£430 | −£1,100 | £660 |
+| Wishful — 300 a month, +35%, France in | 30,600 | 448 | −£930 | −£3,640 | £2,700 |
+| Same three, all-Haiku check | | | −£290 / **+£280** / **+£1,500** | −£390 / −£390 / −£1,210 | |
 
 Read it this way. **Year one costs you money in every scenario**, somewhere
 between £400 and £1,000 of your own cash on the cost basis this ADR assumes,
@@ -159,12 +168,13 @@ ratings today; "Wishful" is a multi-market number by construction.
 
 ## Consequences
 
-- `docs/roadmap.md` puts market check v2 before the App Store, and Plus in 1.1.
+- `docs/roadmap.md` puts market check v2 first, then Plus, then the App Store
+  with both in the build.
 - The meter needs an entitlement writer: App Store Server Notifications v2 (or
   RevenueCat) setting `reads_limit = null` and `searches_limit = 10` on the
   profile, server-side, never from the client — the same rule as Enabled
   Platforms. The schema needs nothing.
-- Vercel moves to Pro on the day Plus goes live, not before.
+- Vercel moves to Pro on launch day, not before.
 - `docs/research/pricing.md` §7 stands as the study; where it and this ADR
   differ (annual price and timing, the pack, monthly free checks, the
   multi-platform check), this ADR wins.

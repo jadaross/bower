@@ -39,10 +39,11 @@ titled "App Store submission — human steps".
    in `screenshots/`; export at 1320×2868 PNG; drop them in that folder in
    order and run `node scripts/asc-screenshots.mjs`, or upload in ASC by hand.
    The six placeholders currently on the record are the raw captures.
-3. **Pricing.** Nothing is chosen yet, and a price (even Free) is required
-   before submission; the UK availability row shows `CANNOT_SELL` until it is.
-   Free is one API call (`appPriceSchedules` with the GBR £0 price point) when
-   the decision is made. **Decision still open** — see *If pricing changes*.
+3. **Pricing.** Decided in ADR-0010: the app is free to download
+   (`appPriceSchedules` with the GBR £0 price point) with a **bower Plus**
+   subscription at £4.99 a month inside it, and it does not go to the App
+   Store until Plus is in the build. The UK availability row shows
+   `CANNOT_SELL` until the price is set. See *Plus before launch*.
 4. **Review contact.** Set `ASC_CONTACT_FIRST`, `ASC_CONTACT_LAST`,
    `ASC_CONTACT_EMAIL`, `ASC_CONTACT_PHONE` in `.asc-key.env` and re-run
    `node scripts/asc-metadata.mjs`; ASC requires a phone number. This also
@@ -78,12 +79,17 @@ pick the day.
 - Delete the account from Profile.
 - Load the privacy URL and the support URL.
 
-## If pricing changes before launch
+## Plus before launch
 
-A paid tier is StoreKit and a real review of the purchase flow:
+Plus is StoreKit and a real review of the purchase flow (ADR-0010 has the
+tiers; `docs/roadmap.md` has the order):
 
-- A **subscription or consumable** in ASC (Monetisation → In-App Purchases)
-  with its own metadata, screenshot and review notes.
+- An **auto-renewable subscription** in ASC (Monetisation → In-App Purchases),
+  one subscription group, monthly only at launch, with its own metadata,
+  screenshot and review notes.
+- **Small Business Program** enrolment as Account Holder, before the first
+  sale — 15% instead of 30% on every month.
+- **Vercel Pro** on launch day; Hobby is non-commercial by policy.
 - **Paid Apps agreement**, bank account and tax forms (W-8BEN for a UK
   individual) before the version can be submitted.
 - The meter reads entitlements from the App Store receipt **server-side**
@@ -95,5 +101,6 @@ A paid tier is StoreKit and a real review of the purchase flow:
   the app (3.1.2); the privacy label gains **Purchase History**.
 - First IAP reviews are stricter and slower; leave a week.
 
-Free with the meter now, and a paid tier in 1.1 once the dashboard says what
-people actually use, is the shorter path to being live.
+The shorter path would be free now and Plus in 1.1; it was considered and
+rejected in ADR-0010, because the purchase flow should be reviewed once and an
+allowance should never be cut after people have it.

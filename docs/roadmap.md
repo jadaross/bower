@@ -41,8 +41,8 @@ less.
 | # | Rung | Why here |
 |---|---|---|
 | 1 | **Market check v2** (above) | Makes every row of ADR-0010 positive. Backend only |
-| 2 | **App Store 1.0, free, at 5 listings and 2 checks** | The human steps in #54. Put the three lines nobody in the category says in the listing copy: *no login, no bot, no ban risk*; *a price per platform, with the listings it came from*; *your photos are never stored*. Say switching and chips are free |
-| 3 | **bower Plus in 1.1** | StoreKit, the Paid Apps agreement, Small Business Program, Vercel Pro, and a server-side entitlement writer for `reads_limit`/`searches_limit`. The paywall sells the price and the two-second read |
+| 2 | **bower Plus** | StoreKit, the Paid Apps agreement, Small Business Program, and a server-side entitlement writer for `reads_limit`/`searches_limit`. The paywall sells the price and the two-second read. Free drops to 5 listings and 2 checks in the same build. Not optional before launch: bower does not go to the App Store without it (ADR-0010) |
+| 3 | **App Store 1.0, with Plus in it** | The human steps in #54, plus Vercel Pro on the day. Put the three lines nobody in the category says in the listing copy: *no login, no bot, no ban risk*; *a price per platform, with the listings it came from*; *your photos are never stored*. Say switching and chips are free |
 | 4 | **Ireland (#56), then decide on France** | Ireland is data entry. France is the category's biggest storefront by an order of magnitude and needs a French listing voice, so it is a real feature and a real decision |
 | 5 | **Scout Mode** | The v2 headline since `CONTEXT.md` was written. Only viable once a check takes seconds; the Valuation is already independent of why it was asked (ADR-0004) |
 | 6 | **eBay Browse API spike** | App-token only, no seller OAuth (ADR-0003 is untouched). Would make the dearest platform's band near-free and structured. After Haiku proves out, because it changes what "the search step" even is |
