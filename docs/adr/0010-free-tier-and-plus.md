@@ -111,32 +111,51 @@ Assumptions, all from the study: install → paid 2% (freemium median 2.1%,
 shopping 1.3%); 30% of installs use the free tier in month one, 10% keep using
 it; monthly-plan retention ~17% at a year, so a subscriber lasts about six months.
 
-- A Plus subscriber is worth **£1.92** a month after their own usage.
-- At 2% conversion each subscriber arrives with ~5 lingering free users, ~75p a
-  month. Call a subscriber **£1.17 net**.
-- A cohort of 100 installs costs ~£7.50 in its first month (the free tier) and
-  brings 2 subscribers; it pays for itself in month two.
+The right unit is **an install**, because the free tier is paid for per install
+and the subscribers arrive per install. Over its life (a subscriber lasts ~7
+months at 14% monthly churn; a lingering free user about the same):
 
-| Fixed costs | Subscribers to break even | Installs to get there (2%) | Installs a month to stay there |
-|---|---|---|---|
-| £22 (minimum) | **~20** | ~1,000 | ~175 |
-| £41 (with Supabase Pro) | ~35 | ~1,750 | ~300 |
-| £62 (with Langfuse Core) | ~53 | ~2,650 | ~450 |
+| Per install, lifetime | Depop on Sonnet (19p check) | All Haiku (9p check) |
+|---|---|---|
+| Revenue net of the subscriber's own usage (2% × £1.92 × 7) | 27p | 36p |
+| Free tier: month one (30% × 25p) + lingering (10% × 15p × 7) | 18p | 10p |
+| **Net per install** | **10p** | **26p** |
+| Installs a month to cover £22 fixed | ~220 | ~85 |
+| Installs a month to cover £41 fixed | ~410 | ~160 |
+| Subscribers that many installs holds at steady state | ~30 / ~58 | ~12 / ~23 |
 
-And what the same arithmetic says at scale, after fixed costs of £41:
+A cohort of 100 installs is £5 down after month one and pays itself back in
+month four. **The free tier costs more than serving the subscribers does**,
+which makes it the second dial after the model choice: 2 free checks a month
+is generous by design, and the 90-day review should look at it with real numbers.
 
-| Subscribers | Net a month |
-|---|---|
-| 20 | −£18 |
-| 100 | £76 |
-| 500 | £544 |
-| 1,000 | £1,129 |
+## Year one
 
-Two honest readings of that table. The business is the Anthropic bill: cost,
-not price, is the lever, which is why the eBay Browse API and the Depop model
-question stay on the roadmap. And the UK storefront for this category tops out
-at ~40 ratings today; the competitor research says France and the US are where
-the installs are. A thousand subscribers is a multi-market number.
+A month-by-month model (2% conversion, 14% monthly churn, Plus from month 2,
+Supabase Pro from month 3, Apple paying five weeks after month end, £12 for a
+domain). "Cash" is what has actually left or reached the bank by month 12;
+"earned" counts what Apple still owes.
+
+| Scenario | Installs, year | Subscribers at m12 | Earned, year | Cash at m12 | Apple still owes |
+|---|---|---|---|---|---|
+| Quiet — 100 a month, no marketing | 1,200 | 12 | −£430 | −£520 | £80 |
+| Works — 200 a month, +20% a month | 7,900 | 103 | −£460 | −£1,120 | £650 |
+| Wishful — 300 a month, +35%, France in | 30,600 | 447 | −£980 | −£3,680 | £2,690 |
+| Same three, all-Haiku check | | | −£300 / **+£240** / **+£1,430** | −£400 / −£430 / −£1,280 | |
+
+Read it this way. **Year one costs you money in every scenario**, somewhere
+between £400 and £1,000 of your own cash on the cost basis this ADR assumes,
+because growth is paid for up front through the free tier and Apple pays late.
+What you buy with it is the run-rate you exit the year with: the "Works" case
+ends at 103 subscribers and would net about £150 a month the moment growth
+levelled off; "Wishful" ends at 447 and about £420. Nothing here pays a salary
+in year one. The number that moves the whole table is the cost of a market
+check, not the price of Plus.
+
+Two more honest readings. Paid acquisition cannot work at 10–26p an install
+against a £1–3 cost per install; growth has to be organic (TikTok, the seller
+subreddits, France). And the UK storefront for this category tops out at ~40
+ratings today; "Wishful" is a multi-market number by construction.
 
 ## Consequences
 
