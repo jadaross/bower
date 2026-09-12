@@ -161,6 +161,33 @@ levelled off; "Wishful" ends at 447 and about £420. Nothing here pays a salary
 in year one. The number that moves the whole table is the cost of a market
 check, not the price of Plus.
 
+### Levers, in the "Works" scenario (200 installs a month growing 20%)
+
+Same model, one change at a time. "Earned" is the year; "m12" is the monthly
+run-rate at the end of it. Usage "heavy" is 20 listings and 6 checks a month
+for a subscriber; "light" is two runs a month (2 listings, 2 checks), with free
+users at half that, which is probably closer to a real wardrobe-clearer.
+
+| | Check | Free tier | Price | Conv. | Fixed | Usage | Earned | m12 |
+|---|---|---|---|---|---|---|---|---|
+| A · this ADR as written | 19p | 5L + 2C/mo | £4.99 | 2% | £41 | heavy | −£440 | −£22 |
+| B · all-Haiku | **9p** | 5L + 2C/mo | £4.99 | 2% | £41 | heavy | **+£220** | +£109 |
+| E · B, one free check ever | 9p | 5L + 1C ever | £4.99 | 2% | £41 | heavy | +£330 | +£132 |
+| F · B at £5.99 | 9p | 5L + 2C/mo | **£5.99** | 2% | £41 | heavy | +£570 | +£181 |
+| H · B at 3% conversion | 9p | 5L + 2C/mo | £4.99 | **3%** | £41 | heavy | +£850 | +£239 |
+| K · no Haiku on Depop, but £5.99 and one free check ever | 19p | 5L + 1C ever | £5.99 | 2% | £41 | heavy | +£140 | +£97 |
+| M · this ADR, light usage | 19p | 5L + 2C/mo | £4.99 | 2% | £41 | **light** | +£310 | +£131 |
+| N · all-Haiku, light usage | 9p | 5L + 2C/mo | £4.99 | 2% | £41 | light | **+£720** | +£211 |
+| P · N at £5.99 | 9p | 5L + 2C/mo | £5.99 | 2% | £41 | light | +£1,070 | +£283 |
+| J · everything: 9p, 1C ever, £5.99, 3%, Supabase Free | 9p | 5L + 1C ever | £5.99 | 3% | £22 | heavy | +£1,690 | +£388 |
+
+What the table says, in order of leverage: the **check cost** (A→B, +£660),
+then **conversion** (+£630 a point), then **price** (+£350 for £1), then
+**fixed costs** (+£210 for staying on Supabase Free), and last the **free tier**
+(+£110 for one check ever instead of two a month — not worth the meaner
+product). In the Quiet scenario (100 installs a month, no marketing) no
+combination is profitable except J, barely: **marketing is not optional.**
+
 Two more honest readings. Paid acquisition cannot work at 10–26p an install
 against a £1–3 cost per install; growth has to be organic (TikTok, the seller
 subreddits, France). And the UK storefront for this category tops out at ~40
