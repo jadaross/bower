@@ -225,14 +225,19 @@ about £2 in free-tier usage:
 
 Holding 6 subscribers at 2% conversion and 14% churn needs about 40 installs a
 month arriving on their own. That is plausible for a UK App Store listing in
-this category but not certain, so the fallback is decided now rather than
-later: **if after six months there are fewer than 5 subscribers, move the five
-API routes off Vercel** to a host whose free tier permits commercial use
-(Supabase Edge Functions or Cloudflare Workers; the routes are plain
-TypeScript on the Anthropic SDK and port cleanly), leaving the dashboard on
-Vercel Hobby. Fixed cost is then £0 and a negative month is impossible by
-construction. The annual plan and the £5.99 price both move the bar down and
-should be in from launch in this mode.
+this category but not certain.
+
+**The worst case is bounded, not a bleed.** With zero subscribers the month
+costs Vercel's £14.80 plus whatever free users spend under the Anthropic cap:
+about £15–£20 a month, £180–£240 a year, and it cannot grow past that without
+subscribers arriving, because every free user is metered and the Anthropic
+limit is a hard stop. Each subscriber takes £3–£4 off it; six zero it. Vercel
+Pro is accepted as the cost of leaving the app up. If the balance still
+bothers after six months, the escape is to move the five API routes to a host
+whose free tier permits commercial use (Supabase Edge Functions or Cloudflare
+Workers; plain TypeScript on the Anthropic SDK, a port not a rewrite), which
+takes the fixed cost to £0. The annual plan and the £5.99 price both move the
+bar down and should be in from launch in this mode.
 
 Cash, not profit: Apple pays out once the balance passes its minimum (about
 $150 ⚠️), so at 6 subscribers the money arrives every few months, not monthly.
