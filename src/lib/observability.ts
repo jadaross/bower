@@ -5,7 +5,7 @@ import {
   startObservation,
 } from "@langfuse/tracing";
 import { LangfuseClient } from "@langfuse/client";
-import { langfuseSpanProcessor } from "@/instrumentation";
+import { trace } from "@opentelemetry/api";
 
 /**
  * Langfuse LLM observability (#37), fail-safe and opt-in.
@@ -23,6 +23,16 @@ import { langfuseSpanProcessor } from "@/instrumentation";
  * per-feature filtering) on every observation created within it. `withAuth`
  * wraps the whole request; the streaming analyse call, which runs after the
  * handler returns, re-propagates its own context.
+ *
+ * Nothing in here imports `src/instrumentation.ts`. It used to, to reach the
+ * span processor for `forceFlush` — and Turbopack bundles that module once
+ * for the instrumentation entry and again for the route handlers, so the
+ * routes held a second, never-registered processor and every flush here
+ * emptied an empty queue. Spans only left when the batch timer fired while
+ * the function instance happened to stay warm: about one analyse in four
+ * reached Langfuse. The flush now goes through the OpenTelemetry API's global
+ * provider (`registeredProvider`), which lives on `globalThis` and so is the
+ * same object from every bundle.
  */
 
 export interface TraceContext {
@@ -124,9 +134,24 @@ export function scheduleFlush(): void {
   }
 }
 
+/**
+ * The tracer provider `register()` installed, found through the API's global
+ * rather than by importing the module that built it (see the header). The
+ * global is a proxy whose delegate is the NodeSDK's provider; flushing the
+ * provider flushes every span processor it was given.
+ */
+function registeredProvider(): { forceFlush: () => Promise<void> } | null {
+  const provider = trace.getTracerProvider() as { getDelegate?: () => unknown };
+  const delegate = (typeof provider.getDelegate === "function" ? provider.getDelegate() : provider) as {
+    forceFlush?: unknown;
+  } | null;
+  return typeof delegate?.forceFlush === "function" ? (delegate as { forceFlush: () => Promise<void> }) : null;
+}
+
 export async function flushObservability(): Promise<void> {
+  if (!observabilityEnabled()) return;
   try {
-    await langfuseSpanProcessor?.forceFlush();
+    await registeredProvider()?.forceFlush();
   } catch (err) {
     // Losing a trace must never surface to the user, but it must not vanish
     // without a trace of its own either — see logTracingFailure.

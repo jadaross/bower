@@ -10,6 +10,13 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
  * before the keys exist; add them and it lights up with no code change.
  *
  * Next.js calls the exported `register()` once at server start.
+ *
+ * Nothing else may import this module. Turbopack gives the instrumentation
+ * entry and the route handlers separate copies of it, so an import from route
+ * code gets a second processor that OpenTelemetry never registered — which is
+ * how `flushObservability` came to flush an empty queue and lose most analyse
+ * traces. Route code reaches the registered provider through the
+ * OpenTelemetry API's global instead (`src/lib/observability.ts`).
  */
 // Best practice: traces should say which environment they came from. Default
 // it from Vercel/Node before the processor reads LANGFUSE_TRACING_ENVIRONMENT.
@@ -27,7 +34,7 @@ function makeProcessor(): LangfuseSpanProcessor | null {
   return new LangfuseSpanProcessor();
 }
 
-export const langfuseSpanProcessor = makeProcessor();
+const langfuseSpanProcessor = makeProcessor();
 
 export function register(): void {
   if (!langfuseSpanProcessor) return;
