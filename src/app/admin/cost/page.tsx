@@ -1,4 +1,4 @@
-import { costStats, daily, summary } from "@/lib/dashboard/metrics";
+import { costStats, daily } from "@/lib/dashboard/metrics";
 import { Bars, Card, Columns, Stat } from "../_components/charts";
 import { compact, money, num } from "../_components/format";
 import { pageData } from "../_components/load";
@@ -12,7 +12,6 @@ const ROUTE_LABEL = { analyse: "Listing (analyse)", valuate: "Market check (valu
 export default async function Cost({ searchParams }: { searchParams: Promise<Query> }) {
   const { q, data, badges } = await pageData(searchParams);
   const c = costStats(data);
-  const s = summary(data);
   const days = daily(data);
 
   return (
@@ -25,7 +24,7 @@ export default async function Cost({ searchParams }: { searchParams: Promise<Que
         <Stat label="Per listing, all in" value={money(c.perListingAllIn)} hint="the read plus every switch, chip and check on that item" />
         <Stat label="Per listing, the read alone" value={money(c.perListingRead)} />
         <Stat label="Per market check" value={money(c.perCheck)} hint="all platforms in the one check" />
-        <Stat label="Per active person" value={money(c.perActivePerson)} hint={`${s.activePeople} people spent something`} />
+        <Stat label="Per active person" value={money(c.perActivePerson)} hint={`${num(c.spenders)} ${c.spenders === 1 ? "person" : "people"} spent something`} />
         <Stat label="Monthly run rate" value={money(c.monthlyRunRate)} hint="this range's daily average × 30" />
         <Stat label="A full meter" value={money(c.fullMeter)} hint="10 listings + 3 checks, at today's averages" tone="warn" />
       </div>

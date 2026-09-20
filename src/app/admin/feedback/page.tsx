@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function Feedback({ searchParams }: { searchParams: Promise<Query> }) {
   const { q, data, badges } = await pageData(searchParams);
   const fb = feedbackStats(data);
+  // Signals are scores on traces, so their share is over the listings with a trace.
+  const traced = fb.funnel[0].count;
   const s = summary(data);
   const thumbs = fb.thumbsUp + fb.thumbsDown;
 
@@ -19,9 +21,9 @@ export default async function Feedback({ searchParams }: { searchParams: Promise
 
       <div className="kpis">
         <Stat label="Thumbs up" value={thumbs ? pct(fb.thumbsUp, thumbs) : "—"} hint={thumbs ? `${fb.thumbsUp} up, ${fb.thumbsDown} down` : "no thumbs yet"} tone={thumbs ? (fb.thumbsDown > fb.thumbsUp ? "bad" : "good") : undefined} />
-        <Stat label="Kept the listing" value={s.listings ? pct(fb.copiedListings, s.listings) : "—"} hint={`${fb.copiedListings} of ${s.listings} listings had something copied`} />
+        <Stat label="Kept the listing" value={traced ? pct(fb.copiedListings, traced) : "—"} hint={traced < s.listings ? `${fb.copiedListings} of the ${traced} listings with a trace had something copied (${s.listings} written)` : `${fb.copiedListings} of ${s.listings} listings had something copied`} />
         <Stat label="Went to post it" value={num(fb.opened)} hint="opened the platform from bower" />
-        <Stat label="Edited by hand" value={num(fb.manualEdits)} hint={s.listings ? `${pct(fb.manualEdits, s.listings)} of listings` : undefined} tone={fb.manualEdits ? "warn" : undefined} />
+        <Stat label="Edited by hand" value={num(fb.manualEdits)} hint={traced ? `${pct(fb.manualEdits, traced)} of listings${traced < s.listings ? " with a trace" : ""}` : undefined} tone={fb.manualEdits ? "warn" : undefined} />
         <Stat label="Chip rounds" value={num(fb.refineRounds)} hint={fb.refineRounds ? `on ${fb.refinedListings} listing${fb.refinedListings === 1 ? "" : "s"}` : "no chips tapped"} />
         <Stat label="Notes" value={num(fb.notes.length)} hint="typed feedback, below" tone={fb.notes.length ? "warn" : undefined} />
       </div>

@@ -35,7 +35,7 @@ export default async function Health({ searchParams }: { searchParams: Promise<Q
       </div>
 
       <div className="grid">
-        <Card title="Failures" sub="Every model call that errored. Each one handed the unit back." span="c12">
+        <Card title="Failures" sub="Every model call that errored. A failed read or check handed the unit back; one platform failing inside a check did not stop the check, which was delivered and charged." span="c12">
           {h.errorList.length === 0 ? (
             <p className="empty">Nothing failed in this range</p>
           ) : (

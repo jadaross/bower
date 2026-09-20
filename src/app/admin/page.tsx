@@ -1,4 +1,4 @@
-import { daily, recentEvents, summary, costStats, feedbackStats } from "@/lib/dashboard/metrics";
+import { daily, recentEvents, summary, costStats, feedbackStats, itemStats } from "@/lib/dashboard/metrics";
 import { Card, Columns, Stat } from "./_components/charts";
 import { money, num, pct, when } from "./_components/format";
 import { pageData } from "./_components/load";
@@ -17,6 +17,9 @@ export default async function Overview({ searchParams }: { searchParams: Promise
   const days = daily(data);
   const cost = costStats(data);
   const fb = feedbackStats(data);
+  const it = itemStats(data);
+  // Listings with a trace: the denominator of anything read from Langfuse scores.
+  const traced = fb.funnel[0].count;
   const events = recentEvents(data, 14);
   const thumbsTotal = s.thumbsUp + s.thumbsDown;
 
@@ -29,10 +32,10 @@ export default async function Overview({ searchParams }: { searchParams: Promise
         <Stat label="People with an account" value={num(s.accounts)} hint={s.newAccounts ? `+${s.newAccounts} in this range` : "none new in this range"} />
         <Stat label="Used it in this range" value={num(s.activePeople)} hint={s.neverWrote ? `${s.neverWrote} signed up and never wrote a listing` : "everyone has written at least one"} tone={s.neverWrote ? "warn" : undefined} />
         <Stat label="Listings written" value={num(s.listings)} hint={s.rejections ? `${s.rejections} photo set${s.rejections === 1 ? "" : "s"} rejected` : "no rejections"} />
-        <Stat label="Market checks" value={num(s.checks)} hint={s.listings ? `${pct(fb.journey[3].count, s.listings)} of listings went on to one` : undefined} />
+        <Stat label="Market checks" value={num(s.checks)} hint={s.listings ? `${pct(it.checked, s.listings)} of listings went on to one` : undefined} />
         <Stat label="Spend" value={money(s.spend)} hint={cost.perListingAllIn !== null ? `${money(cost.perListingAllIn)} per listing, all in` : undefined} />
         <Stat label="Thumbs up" value={thumbsTotal ? pct(s.thumbsUp, thumbsTotal) : "—"} hint={thumbsTotal ? `${s.thumbsUp} up · ${s.thumbsDown} down` : "no thumbs yet"} tone={s.thumbsDown > s.thumbsUp ? "bad" : s.thumbsUp ? "good" : undefined} />
-        <Stat label="Copied" value={s.listings ? pct(fb.copiedListings, s.listings) : "—"} hint="listings where something was copied" />
+        <Stat label="Copied" value={traced ? pct(fb.copiedListings, traced) : "—"} hint={traced < s.listings ? `listings where something was copied, of the ${num(traced)} with a trace` : "listings where something was copied"} />
       </div>
 
       <div className="grid">
@@ -55,7 +58,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
               <div className="n">{s.notes}</div><p>typed notes from testers</p>
             </a>
             <a href={`/admin/health${qs(q)}`} className={`callout${s.errors ? " alert" : ""}`}>
-              <div className="n">{s.errors}</div><p>failed model calls (each one refunded a unit)</p>
+              <div className="n">{s.errors}</div><p>failed model calls — a failed read or check refunded its unit</p>
             </a>
             <a href={`/admin/people${qs(q)}`} className="callout">
               <div className="n">{s.neverWrote}</div><p>people who signed up but never wrote a listing</p>

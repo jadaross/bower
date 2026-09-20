@@ -12,30 +12,32 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
   const it = itemStats(data);
   const mk = marketStats(data);
   const rejected = ph.rejections.reduce((s, r) => s + r.count, 0);
+  const gap = ph.listings < it.rows.length;
+  const traced = `${num(ph.listings)} of ${num(it.rows.length)} traced`;
 
   return (
     <Shell tab="items" q={q} data={data} badges={badges}>
       <h1>What they&rsquo;re photographing</h1>
-      <p>How many photos go into a listing, what gets rejected, and what the clothes actually are — brands, types, condition and what bower estimated for them. Items come from the text-only history; photos are never stored, so the counts are all that remains of them.</p>
+      <p>How many photos go into a listing, what gets rejected, and what the clothes actually are — brands, types, condition and what bower estimated for them. Items come from the text-only history; photos are never stored, so the counts are all that remains of them.{gap ? <> Photo counts, tone and rejections are read from the Langfuse trace, and <strong>{num(ph.listings)} of the {num(it.rows.length)}</strong> listings here have one — the rest were written before the trace flush was fixed on 20 Sep 2026.</> : null}</p>
 
       <div className="kpis">
         <Stat label="Listings written" value={num(it.rows.length)} />
-        <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint="of a possible 5" />
-        <Stat label="With a label photo" value={ph.tagKnown ? pct(ph.withTagPhoto, ph.tagKnown) : "—"} hint="the model saw a care or brand tag" tone={ph.tagKnown && ph.withTagPhoto / ph.tagKnown < 0.3 ? "warn" : undefined} />
-        <Stat label="Rejected" value={num(rejected)} hint={rejected ? ph.rejections.map((r) => `${r.count} ${r.label}`).join(" · ") : "nothing that was not clothing"} tone={rejected ? "warn" : undefined} />
+        <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint={gap ? `of a possible 5 · over the ${traced}` : "of a possible 5"} />
+        <Stat label="Tag read" value={ph.tagKnown ? pct(ph.withTag, ph.tagKnown) : "—"} hint={gap ? `a brand, size or fabric read off a label · ${traced}` : "a brand, size or fabric read off a label"} tone={ph.tagKnown && ph.withTag / ph.tagKnown < 0.3 ? "warn" : undefined} />
+        <Stat label="Rejected" value={num(rejected)} hint={rejected ? ph.rejections.map((r) => `${r.count} ${r.label}`).join(" · ") : gap ? `none among the ${traced}` : "nothing that was not clothing"} tone={rejected ? "warn" : undefined} />
         <Stat label="Typical estimate" value={gbp(it.medianEstimate)} hint="median of the photo-only price band midpoint" />
       </div>
 
       <div className="grid">
-        <Card title="Photos per listing" sub="More photos means a better read; the app suggests four angles" span="c4">
+        <Card title="Photos per listing" sub="More photos means a better read; the app suggests four angles" kicker={gap ? traced : undefined} span="c4">
           <Bars items={ph.distribution.map((d) => ({ label: `${d.label} photo${d.label === "1" ? "" : "s"}`, count: d.count }))} of={ph.listings} />
         </Card>
-        <Card title="Written for" sub="The Preferred Platform at the time, and the tone asked for" span="c4">
-          <Bars items={ph.platformAsked} of={ph.listings} />
+        <Card title="Written for" sub={gap ? `The Preferred Platform at the time, for every listing; then the tone asked for, over the ${traced}` : "The Preferred Platform at the time, and the tone asked for"} span="c4">
+          <Bars items={it.platforms} of={it.rows.length} />
           <div style={{ height: 12 }} />
           <Bars items={ph.tone} of={ph.listings} color="--s3" />
         </Card>
-        <Card title="Rejections" sub="Photo sets bower would not write for. Each one refunded the listing." span="c4">
+        <Card title="Rejections" sub="Photo sets bower would not write for. Each one refunded the listing." kicker={gap ? traced : undefined} span="c4">
           <Bars items={ph.rejections} color="--s2" empty="Every photo set was clothing" />
         </Card>
       </div>
@@ -74,7 +76,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
       </div>
 
       <div className="grid">
-        <Card title="Every item" sub="Newest first, from the text-only history. Listing counts above come from Langfuse traces, so an item written before tracing was on, or from a device on a development build, appears here and not there." kicker={`${it.rows.length} items`} span="c12">
+        <Card title="Every item" sub="Newest first, from the text-only history: every listing written, whether or not its trace reached Langfuse." kicker={`${it.rows.length} items`} span="c12">
           {it.rows.length === 0 ? (
             <p className="empty">Nothing written in this range</p>
           ) : (

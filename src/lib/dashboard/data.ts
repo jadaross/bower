@@ -1,6 +1,6 @@
 import { fetchGenerations, fetchScores, langfuseConfigured, type Generation } from "./langfuse";
 import { fetchAccounts, fetchHistory, fetchNotes } from "./supabase";
-import { rangeFor, type DashboardData } from "./metrics";
+import { isAccountId, rangeFor, type DashboardData } from "./metrics";
 
 /**
  * One load for a dashboard page: everything from Supabase and Langfuse for
@@ -50,9 +50,11 @@ async function load(opts: LoadOptions): Promise<DashboardData> {
 
   const owners = new Set(accounts.filter((a) => a.isOwner).map((a) => a.id));
   const keep = (userId: string | null) => includeOwner || !userId || !owners.has(userId);
+  // An audit run once traced under made-up user ids; they are not people.
+  const person = (userId: string | null) => !userId || isAccountId(userId);
   const inRange = (iso: string) => !from || iso >= from;
 
-  const gens = generations.filter((g) => keep(g.userId));
+  const gens = generations.filter((g) => keep(g.userId) && person(g.userId));
   const traceIds = new Set(gens.map((g) => g.traceId));
 
   return {

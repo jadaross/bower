@@ -133,14 +133,26 @@ export function platformAskedOf(g: Generation): string | null {
   return typeof v === "string" ? v : null;
 }
 
-/** Whether the model saw a care/brand label in the photos. */
-export function hadTagPhoto(g: Generation): boolean | null {
-  const pa = outputObject(g)?.photo_analysis;
-  if (pa && typeof pa === "object" && "has_tag_photo" in pa) {
-    const v = (pa as { has_tag_photo?: unknown }).has_tag_photo;
-    return typeof v === "boolean" ? v : null;
-  }
-  return null;
+/**
+ * Whether the tag OCR read anything off a label: a brand, a size or a fabric.
+ * Not `photo_analysis.has_tag_photo` — the prompt no longer asks for that
+ * section and the server fills it in as `false` for older clients, so it read
+ * 0% for every listing ever written. Null when the trace carries no output.
+ */
+export function tagRead(g: Generation): boolean | null {
+  const tag = outputObject(g)?.tag_data;
+  if (!tag || typeof tag !== "object") return null;
+  const t = tag as { brand?: unknown; size?: unknown; fabric_composition?: unknown };
+  return [t.brand, t.size, t.fabric_composition].some((v) => typeof v === "string" && v.trim() !== "");
+}
+
+/**
+ * A Supabase account id. Langfuse also holds a handful of generations whose
+ * userId is a label from a one-off audit ("live-aud", "fb-audit"); they are
+ * not people and must not count as one.
+ */
+export function isAccountId(userId: string | null): boolean {
+  return !!userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
 }
 
 /** Which Refinement Chips a refine call carried, matched by instruction text. */
@@ -454,16 +466,22 @@ export function countBy<T>(items: T[], key: (t: T) => string | null | undefined,
     .slice(0, top);
 }
 
+/**
+ * Everything here is read from analyse traces, so each number is over the
+ * listings that *have* a trace — `listings` — not the true total, which is
+ * `data.history.length` (see `itemStats`). The page says so wherever the two
+ * differ; every listing written before 20 Sep 2026 that lost its trace to
+ * the flush bug (`src/lib/observability.ts`) is in the history and not here.
+ */
 export interface PhotoStats {
-  /** Listings with an analyse trace in Langfuse — a subset of the true total
-   * (`data.history.length`, shown on the Items page) when a trace is missing. */
+  /** Listings with an analyse trace in Langfuse. */
   listings: number;
   avgPhotos: number | null;
   distribution: Count[]; // 1..5
-  withTagPhoto: number;
+  /** Listings whose tag OCR read a brand, size or fabric. */
+  withTag: number;
   tagKnown: number;
   rejections: Count[];
-  platformAsked: Count[];
   tone: Count[];
 }
 
@@ -472,20 +490,24 @@ export function photoStats(data: DashboardData): PhotoStats {
   const listings = analyses.filter(isListing);
   const counts = listings.map(photoCountOf).filter((n): n is number => n !== null);
   const dist = [1, 2, 3, 4, 5].map((n) => ({ label: `${n}`, count: counts.filter((c) => c === n).length }));
-  const tags = listings.map(hadTagPhoto).filter((v): v is boolean => v !== null);
+  const tags = listings.map(tagRead).filter((v): v is boolean => v !== null);
   return {
     listings: listings.length,
     avgPhotos: counts.length ? counts.reduce((a, b) => a + b, 0) / counts.length : null,
     distribution: dist,
-    withTagPhoto: tags.filter(Boolean).length,
+    withTag: tags.filter(Boolean).length,
     tagKnown: tags.length,
     rejections: countBy(analyses, (g) => rejectionOf(g)?.replace("_", " ")),
-    platformAsked: countBy(listings, platformAskedOf),
     tone: countBy(listings, toneOf),
   };
 }
 
+/** From the history table, so every listing counts — traced or not. */
 export interface ItemStats {
+  /** The Preferred Platform each listing was written for. */
+  platforms: Count[];
+  /** Listings that went on to a market check. */
+  checked: number;
   brands: Count[];
   types: Count[];
   conditions: Count[];
@@ -511,6 +533,8 @@ export function itemStats(data: DashboardData): ItemStats {
     ["£80+", 80, Infinity],
   ] as const;
   return {
+    platforms: countBy(rows, (r) => r.preferredPlatform),
+    checked: rows.filter((r) => r.valuation).length,
     brands: countBy(rows, (r) => (r.brand && r.brand.toLowerCase() !== "unknown" ? r.brand : "Unknown / unbranded")),
     types: countBy(rows, (r) => r.clothingType),
     conditions: countBy(rows, (r) => r.condition),
@@ -717,6 +741,8 @@ export interface CostStats {
   perListingRead: number | null;
   perCheck: number | null;
   perActivePerson: number | null;
+  /** People with any priced call in the range — the divisor of `perActivePerson`. */
+  spenders: number;
   /** Spend scaled to a 30-day month from the range's daily average. */
   monthlyRunRate: number | null;
   /** What one person costs if they use their whole meter: 10 listings + 3 checks. */
@@ -759,6 +785,7 @@ export function costStats(data: DashboardData): CostStats {
     perListingRead: analyseAvg,
     perCheck: checkAvg,
     perActivePerson: rows.length ? spend / rows.length : null,
+    spenders: rows.length,
     monthlyRunRate: gens.length ? (spend / days) * 30 : null,
     fullMeter: analyseAvg !== null && checkAvg !== null ? 10 * analyseAvg + 3 * checkAvg : null,
     byRoute,

@@ -6,7 +6,9 @@ import {
   dayKey,
   feedbackStats,
   healthStats,
+  isAccountId,
   isListing,
+  itemStats,
   labelFor,
   marketChecks,
   people,
@@ -229,12 +231,12 @@ describe("summary and people", () => {
 });
 
 describe("photoStats", () => {
-  it("reads photo counts and tag photos from the analyse io", () => {
+  it("reads photo counts and tags from the analyse io", () => {
     const p = photoStats(
       data({
         generations: [
-          gen({ input: { photoCount: 2 }, output: { photo_analysis: { has_tag_photo: true } } }),
-          gen({ input: { photoCount: 4 }, output: { photo_analysis: { has_tag_photo: false } } }),
+          gen({ input: { photoCount: 2 }, output: { tag_data: { brand: "Nike", size: null, fabric_composition: null } } }),
+          gen({ input: { photoCount: 4 }, output: { tag_data: { brand: null, size: null, fabric_composition: null } } }),
           gen({ input: { photoCount: 1 }, output: { rejected: "not_clothing" } }),
         ],
       })
@@ -242,8 +244,44 @@ describe("photoStats", () => {
     expect(p.listings).toBe(2);
     expect(p.avgPhotos).toBe(3);
     expect(p.distribution.map((x) => x.count)).toEqual([0, 1, 0, 1, 0]);
-    expect(p.withTagPhoto).toBe(1);
+    expect(p.withTag).toBe(1);
+    expect(p.tagKnown).toBe(2);
     expect(p.rejections).toEqual([{ label: "not clothing", count: 1 }]);
+  });
+
+  it("ignores the legacy photo_analysis flag, which is always false", () => {
+    const p = photoStats(
+      data({
+        generations: [
+          gen({ output: { photo_analysis: { has_tag_photo: false }, tag_data: { brand: null, size: "M", fabric_composition: null } } }),
+          gen({ output: { photo_analysis: { has_tag_photo: false } } }),
+        ],
+      })
+    );
+    expect(p.withTag).toBe(1);
+    expect(p.tagKnown).toBe(1);
+  });
+});
+
+describe("itemStats", () => {
+  it("counts platforms and market checks from the history, so untraced listings count", () => {
+    const row = (over: Partial<HistoryRow>): HistoryRow => ({ id: Math.random().toString(36), userId: FRIEND, createdAt: "t", sessionId: null, brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null, ...over });
+    const it = itemStats(
+      data({
+        generations: [],
+        history: [row({}), row({ preferredPlatform: "ebay" }), row({ valuation: { perPlatform: {}, query: "q", recommendation: null } })],
+      })
+    );
+    expect(it.platforms).toEqual([{ label: "vinted", count: 2 }, { label: "ebay", count: 1 }]);
+    expect(it.checked).toBe(1);
+  });
+});
+
+describe("isAccountId", () => {
+  it("accepts Supabase ids and rejects audit labels", () => {
+    expect(isAccountId(FRIEND)).toBe(true);
+    expect(isAccountId("live-aud")).toBe(false);
+    expect(isAccountId(null)).toBe(false);
   });
 });
 
@@ -290,6 +328,7 @@ describe("costStats", () => {
     expect(c.perListingAllIn).toBeCloseTo(0.225);
     expect(c.perCheck).toBeCloseTo(0.2);
     expect(c.fullMeter).toBeCloseTo(10 * 0.02 + 3 * 0.2);
+    expect(c.spenders).toBe(1);
     expect(c.byRoute.find((r) => r.route === "valuate")?.calls).toBe(1);
   });
 });
