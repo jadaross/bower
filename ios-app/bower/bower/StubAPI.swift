@@ -62,7 +62,7 @@ struct StubAPI: BowerAPIClient {
                                allowance: AllowanceState(used: 4, limit: 10, resetsAt: nil))
     }
 
-    func analyse(images: [Data], tone: Tone, platform: Platform?,
+    func analyse(images: [Data], link: String?, size: String?, condition: WireCondition?, tone: Tone, platform: Platform?,
                  onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult {
         // Paced like the real thing: the stream opens fast, the title lands
         // around the image-reading floor, the tail is short.

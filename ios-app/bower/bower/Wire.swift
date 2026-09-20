@@ -222,6 +222,8 @@ struct HistoryItem: Codable, Sendable, Identifiable {
     /// ISO 4217 for the estimate. Nil on rows from before markets: pounds.
     var currency: String? = nil
     let preferredPlatform: Platform?
+    /// The product page the read came from, when a link was pasted. Nil otherwise.
+    var sourceUrl: String? = nil
     /// The full Neutral Listing as first seen — for the detail view. Nil on older rows.
     let listing: NeutralListing?
     /// Present once a real price search ran for this item.

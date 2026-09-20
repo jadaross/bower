@@ -449,6 +449,34 @@ final class AppState {
         didSet { if photos.map(\.id) != oldValue.map(\.id) { analysis = nil } }
     }
 
+    /// A product page pasted on Home: the seller's item as the shop sold it
+    /// new. Read alongside the photos, or instead of them. Any change drops
+    /// the listing written for the old link, as a change to the pile does.
+    var link: String = "" {
+        didSet { if link != oldValue { analysis = nil } }
+    }
+    /// What a page cannot know, asked only when the read is from a link alone.
+    /// Empty size means whatever the page says; nil condition means Good.
+    var linkSize: String = ""
+    var linkCondition: WireCondition? = nil
+
+    /// The link with its whitespace trimmed, or nil when the field is empty.
+    var trimmedLink: String? {
+        let t = link.trimmingCharacters(in: .whitespacesAndNewlines)
+        return t.isEmpty ? nil : t
+    }
+    /// A link Write it can send: http(s) with a real host. Mirrors the server's check.
+    var linkIsUsable: Bool {
+        guard let t = trimmedLink, let url = URL(string: t), let scheme = url.scheme?.lowercased(),
+              scheme == "https" || scheme == "http", let host = url.host, host.contains(".") else { return false }
+        return true
+    }
+    /// Something to write from: photos, a usable link, or both.
+    var hasSource: Bool { !photos.isEmpty || linkIsUsable }
+
+    /// Start over: the pile, the link and what was said about it.
+    func clearItem() { photos = []; link = ""; linkSize = ""; linkCondition = nil }
+
     /// What the last read produced. Cleared with the photos on a new item.
     /// Setting it hands the listing screen a fresh working model.
     var analysis: AnalysisResult? {

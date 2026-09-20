@@ -34,7 +34,10 @@ protocol BowerAPIClient: Sendable {
     /// things are surfaced mid-flight, each a real event on the wire (see
     /// `AnalyseProgress`), so the analysing screen can show the read as it
     /// happens rather than a spinner and a guess.
-    func analyse(images: [Data], tone: Tone, platform: Platform?,
+    /// `link` is a product page to read alongside the photos, or instead of
+    /// them; `size` and `condition` are what the seller says about their own
+    /// item when there are no photos to read it from.
+    func analyse(images: [Data], link: String?, size: String?, condition: WireCondition?, tone: Tone, platform: Platform?,
                  onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult
     func valuate(item: ValuationItem) async throws -> ValuationResponse
     func format(listing: NeutralListing, platform: Platform, tone: Tone) async throws -> PlatformListing
@@ -282,17 +285,22 @@ struct BowerAPI: BowerAPIClient {
 
     // MARK: analyse — the streaming one
 
-    func analyse(images: [Data], tone: Tone, platform: Platform?,
+    func analyse(images: [Data], link: String?, size: String?, condition: WireCondition?, tone: Tone, platform: Platform?,
                  onProgress: @escaping @Sendable (AnalyseProgress) -> Void) async throws -> AnalysisResult {
-        struct Body: Encodable { let images: [String]; let tone: Tone; let platform: Platform? }
-        let body = Body(images: images.map { $0.base64EncodedString() }, tone: tone, platform: platform)
+        struct Body: Encodable {
+            let images: [String]; let link: String?; let size: String?; let condition: WireCondition?
+            let tone: Tone; let platform: Platform?
+        }
+        let body = Body(images: images.map { $0.base64EncodedString() }, link: link, size: size, condition: condition,
+                        tone: tone, platform: platform)
         // A new analyse starts a new item; format/refine/valuate reuse this id.
         sessionBox.value = UUID().uuidString
 
         var req = try await request("/api/analyse", method: "POST", body: body)
         req.setValue("text/event-stream", forHTTPHeaderField: "Accept")
-        // The model call runs long; the default 60s is not enough.
-        req.timeoutInterval = 120
+        // The model call runs long; the default 60s is not enough, and a
+        // link read fetches the page before the listing is even started.
+        req.timeoutInterval = 180
 
         let assembled = try await readStringStream(req, onProgress: onProgress)
         guard let data = assembled.data(using: .utf8) else {

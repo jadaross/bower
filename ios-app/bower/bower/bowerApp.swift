@@ -21,6 +21,11 @@ struct bowerApp: App {
             } else {
                 s.screen = .capture
             }
+            // `-bowerLink <url>` starts with a product page pasted on Home,
+            // for looking at the link row and the link-only read.
+            if let i = args.firstIndex(of: "-bowerLink"), i + 1 < args.count {
+                s.link = args[i + 1]
+            }
             _state = State(initialValue: s)
             return
         }

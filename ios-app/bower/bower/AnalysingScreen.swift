@@ -13,8 +13,13 @@ struct AnalysingScreen: View {
     enum Phase: Equatable { case reading, failed, allowance(AllowanceState), rejected(AnalyseRejection) }
 
     /// Left to right. `sent` is true the moment the request is built; the rest
-    /// arrive from the stream.
-    private static let stages = ["Photos sent", "Reading tag and label", "Writing the listing", "Finishing touches"]
+    /// arrive from the stream. With a link the second stage is the page being
+    /// fetched and read, which is the long one.
+    private var stages: [String] {
+        if state.photos.isEmpty { return ["Link sent", "Reading the page", "Writing the listing", "Finishing touches"] }
+        if state.linkIsUsable { return ["Photos sent", "Reading the page and tags", "Writing the listing", "Finishing touches"] }
+        return ["Photos sent", "Reading tag and label", "Writing the listing", "Finishing touches"]
+    }
 
     @State private var phase: Phase = .reading
     @State private var stage = 0
@@ -40,13 +45,13 @@ struct AnalysingScreen: View {
     private var reading: some View {
         VStack(alignment: .leading, spacing: 38) {
             HStack(spacing: 10) {
-                ForEach(0..<Self.stages.count, id: \.self) { n in
+                ForEach(0..<stages.count, id: \.self) { n in
                     ReadFrame(state: n < stage ? .read : (n == stage ? .active : .waiting), pollen: theme.pollen)
                 }
             }
 
             VStack(alignment: .leading, spacing: 0) {
-                Kicker(Self.stages[min(stage, Self.stages.count - 1)], color: theme.pollen)
+                Kicker(stages[min(stage, stages.count - 1)], color: theme.pollen)
                     .contentTransition(.opacity)
                     .animation(.easeOut(duration: 0.25), value: stage)
 
@@ -57,7 +62,7 @@ struct AnalysingScreen: View {
                             .lineSpacing(2)
                             .transition(.opacity.combined(with: .move(edge: .bottom)))
                     } else {
-                        Text("Reading your photos")
+                        Text(state.photos.isEmpty ? "Reading the page" : "Reading your photos")
                             .font(BowerFont.serif(36))
                             .opacity(0.9)
                     }
@@ -79,8 +84,13 @@ struct AnalysingScreen: View {
 
         task = Task {
             do {
+                let size = state.linkSize.trimmingCharacters(in: .whitespacesAndNewlines)
                 let result = try await state.api.analyse(
                     images: state.photos.map(\.data),
+                    link: state.linkIsUsable ? state.trimmedLink : nil,
+                    // A page cannot know these; with photos in, the photos say.
+                    size: state.photos.isEmpty && !size.isEmpty ? size : nil,
+                    condition: state.photos.isEmpty ? state.linkCondition : nil,
                     tone: .casual,
                     platform: state.preferred,
                     onProgress: { p in Task { @MainActor in advance(p) } }
@@ -89,7 +99,7 @@ struct AnalysingScreen: View {
                 state.analysis = result
                 state.reads.used += 1
                 Notifications.scheduleNudge()
-                stage = Self.stages.count
+                stage = stages.count
                 try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {
@@ -135,8 +145,15 @@ struct AnalysingScreen: View {
     /// because there is nothing to price in them.
     private func rejected(_ r: AnalyseRejection) -> some View {
         fullBleed(badge: "!", badgeColor: theme.coral, title: r.title, body: r.body) {
-            Button { state.photos = []; state.screen = .capture } label: {
-                primaryLabel("Back to photos", fg: theme.avenue, bg: .white)
+            if r == .linkUnreadable {
+                // The link stays, so it can be corrected rather than retyped.
+                Button { state.screen = .capture } label: {
+                    primaryLabel("Back to the link", fg: theme.avenue, bg: .white)
+                }
+            } else {
+                Button { state.photos = []; state.screen = .capture } label: {
+                    primaryLabel("Back to photos", fg: theme.avenue, bg: .white)
+                }
             }
         }
     }

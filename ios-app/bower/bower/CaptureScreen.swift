@@ -45,8 +45,9 @@ struct CaptureScreen: View {
                 .scrollBounceBehavior(.basedOnSize)
             }
         }
-        .safeAreaInset(edge: .bottom) { if !empty { footer } }
+        .safeAreaInset(edge: .bottom) { if !empty || state.trimmedLink != nil { footer } }
         .animation(.snappy(duration: 0.22), value: empty)
+        .animation(.snappy(duration: 0.22), value: state.trimmedLink != nil)
         .animation(.snappy(duration: 0.22), value: state.analysis == nil)
         .sheet(isPresented: $showTips) {
             TipsSheet()
@@ -158,6 +159,7 @@ struct CaptureScreen: View {
         VStack(spacing: 12) {
             captureZone
             BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
+            linkRow
             if importing { preparing }
             if turnedAway { turnedAwayNote }
         }
@@ -207,6 +209,7 @@ struct CaptureScreen: View {
         VStack(alignment: .leading, spacing: 14) {
             pile
             adviceLine
+            linkRow
             if importing { preparing }
             if turnedAway { turnedAwayNote }
             if overLimit { overLimitNote }
@@ -232,6 +235,102 @@ struct CaptureScreen: View {
         .padding(.horizontal, 2)
     }
 
+    // MARK: - Link
+
+    private static let conditions: [WireCondition] = [.newWithTags, .excellent, .good, .fair]
+
+    /// The shop's page for the piece, pasted. With photos it sharpens the
+    /// read; alone it is the read, and the two fields under it say the two
+    /// things a page cannot know — the seller's size and how it has worn.
+    private var linkRow: some View {
+        @Bindable var state = state
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "link")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(state.linkIsUsable ? theme.satin : theme.muted)
+                TextField("Or paste the shop's link to it", text: $state.link)
+                    .font(BowerFont.ui(14))
+                    .foregroundStyle(theme.text)
+                    .keyboardType(.URL)
+                    .textContentType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .submitLabel(.done)
+                if state.trimmedLink != nil {
+                    Button { state.link = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(theme.muted)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear the link")
+                } else {
+                    PasteButton(payloadType: String.self) { strings in
+                        if let s = strings.first { state.link = s.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    }
+                    .labelStyle(.iconOnly)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.small)
+                    .tint(theme.satin)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 11)
+            .background(theme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+
+            if state.photos.isEmpty, state.trimmedLink != nil {
+                HStack(spacing: 10) {
+                    TextField("Size", text: $state.linkSize)
+                        .font(BowerFont.ui(14))
+                        .foregroundStyle(theme.text)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(theme.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+                    Menu {
+                        Button("Not sure") { state.linkCondition = nil }
+                        ForEach(Self.conditions, id: \.rawValue) { c in
+                            Button(c.rawValue) { state.linkCondition = c }
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(state.linkCondition?.rawValue ?? "Condition")
+                                .font(BowerFont.ui(14))
+                                .foregroundStyle(state.linkCondition == nil ? theme.muted : theme.text)
+                                .lineLimit(1)
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(theme.muted)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(theme.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+                    }
+                }
+                Text("A page can't know your size or how it has worn. Left blank, bower takes the page's size and calls it Good.")
+                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 2)
+            }
+        }
+    }
+
+    /// The Write it label names what it will read from.
+    private var writeTitle: String {
+        let n = state.photos.count
+        let photos = n == 0 ? nil : "\(n) photo\(n == 1 ? "" : "s")"
+        let parts = [photos, state.linkIsUsable ? "link" : nil].compactMap { $0 }
+        return "Write it · " + parts.joined(separator: " + ")
+    }
+
     /// Pinned above the tab bar once there is something to price. With a
     /// listing already written for these photos, the way back to it leads
     /// and writing again is a stated cost, never the only thing to tap.
@@ -245,14 +344,16 @@ struct CaptureScreen: View {
                 }
                 if let note = costNote(again: true) { costLine(note) }
             } else {
-                BowerButton(title: canSpend ? "Write it · \(state.photos.count) photo\(state.photos.count == 1 ? "" : "s")" : "No listings left",
-                            disabled: !canSpend) { state.screen = .analysing }
+                BowerButton(title: canSpend ? (state.hasSource ? writeTitle : "Write it") : "No listings left",
+                            disabled: !canSpend || !state.hasSource) { state.screen = .analysing }
                 HStack(spacing: 9) {
-                    BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? "Upload more" : "Five photos in",
+                    BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? (empty ? "Add photos" : "Upload more") : "Five photos in",
                                 kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
                     clearButton
                 }
-                if let note = costNote(again: false) { costLine(note) }
+                if state.trimmedLink != nil && !state.linkIsUsable {
+                    costLine("That doesn't look like a link. It should start with https://")
+                } else if let note = costNote(again: false) { costLine(note) }
             }
         }
         .padding(.horizontal, 22)
@@ -283,7 +384,7 @@ struct CaptureScreen: View {
     }
 
     private var clearButton: some View {
-        Button("Clear") { state.photos = [] }
+        Button("Clear") { state.clearItem() }
             .buttonStyle(.plain)
             .font(BowerFont.ui(12.5, weight: .medium))
             .foregroundStyle(theme.muted)

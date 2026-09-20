@@ -162,6 +162,15 @@ private struct HistoryDetail: View {
                             Text("Written for \(p.name)").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                         }
                     }
+                    if let raw = item.sourceUrl, let url = URL(string: raw), let host = url.host {
+                        Link(destination: url) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "link").font(.system(size: 11, weight: .medium))
+                                Text("From \(host.replacingOccurrences(of: "www.", with: ""))").font(BowerFont.ui(12.5))
+                            }
+                            .foregroundStyle(theme.satin)
+                        }
+                    }
                 }
 
                 prices

@@ -40,6 +40,9 @@ enum AnalyseRejection: String, Sendable {
     case explicit
     case unsafe
     case refused
+    /// The pasted product page could not be read. Raised before any listing is
+    /// attempted, so nothing was charged and the link is still there to fix.
+    case linkUnreadable = "link_unreadable"
     case other
 
     init(wire: String) { self = AnalyseRejection(rawValue: wire) ?? .other }
@@ -48,15 +51,17 @@ enum AnalyseRejection: String, Sendable {
     /// something bower will look at.
     var title: String {
         switch self {
-        case .notClothing: "Sorry, we can't sell that"
-        default:           "Sorry, that was inappropriate"
+        case .notClothing:    "Sorry, we can't sell that"
+        case .linkUnreadable: "Couldn't read that link"
+        default:              "Sorry, that was inappropriate"
         }
     }
 
     var body: String {
         switch self {
-        case .notClothing: "Bower reads clothes, shoes and bags. Take a photo of the piece and try again."
-        default:           "Bower can't read that photo. It has been thrown away, and nothing was charged."
+        case .notClothing:    "Bower reads clothes, shoes and bags. Take a photo of the piece and try again."
+        case .linkUnreadable: "The shop's page didn't open for bower. Check the link, or add photos instead. Nothing was charged."
+        default:              "Bower can't read that photo. It has been thrown away, and nothing was charged."
         }
     }
 }
