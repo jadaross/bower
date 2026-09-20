@@ -60,6 +60,47 @@ beforeEach(() => {
   refundAllowance.mockResolvedValue(undefined);
 });
 
+describe("POST /api/analyse — a pasted link", () => {
+  const LINK = "https://www.cos.com/en_gbp/women/shirts/product.oversized-cotton-shirt-pink.1234.html";
+
+  it("accepts a link with no photos and passes it, the size and the condition to the read", async () => {
+    const res = await POST(post({ link: LINK, size: " 12 ", condition: "Excellent", tone: "casual", platform: "vinted" }));
+    expect(res.status).toBe(200);
+    expect(analyseListingStream).toHaveBeenCalledWith(
+      expect.objectContaining({ photos: [], link: { url: LINK, size: "12", condition: "Excellent" } })
+    );
+  });
+
+  it("accepts a link beside photos", async () => {
+    await POST(post({ images: [PHOTO], link: LINK, tone: "casual" }));
+    expect(analyseListingStream).toHaveBeenCalledWith(expect.objectContaining({ photos: [PHOTO], link: { url: LINK, size: undefined, condition: undefined } }));
+  });
+
+  it("rejects a link that is not a URL, before spending", async () => {
+    const res = await POST(post({ link: "cos shirt", tone: "casual" }));
+    expect(res.status).toBe(400);
+    expect(spendAllowance).not.toHaveBeenCalled();
+  });
+
+  it("rejects a condition off the list", async () => {
+    expect((await POST(post({ link: LINK, condition: "Mint", tone: "casual" }))).status).toBe(400);
+  });
+
+  it("still needs something: neither photos nor a link is a 400", async () => {
+    expect((await POST(post({ tone: "casual" }))).status).toBe(400);
+    expect((await POST(post({ images: [], link: "  ", tone: "casual" }))).status).toBe(400);
+  });
+
+  it("a page that could not be read ends the stream as a rejection and refunds the unit", async () => {
+    analyseListingStream.mockReturnValue(
+      new ReadableStream({ start(c) { c.error(new AnalyseRejected("link_unreadable")); } })
+    );
+    const res = await POST(post({ link: LINK, tone: "casual" }));
+    await expect(readStringStream(res)).rejects.toMatchObject({ reason: "link_unreadable" });
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
+  });
+});
+
 describe("POST /api/analyse — the meter", () => {
   it("reserves one unit before the model is called", async () => {
     await POST(post({ images: [PHOTO], tone: "casual" }));

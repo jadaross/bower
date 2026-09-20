@@ -4,15 +4,22 @@ import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
 import { getListingContext } from "@/lib/profile";
 import { toStringStreamResponse, type StreamRejection } from "@/lib/streaming-text";
-import type { Platform, Tone } from "@/lib/types";
+import { CONDITIONS, type Condition, type Platform, type Tone } from "@/lib/types";
 import { MARKETS } from "@/lib/markets";
+import { isProductUrl } from "@/lib/llm/link";
 
 export const runtime = "nodejs";
 // The web-search valuation and the image read can run long; allow the max.
 export const maxDuration = 300;
 
 interface RequestBody {
-  images: string[];
+  /** Up to five. May be empty when `link` is set. */
+  images?: string[];
+  /** A product page to read alongside the photos, or instead of them. */
+  link?: string;
+  /** What the seller says about their own item when there is a link: a page cannot know these. */
+  size?: string;
+  condition?: string;
   platform?: Platform;
   tone: Tone;
 }
@@ -62,13 +69,25 @@ export const POST = withAuth(async (request, user) => {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { images, platform, tone = "casual" } = body;
-  if (!Array.isArray(images) || images.length === 0) {
-    return Response.json({ error: "No images provided" }, { status: 400 });
+  const { platform, tone = "casual" } = body;
+  const images = body.images ?? [];
+  if (!Array.isArray(images) || !images.every((i) => typeof i === "string")) {
+    return Response.json({ error: "images must be an array of base64 strings" }, { status: 400 });
   }
   if (images.length > 5) {
     return Response.json({ error: "Maximum 5 images allowed per listing" }, { status: 400 });
   }
+  const link = typeof body.link === "string" && body.link.trim() ? body.link.trim() : undefined;
+  if (link !== undefined && !isProductUrl(link)) {
+    return Response.json({ error: "link must be an http(s) URL" }, { status: 400 });
+  }
+  if (images.length === 0 && !link) {
+    return Response.json({ error: "No images or link provided" }, { status: 400 });
+  }
+  if (body.condition !== undefined && !(CONDITIONS as readonly string[]).includes(body.condition)) {
+    return Response.json({ error: `condition must be one of ${CONDITIONS.join(", ")}` }, { status: 400 });
+  }
+  const size = typeof body.size === "string" && body.size.trim() ? body.size.trim().slice(0, 40) : undefined;
 
   // A read costs one unit, the same as a search. Reserved before the model is
   // called, so two reads racing on one account cannot both spend the last unit,
@@ -90,6 +109,7 @@ export const POST = withAuth(async (request, user) => {
   try {
     stream = analyseListingStream({
       photos: images,
+      link: link ? { url: link, size, condition: body.condition as Condition | undefined } : undefined,
       tone,
       platform,
       sellerNotes,
@@ -104,6 +124,7 @@ export const POST = withAuth(async (request, user) => {
           listing: result.listing,
           preferredPlatform: platform,
           currency: market ? MARKETS[market].currency : undefined,
+          sourceUrl: link,
         }),
     });
   } catch (err) {

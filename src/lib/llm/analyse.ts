@@ -1,4 +1,4 @@
-import { ANALYSIS_SUBJECTS, type AnalysisSubject, type AnalysisResult, Platform, Tone } from "@/lib/types";
+import { ANALYSIS_SUBJECTS, type AnalysisSubject, type AnalysisResult, type Condition, Platform, Tone } from "@/lib/types";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS, anthropicClient } from "./client";
 import { parseAnalysisResult } from "./analyse-parse";
@@ -7,11 +7,24 @@ import { analysisResultSchema } from "./schemas";
 import { beginGeneration, flushObservability, observeGeneration, type TraceContext } from "@/lib/observability";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
 import { DEFAULT_MARKET, MARKETS, type Market } from "@/lib/markets";
+import { productFactsPrompt, readProductLink } from "./link";
 export { parseAnalysisResult };
 
+/**
+ * The product page the seller pasted, with what they said about their own
+ * item — the two things a page cannot know. Either may be absent.
+ */
+export interface LinkInput {
+  url: string;
+  size?: string;
+  condition?: Condition;
+}
+
 export interface AnalyseInput {
-  /** base64 JPEG strings, optionally with a `data:` prefix. */
+  /** base64 JPEG strings, optionally with a `data:` prefix. Empty when the read is from a link alone. */
   photos: string[];
+  /** A product page to read alongside the photos, or instead of them. */
+  link?: LinkInput;
   tone: Tone;
   /** The seller's Market, from their profile: sets the currency of the estimate. */
   market?: Market;
@@ -102,12 +115,43 @@ TAG DATA (a record for the seller, NOT material for the listing):
 - Never copy tag_data into the title or description: no country of manufacture, no RN or style number, no care instructions, no barcode. Buyers do not search for these and copying them reads as a robot reading a label.
 - The one exception is country of manufacture when it genuinely raises the price or dates the piece for THIS brand: Made in USA (Carhartt, Levi's, vintage tees), Made in England (Dr. Martens, Barbour), Made in Italy or France (designer, Ray-Ban, Lacoste), Made in Japan (denim). Then it may go in the title or first line. Never mention China, Bangladesh, Vietnam, Turkey, Cambodia or similar.`;
 
-function buildPlatformPrompt(platform: Platform, tone: Tone, photoCount: number, notes: SellerNote[] = [], market: Market = DEFAULT_MARKET): string {
+/** What the model is looking at: photos, a page, or both. */
+export interface Source {
+  photoCount: number;
+  /** The product page as `productFactsPrompt` writes it, when there is one. */
+  page?: string;
+}
+
+function task(source: Source): string {
+  if (source.photoCount === 0) return "Write a listing for the product on the page below, as the seller's secondhand item,";
+  if (source.page) return `Analyse these ${source.photoCount} clothing photo(s) together with the product page below,`;
+  return `Analyse these ${source.photoCount} clothing photo(s)`;
+}
+
+/** The rules that change when a page is in play. Appended after the common ones. */
+function pageRules(source: Source): string {
+  if (!source.page) return "";
+  const noPhotos = source.photoCount === 0;
+  return `
+
+${source.page}
+
+PRODUCT PAGE RULES:
+- The page describes the product as sold new. Brand, name, type, material, colours and fit come from it${noPhotos ? "" : " where the photos cannot show them; where they disagree, trust the photos"}.
+- ${noPhotos ? 'subject: judge from the page. "clothing" if the product is a garment, shoes, a bag or an accessory; "not_clothing" otherwise.' : "subject: judge from the photos as usual."}
+- ${noPhotos ? "condition: exactly what the seller stated above. Never invent how often it was worn, nor wear, marks or flaws you cannot see; with nothing stated, the description says nothing about condition at all." : "condition: from the photos, as usual; the seller's stated condition, if any, is what to check the photos against."}
+- size: what the seller stated above${noPhotos ? "; otherwise as the rule above says" : ", else from the photos, else as the rule above says"}.
+- price_min/price_max: the RRP is a strong anchor. Secondhand in good condition is typically 30–60% of RRP for high-street brands, higher for sought-after or sold-out pieces, lower for basics. Say so in price_reasoning.
+- tag_data: ${noPhotos ? "all null and barcode_visible false — no label was seen." : "from the photos only, never from the page."}
+- Never mention the page, the link or the RRP in the title or description. Write it as the seller would.`;
+}
+
+function buildPlatformPrompt(platform: Platform, tone: Tone, source: Source, notes: SellerNote[] = [], market: Market = DEFAULT_MARKET): string {
   const currency = MARKETS[market].currency;
   const spec = platformListingSpec[platform];
   return `You are an expert clothing photographer and professional reselling assistant for secondhand fashion platforms.
 
-Analyse these ${photoCount} clothing photo(s) and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
+${task(source)} and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
 
 ${spec.promptFragment}
 
@@ -119,7 +163,7 @@ ${jsonShape(platform)}
 
 ${sellerNotesPrompt(notes, platform)}
 
-${COMMON_RULES}
+${COMMON_RULES}${pageRules(source)}
 
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
@@ -146,11 +190,11 @@ For every field:
 - If the photos genuinely lack the info, pick the best safe default (e.g. "Unbranded" if no brand) rather than leaving the value empty.`;
 }
 
-function buildNeutralPrompt(tone: Tone, photoCount: number, market: Market = DEFAULT_MARKET): string {
+function buildNeutralPrompt(tone: Tone, source: Source, market: Market = DEFAULT_MARKET): string {
   const currency = MARKETS[market].currency;
   return `You are an expert clothing photographer and professional reselling assistant for secondhand fashion platforms.
 
-Analyse these ${photoCount} clothing photo(s) and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
+${task(source)} and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
 
 ${TONE_HINT[tone]}
 
@@ -158,7 +202,7 @@ Return exactly this JSON structure (fill in all fields):
 
 ${jsonShape()}
 
-${COMMON_RULES}
+${COMMON_RULES}${pageRules(source)}
 
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
@@ -184,10 +228,41 @@ function imageBlocks(photos: string[]) {
   }));
 }
 
-function buildPrompt(input: AnalyseInput): string {
+/** The document, wherever it sits: a thinking block may come first. */
+function textOf(content: { type: string; text?: string }[]): string {
+  return content.find((b): b is { type: "text"; text: string } => b.type === "text")?.text ?? "";
+}
+
+function buildPrompt(input: AnalyseInput, source: Source): string {
   return input.platform
-    ? buildPlatformPrompt(input.platform, input.tone, input.photos.length, input.sellerNotes, input.market)
-    : buildNeutralPrompt(input.tone, input.photos.length, input.market);
+    ? buildPlatformPrompt(input.platform, input.tone, source, input.sellerNotes, input.market)
+    : buildNeutralPrompt(input.tone, source, input.market);
+}
+
+/**
+ * Read the pasted page, if there is one, and describe what the model will
+ * look at. A page that cannot be read (or is not a product) stops the read
+ * here — before a unit of model time is spent on the listing — as a
+ * rejection the route hands the unit back for.
+ */
+async function resolveSource(input: AnalyseInput): Promise<Source> {
+  if (!input.link) return { photoCount: input.photos.length };
+  const facts = await readProductLink(input.link.url, { trace: input.trace });
+  if (!facts.found) throw new AnalyseRejected("link_unreadable");
+  if (input.photos.length === 0 && !facts.is_clothing) throw new AnalyseRejected("not_clothing");
+  return {
+    photoCount: input.photos.length,
+    page: productFactsPrompt(input.link.url, facts, { size: input.link.size, condition: input.link.condition }),
+  };
+}
+
+/** The request shape for the trace: never the photos, never the page text. */
+function traceInput(input: AnalyseInput) {
+  let link: string | undefined;
+  if (input.link) {
+    try { link = new URL(input.link.url).hostname.replace(/^www\./, ""); } catch { link = "invalid"; }
+  }
+  return { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length, ...(link ? { link } : {}) };
 }
 
 /**
@@ -196,10 +271,11 @@ function buildPrompt(input: AnalyseInput): string {
  */
 export async function analyseListing(input: AnalyseInput): Promise<AnalysisResult> {
   const client = anthropicClient();
+  const source = await resolveSource(input);
   const messages = [
     {
       role: "user" as const,
-      content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input) }],
+      content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input, source) }],
     },
   ];
   const message = await observeGeneration(
@@ -207,7 +283,7 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
       name: "analyse",
       model: MODELS.analyse,
       // Never trace the base64 photos — log only the meaningful request shape.
-      input: { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length },
+      input: traceInput(input),
       modelParameters: { max_tokens: 4096 },
       trace: input.trace,
     },
@@ -219,11 +295,11 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
         messages,
       }),
     (m) => ({
-      output: m.content[0].type === "text" ? m.content[0].text : "",
+      output: textOf(m.content),
       usage: { input: m.usage?.input_tokens, output: m.usage?.output_tokens },
     })
   );
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
+  const text = textOf(message.content);
   const parsed = parseAnalysisResult(text);
   await input.onResult?.(parsed);
   return parsed;
@@ -235,7 +311,7 @@ export async function analyseListing(input: AnalyseInput): Promise<AnalysisResul
  * or "refused" when the model returned no document at all.
  */
 export class AnalyseRejected extends Error {
-  constructor(readonly subject: Exclude<AnalysisSubject, "clothing"> | "refused") {
+  constructor(readonly subject: Exclude<AnalysisSubject, "clothing"> | "refused" | "link_unreadable") {
     super(`Analyse rejected: ${subject}`);
     this.name = "AnalyseRejected";
   }
@@ -255,7 +331,9 @@ export function earlySubject(buffer: string): AnalysisSubject | undefined {
  * The first field is the subject. Anything but "clothing" ends the stream with
  * an `AnalyseRejected` before a listing is written, and a model refusal (no
  * document at all) is reported the same way — so the route can hand the unit
- * back and tell the client why, instead of a decode failure downstream.
+ * back and tell the client why, instead of a decode failure downstream. A
+ * pasted link that cannot be read is a fourth reason, `link_unreadable`,
+ * raised before the model is asked for a listing at all.
  */
 export function analyseListingStream(input: AnalyseInput): ReadableStream<string> {
   return new ReadableStream({
@@ -263,10 +341,13 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
       let generation: ReturnType<typeof beginGeneration> = null;
       try {
         const client = anthropicClient();
+        // The link read happens here, inside the stream, so a page that cannot
+        // be read fails the same way a rejection does and refunds the unit.
+        const source = await resolveSource(input);
         const messages = [
           {
             role: "user" as const,
-            content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input) }],
+            content: [...imageBlocks(input.photos), { type: "text" as const, text: buildPrompt(input, source) }],
           },
         ];
         let analyseTraceId: string | undefined;
@@ -274,7 +355,7 @@ export function analyseListingStream(input: AnalyseInput): ReadableStream<string
           name: "analyse",
           model: MODELS.analyse,
           // Never trace the base64 photos — log only the meaningful request shape.
-          input: { platform: input.platform ?? "neutral", tone: input.tone, photoCount: input.photos.length },
+          input: traceInput(input),
           modelParameters: { max_tokens: 4096 },
           trace: input.trace,
           onTraceId: (id) => { analyseTraceId = id; },

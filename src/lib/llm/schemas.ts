@@ -147,6 +147,27 @@ const comparableSchema: Schema = {
 };
 
 /** PriceBand — one platform's low-to-high range, with its comparables. */
+/** ProductFacts — what `readProductLink` reports from a product page. */
+export const productFactsSchema: Schema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["found", "is_clothing", "brand", "product_name", "clothing_type", "gender", "colours", "material", "sizes_offered", "rrp_amount", "rrp_currency", "details"],
+  properties: {
+    found: { type: "boolean" },
+    is_clothing: { type: "boolean" },
+    brand: nullableString,
+    product_name: nullableString,
+    clothing_type: nullableString,
+    gender: { anyOf: [{ type: "string", enum: ["women", "men", "kids", "unisex"] }, { type: "null" }] },
+    colours: { type: "array", items: { type: "string" } },
+    material: nullableString,
+    sizes_offered: { type: "array", items: { type: "string" } },
+    rrp_amount: { type: ["number", "null"] },
+    rrp_currency: nullableString,
+    details: { type: "array", items: { type: "string" } },
+  },
+};
+
 export const priceBandSchema: Schema = {
   type: "object",
   additionalProperties: false,

@@ -8,7 +8,21 @@ vi.mock("./client", async (importOriginal) => ({
   anthropicClient: () => ({ messages: { create } }),
 }));
 
+const readProductLink = vi.fn();
+vi.mock("./link", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./link")>()),
+  readProductLink,
+}));
+
 const { analyseListing, analyseListingStream, AnalyseRejected, earlySubject } = await import("./analyse");
+const { productFactsPrompt } = await import("./link");
+
+const LINK = "https://www.cos.com/en_gbp/women/shirts/product.oversized-cotton-shirt-pink.1234.html";
+const FACTS = {
+  found: true, is_clothing: true, brand: "COS", product_name: "Oversized cotton shirt", clothing_type: "Shirt",
+  gender: "women" as const, colours: ["Pink"], material: "100% cotton", sizes_offered: ["XS", "S", "M", "L"],
+  rrp_amount: 65, rrp_currency: "GBP", details: ["Relaxed fit", "Dropped shoulders"],
+};
 
 const PHOTO = "data:image/jpeg;base64,AAAA";
 
@@ -19,6 +33,76 @@ function lastCall() {
 beforeEach(() => {
   create.mockReset();
   create.mockResolvedValue(textMessage(JSON.stringify(analysisResult)));
+  readProductLink.mockReset();
+  readProductLink.mockResolvedValue(FACTS);
+});
+
+describe("analyseListing — a pasted link", () => {
+  it("reads the page first, then writes from it with no image blocks", async () => {
+    await analyseListing({ photos: [], link: { url: LINK, size: "M", condition: "Excellent" }, tone: "casual" });
+    expect(readProductLink).toHaveBeenCalledWith(LINK, expect.anything());
+    const content = lastCall().messages[0].content;
+    expect(content.filter((b: { type: string }) => b.type === "image")).toHaveLength(0);
+    const prompt = content.at(-1).text as string;
+    expect(prompt).toContain("Write a listing for the product on the page below");
+    expect(prompt).toContain("PRODUCT PAGE (cos.com)");
+    expect(prompt).toContain("Brand: COS");
+    expect(prompt).toContain("Full price (RRP): GBP 65");
+    expect(prompt).toContain("Their item is size M.");
+    expect(prompt).toContain('Its condition is "Excellent".');
+    expect(prompt).toContain("all null and barcode_visible false");
+  });
+
+  it("without a stated size or condition, says what to assume", async () => {
+    await analyseListing({ photos: [], link: { url: LINK }, tone: "casual" });
+    const prompt = lastCall().messages[0].content.at(-1).text as string;
+    expect(prompt).toContain("They did not say the size");
+    expect(prompt).toContain('write "Good" as the condition and say nothing about wear');
+    expect(prompt).toContain("Never invent how often it was worn");
+  });
+
+  it("with photos too, keeps the image blocks and trusts the photos where they disagree", async () => {
+    await analyseListing({ photos: [PHOTO, PHOTO], link: { url: LINK }, tone: "casual", platform: "vinted" });
+    const content = lastCall().messages[0].content;
+    expect(content.filter((b: { type: string }) => b.type === "image")).toHaveLength(2);
+    const prompt = content.at(-1).text as string;
+    expect(prompt).toContain("together with the product page below");
+    expect(prompt).toContain("trust the photos");
+    expect(prompt).toContain("from the photos only, never from the page");
+  });
+
+  it("never asks the page's RRP or the link into the listing text", async () => {
+    await analyseListing({ photos: [], link: { url: LINK }, tone: "casual" });
+    const prompt = lastCall().messages[0].content.at(-1).text as string;
+    expect(prompt).toContain("Never mention the page, the link or the RRP in the title or description");
+  });
+
+  it("rejects as link_unreadable when the page could not be read, before the model is asked", async () => {
+    readProductLink.mockResolvedValue({ ...FACTS, found: false });
+    await expect(analyseListing({ photos: [], link: { url: LINK }, tone: "casual" })).rejects.toBeInstanceOf(AnalyseRejected);
+    await expect(analyseListing({ photos: [], link: { url: LINK }, tone: "casual" })).rejects.toMatchObject({ subject: "link_unreadable" });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("rejects a link-only read of something that is not clothing", async () => {
+    readProductLink.mockResolvedValue({ ...FACTS, is_clothing: false });
+    await expect(analyseListing({ photos: [], link: { url: LINK }, tone: "casual" })).rejects.toMatchObject({ subject: "not_clothing" });
+  });
+
+  it("the stream ends with the same rejection and the unit can be refunded", async () => {
+    readProductLink.mockResolvedValue({ ...FACTS, found: false });
+    const reader = analyseListingStream({ photos: [], link: { url: LINK }, tone: "casual" }).getReader();
+    await expect(reader.read()).rejects.toMatchObject({ subject: "link_unreadable" });
+  });
+});
+
+describe("productFactsPrompt", () => {
+  it("leaves out what the page did not say", () => {
+    const text = productFactsPrompt(LINK, { ...FACTS, material: null, rrp_amount: null, details: [] }, {});
+    expect(text).not.toContain("Material:");
+    expect(text).not.toContain("RRP");
+    expect(text).toContain("Sizes the shop sells: XS, S, M, L");
+  });
 });
 
 describe("analyseListing — prompt", () => {
@@ -130,9 +214,9 @@ describe("analyseListingStream", () => {
     expect(JSON.parse(assembled)).toEqual(analysisResult);
   });
 
-  it("asks for the subject before anything else", () => {
+  it("asks for the subject before anything else", async () => {
     create.mockResolvedValue(textStream(["{}"]));
-    void analyseListingStream({ photos: [PHOTO], tone: "casual" }).getReader().read();
+    await analyseListingStream({ photos: [PHOTO], tone: "casual" }).getReader().read();
     const prompt = lastCall().messages[0].content.at(-1).text as string;
     expect(prompt.indexOf('"subject"')).toBeLessThan(prompt.indexOf('"listing"'));
     expect(prompt).toContain('"not_clothing"');

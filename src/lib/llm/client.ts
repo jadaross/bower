@@ -17,6 +17,8 @@ export const MODELS = {
   format: "claude-haiku-4-5-20251001",
   refine: "claude-haiku-4-5-20251001",
   valuation: "claude-sonnet-5",
+  /** The product-page read behind a pasted link: needs web fetch, so Sonnet. */
+  link: "claude-sonnet-5",
 } as const;
 
 let _client: Anthropic | null = null;

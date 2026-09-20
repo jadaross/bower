@@ -3,13 +3,14 @@
  * REST API directly (Basic auth with the project keys) rather than the tracing
  * SDK, which only writes. Every generation bower makes is a Langfuse
  * GENERATION observation named after its route — `analyse`, `format`,
- * `refine`, `valuate:<platform>` — carrying the model, token usage, the cost
+ * `refine`, `link` (the product-page read behind a pasted link),
+ * `valuate:<platform>` — carrying the model, token usage, the cost
  * Langfuse computed from its price table, latency, the user and the item's
  * session id. Feedback arrives as scores on the trace (`copied`, `thumbs`,
  * `manual-edit`, `opened-platform`, `refine-requested`, `note`).
  */
 
-export type Route = "analyse" | "valuate" | "format" | "refine";
+export type Route = "analyse" | "link" | "valuate" | "format" | "refine";
 
 export interface Generation {
   id: string;
@@ -91,7 +92,7 @@ async function paginate<T>(
 
 function routeOf(name: string): Route {
   if (name.startsWith("valuate")) return "valuate";
-  if (name === "format" || name === "refine" || name === "analyse") return name;
+  if (name === "format" || name === "refine" || name === "analyse" || name === "link") return name;
   return "analyse";
 }
 

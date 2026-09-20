@@ -6,8 +6,8 @@ import { Shell, type Query } from "../_components/Shell";
 
 export const dynamic = "force-dynamic";
 
-const ROUTE_COLOR = { analyse: "--s1", valuate: "--s2", format: "--s3", refine: "--s4" } as const;
-const ROUTE_LABEL = { analyse: "Listing (analyse)", valuate: "Market check (valuate)", format: "Switch (format)", refine: "Chips (refine)" } as const;
+const ROUTE_COLOR = { analyse: "--s1", link: "--s5", valuate: "--s2", format: "--s3", refine: "--s4" } as const;
+const ROUTE_LABEL = { analyse: "Listing (analyse)", link: "Link read (link)", valuate: "Market check (valuate)", format: "Switch (format)", refine: "Chips (refine)" } as const;
 
 export default async function Cost({ searchParams }: { searchParams: Promise<Query> }) {
   const { q, data, badges } = await pageData(searchParams);

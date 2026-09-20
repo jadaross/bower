@@ -342,7 +342,7 @@ export function daily(data: DashboardData): DayRow[] {
       refines: 0,
       rejections: 0,
       cost: 0,
-      costByRoute: { analyse: 0, valuate: 0, format: 0, refine: 0 },
+      costByRoute: { analyse: 0, link: 0, valuate: 0, format: 0, refine: 0 },
       activePeople: 0,
       signups: 0,
     });
@@ -759,7 +759,7 @@ export function costStats(data: DashboardData): CostStats {
   const spend = gens.reduce((s, g) => s + g.cost.total, 0);
   const listings = gens.filter(isListing);
   const checks = marketChecks(gens);
-  const routes: Route[] = ["analyse", "valuate", "format", "refine"];
+  const routes: Route[] = ["analyse", "link", "valuate", "format", "refine"];
   const byRoute = routes.map((route) => {
     const rs = gens.filter((g) => g.route === route);
     const cost = rs.reduce((s, g) => s + g.cost.total, 0);
@@ -836,7 +836,7 @@ export function percentile(sorted: number[], p: number): number | null {
 
 export function healthStats(data: DashboardData): HealthStats {
   const gens = data.generations;
-  const routes: Route[] = ["analyse", "valuate", "format", "refine"];
+  const routes: Route[] = ["analyse", "link", "valuate", "format", "refine"];
   const latency = routes.map((route) => {
     const rs = gens.filter((g) => g.route === route);
     const ls = rs.map((g) => g.latency).filter((l): l is number => l !== null).sort((a, b) => a - b);
@@ -945,6 +945,9 @@ export function waits(data: DashboardData): Wait[] {
   for (const g of data.generations) {
     if (g.route === "valuate" || isError(g) || g.latency === null) continue;
     if (g.route === "analyse" && !isListing(g)) continue;
+    // The link read is the first half of a read, not a wait of its own; the
+    // person waits on the analyse that follows it.
+    if (g.route === "link") continue;
     const task: Task = g.route === "analyse" ? "read" : g.route === "format" ? "switch" : "chips";
     out.push({ at: g.startTime, task, who: who(g.userId), userId: g.userId, sessionId: g.sessionId, seconds: g.latency, traceId: g.traceId, detail: null });
   }

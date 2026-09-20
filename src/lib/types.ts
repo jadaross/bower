@@ -14,6 +14,7 @@ export interface TagData {
 }
 
 export type Condition = "New with tags" | "Excellent" | "Good" | "Fair";
+export const CONDITIONS: readonly Condition[] = ["New with tags", "Excellent", "Good", "Fair"];
 
 /** The platform-agnostic description of an item. See CONTEXT.md — "Neutral Listing". */
 export interface Listing {
@@ -75,6 +76,30 @@ export interface PlatformListing {
  */
 export type AnalysisSubject = "clothing" | "not_clothing" | "explicit" | "unsafe";
 export const ANALYSIS_SUBJECTS: readonly AnalysisSubject[] = ["clothing", "not_clothing", "explicit", "unsafe"];
+
+/**
+ * What a product page says about the product, as read by `readProductLink`.
+ * Feeds the analyse prompt when the seller pastes a link; never shown as is.
+ */
+export interface ProductFacts {
+  /** The page was read (or found by search) and describes one product. */
+  found: boolean;
+  /** A garment, shoes, a bag or an accessory — something bower writes for. */
+  is_clothing: boolean;
+  brand: string | null;
+  product_name: string | null;
+  clothing_type: string | null;
+  gender: "women" | "men" | "kids" | "unisex" | null;
+  colours: string[];
+  material: string | null;
+  /** The size range the shop sells, as written. */
+  sizes_offered: string[];
+  /** The shop's full price before any sale, and its ISO currency. */
+  rrp_amount: number | null;
+  rrp_currency: string | null;
+  /** Up to six short facts a reseller would want: fit, length, closure, care. */
+  details: string[];
+}
 
 export interface AnalysisResult {
   subject?: AnalysisSubject;

@@ -45,9 +45,9 @@ const TABLE = "item_history";
 /** Record an analysed item. Best-effort. */
 export async function recordItem(
   token: string,
-  params: { userId: string; sessionId?: string; listing: Listing; preferredPlatform?: Platform; currency?: string }
+  params: { userId: string; sessionId?: string; listing: Listing; preferredPlatform?: Platform; currency?: string; sourceUrl?: string }
 ): Promise<void> {
-  const { userId, sessionId, listing, preferredPlatform, currency } = params;
+  const { userId, sessionId, listing, preferredPlatform, currency, sourceUrl } = params;
   try {
     const { error } = await userClient(token)
       .from(TABLE)
@@ -66,6 +66,8 @@ export async function recordItem(
         price_max: listing.price_max,
         currency: currency ?? "GBP",
         preferred_platform: preferredPlatform ?? null,
+        // The product page the seller pasted, when the read came from one.
+        source_url: sourceUrl ?? null,
         // The whole Neutral Listing, so the detail view can show it as first seen.
         listing,
       });

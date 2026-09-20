@@ -34,7 +34,8 @@ Prefer the XcodeBuildMCP tools; call `session_show_defaults` first. Launch with
 `-bowerStub` to run every screen on fixtures with no network and no sign-in — DEBUG
 only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,
 `platforms`, …) to open on one of the one-time pages instead of Home; `-bowerUnlimited`
-for an account with no limits, `-bowerSpent` for both meters at zero.
+for an account with no limits, `-bowerSpent` for both meters at zero, `-bowerLink <url>` for a
+product page already pasted on Home.
 
 ## Environment
 
@@ -51,7 +52,7 @@ there are no anonymous requests, because the meter needs someone to meter
 
 | Route | Purpose |
 |---|---|
-| `POST /api/analyse` | Photos → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price estimate, plus the named platform's form fields). Streams SSE. Up to 5 photos. **Spends one listing.** |
+| `POST /api/analyse` | Photos and/or a pasted product-page `link` → `AnalysisResult` (tag OCR + Neutral Listing, including the search-free price estimate, plus the named platform's form fields). Streams SSE. Up to 5 photos; with a link the page is read first (`src/lib/llm/link.ts`, Claude's web fetch, traced as `link`) and its facts go into the prompt — link alone takes `size` and `condition` from the body, since a page cannot know them. A page that cannot be read ends the stream with `{"rejected": "link_unreadable"}` and refunds. **Spends one listing.** |
 | `POST /api/format`  | Neutral `Listing` + platform + tone → `PlatformListing`. |
 | `POST /api/refine`  | Existing `PlatformListing` + chip instruction text → rewritten `PlatformListing`. |
 | `POST /api/valuate` | `ValuationItem` → a Price Band per Enabled Platform, plus a Recommendation. **Spends one market check.** |
