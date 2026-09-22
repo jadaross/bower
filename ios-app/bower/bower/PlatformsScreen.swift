@@ -31,6 +31,12 @@ struct PlatformsScreen: View {
 
             Spacer(minLength: 20)
 
+            if !state.onboardingComplete {
+                Text("Next, bower will ask to notify you — so it can tell you when a market check finishes and when your monthly limits reset.")
+                    .font(BowerFont.ui(12))
+                    .foregroundStyle(theme.muted)
+            }
+
             BowerButton(title: saving ? "Saving…" : "Continue with \(countLabel)", disabled: saving) {
                 Task { await save() }
             }
@@ -51,10 +57,15 @@ struct PlatformsScreen: View {
     private func save() async {
         saving = true
         defer { saving = false }
+        let firstTime = !state.onboardingComplete
         // Best effort: if the network is down the local choice still stands and
         // Settings can re-save it. Enabled Platforms are also re-read on launch.
         await state.savePlatforms()
         state.onboardingComplete = true
+        // Asked here, at the end of set-up, with the line above explaining why —
+        // not at launch with no context, and not buried in the first market
+        // check, which someone may never run.
+        if firstTime { await Notifications.requestIfNeeded() }
         state.screen = .capture
     }
 
