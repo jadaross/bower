@@ -68,4 +68,19 @@ final class SupabaseSession: SessionProviding, @unchecked Sendable {
             credentials: OpenIDConnectCredentials(provider: .apple, idToken: idToken, nonce: nonce.raw)
         )
     }
+
+    // MARK: Email
+
+    /// `true` when a session came back immediately; `false` means Supabase's
+    /// mailer sent a confirmation link first and there is nothing to sign
+    /// into yet.
+    @discardableResult
+    func signUpWithEmail(email: String, password: String) async throws -> Bool {
+        let response = try await client.signUp(email: email, password: password)
+        return response.session != nil
+    }
+
+    func signInWithEmail(email: String, password: String) async throws {
+        _ = try await client.signIn(email: email, password: password)
+    }
 }

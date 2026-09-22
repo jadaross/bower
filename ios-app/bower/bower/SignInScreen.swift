@@ -1,9 +1,11 @@
 import SwiftUI
 import AuthenticationServices
 
-/// Apple only for v1. Email/password was designed and is the first ladder
-/// rung, but shipping both without account linking lets one person become
-/// two accounts with two allowances — see issue #30. One method, no collision.
+/// Apple, or email and password — plain, independent Supabase identities.
+/// No linking: someone who uses both on the same address gets two accounts,
+/// same as any app without SSO account merging (see issue #30, and #58 for
+/// why linking isn't attempted — Supabase's own automatic linking 500s on an
+/// Apple Hide My Email address, supabase/supabase#43895).
 struct SignInScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
@@ -15,6 +17,16 @@ struct SignInScreen: View {
     @State private var nonces = NonceBox()
     @State private var working = false
     @State private var failure: String?
+    @State private var notice: String?
+
+    @State private var showEmail = false
+    @State private var signingUp = true
+    @State private var email = ""
+    @State private var password = ""
+
+    private var canSubmitEmail: Bool {
+        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
+    }
 
     var body: some View {
         // Avenue ground: the launch splash carries straight through into this
@@ -49,24 +61,38 @@ struct SignInScreen: View {
                 VStack(spacing: 12) {
                     if let failure { rejection(failure) }
 
-                    SignInWithAppleButton(.signIn) { request in
-                        let fresh = SupabaseSession.AppleNonce()
-                        nonces.current = fresh
-                        request.requestedScopes = [.email]
-                        request.nonce = fresh.hashed
-                    } onCompletion: { result in
-                        Task { await complete(result) }
-                    }
-                    .signInWithAppleButtonStyle(.white)
-                    .frame(height: 50)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .disabled(working)
-                    .overlay {
-                        if working {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(.black.opacity(0.35))
-                                .overlay { ProgressView().tint(.white) }
+                    if showEmail {
+                        emailForm
+                    } else {
+                        SignInWithAppleButton(.signIn) { request in
+                            let fresh = SupabaseSession.AppleNonce()
+                            nonces.current = fresh
+                            request.requestedScopes = [.email]
+                            request.nonce = fresh.hashed
+                        } onCompletion: { result in
+                            Task { await complete(result) }
                         }
+                        .signInWithAppleButtonStyle(.white)
+                        .frame(height: 50)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .disabled(working)
+                        .overlay {
+                            if working {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.black.opacity(0.35))
+                                    .overlay { ProgressView().tint(.white) }
+                            }
+                        }
+
+                        Button { showEmail = true; notice = nil; failure = nil } label: {
+                            Text("Continue with email")
+                                .font(BowerFont.ui(15, weight: .semibold))
+                                .foregroundStyle(Self.paper)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Self.paper.opacity(0.35), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     Text("Photos are read and thrown away. Bower keeps no images.")
@@ -102,6 +128,130 @@ struct SignInScreen: View {
         .padding(.horizontal, 12)
         .background(theme.coral.opacity(0.18))
         .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func noticeBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("✓")
+                .font(BowerFont.ui(11, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 16, height: 16)
+                .background(theme.moss)
+                .clipShape(Circle())
+            Text(message)
+                .font(BowerFont.ui(12.5))
+                .foregroundStyle(Self.paper)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background(theme.moss.opacity(0.18))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var emailForm: some View {
+        VStack(spacing: 10) {
+            Button { showEmail = false; notice = nil; failure = nil } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
+                    Text("Back")
+                }
+                .font(BowerFont.ui(13, weight: .medium))
+                .foregroundStyle(Self.paper.opacity(0.6))
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 2)
+
+            if let notice { noticeBanner(notice) }
+
+            HStack(spacing: 3) {
+                emailModeTab("Sign up", active: signingUp) { signingUp = true }
+                emailModeTab("Log in", active: !signingUp) { signingUp = false }
+            }
+            .padding(3)
+            .background(.white.opacity(0.06))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            VStack(spacing: 8) {
+                emailField("Email", text: $email, secure: false, keyboard: .emailAddress, contentType: .emailAddress)
+                emailField("Password", text: $password, secure: true, contentType: signingUp ? .newPassword : .password)
+            }
+
+            Button { Task { await submitEmail() } } label: {
+                Text(signingUp ? "Create account" : "Log in")
+                    .font(BowerFont.ui(15, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .foregroundStyle(theme.avenue)
+                    .background(canSubmitEmail ? Self.paper : Self.paper.opacity(0.3))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            .disabled(!canSubmitEmail || working)
+        }
+        .padding(.top, 4)
+    }
+
+    private func emailModeTab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(BowerFont.ui(13, weight: active ? .semibold : .medium))
+                .foregroundStyle(active ? theme.avenue : Self.paper.opacity(0.6))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(active ? Self.paper : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 9))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func emailField(
+        _ placeholder: String, text: Binding<String>, secure: Bool,
+        keyboard: UIKeyboardType = .default, contentType: UITextContentType? = nil
+    ) -> some View {
+        Group {
+            if secure { SecureField(placeholder, text: text) }
+            else { TextField(placeholder, text: text) }
+        }
+        .font(BowerFont.ui(14))
+        .foregroundStyle(Self.paper)
+        .tint(theme.sheen)
+        .keyboardType(keyboard)
+        .textContentType(contentType)
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .background(.white.opacity(0.07))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.white.opacity(0.14), lineWidth: 1))
+    }
+
+    private func submitEmail() async {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard canSubmitEmail else { return }
+        working = true
+        failure = nil
+        notice = nil
+        defer { working = false }
+        do {
+            if signingUp {
+                let confirmed = try await state.session.signUpWithEmail(email: trimmedEmail, password: password)
+                if confirmed {
+                    await state.didSignIn()
+                } else {
+                    notice = "Check your email to confirm your account, then log in."
+                    signingUp = false
+                    password = ""
+                }
+            } else {
+                try await state.session.signInWithEmail(email: trimmedEmail, password: password)
+                await state.didSignIn()
+            }
+        } catch {
+            failure = "Couldn't finish signing in: \(error.localizedDescription)"
+        }
     }
 
     private static func describe(_ error: APIError) -> String {
