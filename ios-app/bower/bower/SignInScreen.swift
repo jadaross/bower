@@ -173,19 +173,31 @@ struct SignInScreen: View {
             .background(.white.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
-            VStack(spacing: 8) {
-                emailField("Email", text: $email, secure: false, keyboard: .emailAddress, contentType: .emailAddress)
-                emailField("Password", text: $password, secure: true, contentType: signingUp ? .newPassword : .password)
+            // One grouped field, split by a hairline, the way a real form
+            // reads — not two boxes floating apart with nothing tying them
+            // together.
+            VStack(spacing: 0) {
+                emailField(icon: "envelope", "Email", text: $email, secure: false, keyboard: .emailAddress, contentType: .emailAddress)
+                Rectangle().fill(.white.opacity(0.09)).frame(height: 0.5).padding(.leading, 42)
+                emailField(icon: "lock", "Password", text: $password, secure: true, contentType: signingUp ? .newPassword : .password)
             }
+            .background(.white.opacity(0.05))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(.white.opacity(0.12), lineWidth: 1))
 
             Button { Task { await submitEmail() } } label: {
                 Text(signingUp ? "Create account" : "Log in")
                     .font(BowerFont.ui(15, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .foregroundStyle(theme.avenue)
-                    .background(canSubmitEmail ? Self.paper : Self.paper.opacity(0.3))
+                    .foregroundStyle(canSubmitEmail ? theme.avenue : Self.paper.opacity(0.4))
+                    .background(canSubmitEmail ? Self.paper : .clear)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay {
+                        if !canSubmitEmail {
+                            RoundedRectangle(cornerRadius: 12).stroke(Self.paper.opacity(0.2), lineWidth: 1)
+                        }
+                    }
             }
             .buttonStyle(.plain)
             .disabled(!canSubmitEmail || working)
@@ -207,25 +219,28 @@ struct SignInScreen: View {
     }
 
     private func emailField(
-        _ placeholder: String, text: Binding<String>, secure: Bool,
+        icon: String, _ placeholder: String, text: Binding<String>, secure: Bool,
         keyboard: UIKeyboardType = .default, contentType: UITextContentType? = nil
     ) -> some View {
-        Group {
-            if secure { SecureField(placeholder, text: text) }
-            else { TextField(placeholder, text: text) }
+        HStack(spacing: 11) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Self.paper.opacity(0.4))
+                .frame(width: 16)
+            Group {
+                if secure { SecureField("", text: text, prompt: Text(placeholder).foregroundColor(Self.paper.opacity(0.4))) }
+                else { TextField("", text: text, prompt: Text(placeholder).foregroundColor(Self.paper.opacity(0.4))) }
+            }
+            .font(BowerFont.ui(14.5))
+            .foregroundStyle(Self.paper)
+            .tint(theme.sheen)
+            .keyboardType(keyboard)
+            .textContentType(contentType)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
         }
-        .font(BowerFont.ui(14))
-        .foregroundStyle(Self.paper)
-        .tint(theme.sheen)
-        .keyboardType(keyboard)
-        .textContentType(contentType)
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .padding(.vertical, 12)
+        .padding(.vertical, 13)
         .padding(.horizontal, 14)
-        .background(.white.opacity(0.07))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.white.opacity(0.14), lineWidth: 1))
     }
 
     private func submitEmail() async {
