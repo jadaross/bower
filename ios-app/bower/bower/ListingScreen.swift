@@ -47,6 +47,9 @@ final class ListingModel {
     var platform: Platform = .vinted
     var tone: Tone = .casual
     var chips: Set<RefinementChip> = []
+    /// Free-text search terms the seller wants woven into the title and
+    /// description as real language, not appended as a hashtag list.
+    var extraKeywords = ""
     var formatted: [Platform: PlatformListing] = [:]
     var edits: [Platform: PlatformListing] = [:]
     /// The Langfuse trace behind the listing shown for each platform (#45).
@@ -115,8 +118,6 @@ final class ListingModel {
         priceState = .searching
         elapsed = 0
         searchError = nil
-        // The one moment "we'll tell you when it's done" is a fair ask.
-        Task { await Notifications.requestIfNeeded() }
         searchTask = Task {
             // Counted from the clock, not by ticks: the ticker stops while the
             // app is suspended but the search does not.
@@ -176,7 +177,7 @@ final class ListingModel {
     func setTone(_ t: Tone) {
         guard t != tone else { return }
         tone = t
-        formatted = [:]; edits = [:]; chips = []; traces = [:]; thumbed = [:]
+        formatted = [:]; edits = [:]; chips = []; traces = [:]; thumbed = [:]; extraKeywords = ""
         formatTask?.cancel()
         formatTask = Task { await format() }
     }
@@ -188,19 +189,29 @@ final class ListingModel {
 
     func resetChips() {
         chips = []
+        extraKeywords = ""
         formatted[platform] = nil
         edits[platform] = nil
         formatTask?.cancel()
         formatTask = Task { await format() }
     }
 
+    func setKeywords(_ k: String) {
+        extraKeywords = k
+        refine()
+    }
+
     private func refine() {
-        guard let state, let base = formatted[platform], !chips.isEmpty else { return }
+        let keywords = extraKeywords.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let state, let base = formatted[platform], !chips.isEmpty || !keywords.isEmpty else { return }
         formatTask?.cancel()
         formatTask = Task {
             rewriting = true
             defer { rewriting = false }
-            let instructions = RefinementChip.allCases.filter { chips.contains($0) }.map(\.instruction)
+            var instructions = RefinementChip.allCases.filter { chips.contains($0) }.map(\.instruction)
+            if !keywords.isEmpty {
+                instructions.append("Work these words naturally into the title and description as real search terms a buyer might type — do not just append them as hashtags: \(keywords)")
+            }
             if let out = try? await state.api.refine(listing: base, platform: platform, instructions: instructions) {
                 edits[platform] = out
                 traces[platform] = out.traceId
@@ -454,6 +465,7 @@ private struct ListingSection: View {
     @Environment(\.bower) private var theme
     @State private var editing: String?
     @State private var feedback = false
+    @State private var editingKeywords = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -479,7 +491,7 @@ private struct ListingSection: View {
                 HStack {
                     Kicker("Rewrite it")
                     Spacer(minLength: 0)
-                    if !model.chips.isEmpty {
+                    if !model.chips.isEmpty || !model.extraKeywords.isEmpty {
                         Button("Reset") { model.resetChips() }
                             .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
                     }
@@ -501,6 +513,24 @@ private struct ListingSection: View {
                         }
                         .buttonStyle(.plain)
                     }
+                    Button { editingKeywords.toggle() } label: {
+                        HStack(spacing: 5) {
+                            if !model.extraKeywords.isEmpty { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
+                            Text(model.extraKeywords.isEmpty ? "+ Keywords" : "Keywords")
+                        }
+                        .font(BowerFont.ui(12.5, weight: .medium))
+                        .foregroundStyle(model.extraKeywords.isEmpty ? theme.text : .white)
+                        .padding(.vertical, 8).padding(.horizontal, 13)
+                        .background(model.extraKeywords.isEmpty ? theme.card : theme.satin)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(model.extraKeywords.isEmpty ? theme.line : .clear, lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                }
+                if editingKeywords {
+                    // Words a buyer might search for that the listing doesn't already
+                    // use — woven into the title and description, not a hashtag list.
+                    EditBox(value: model.extraKeywords, multiline: false, bold: false, placeholder: "e.g. y2k, festival, streetwear") { model.setKeywords($0); editingKeywords = false } onCancel: { editingKeywords = false }
                 }
             }
             .padding(.top, 2)
@@ -668,13 +698,14 @@ private struct EditBox: View {
     let value: String
     let multiline: Bool
     let bold: Bool
+    let placeholder: String
     let onSave: (String) -> Void
     let onCancel: () -> Void
     @Environment(\.bower) private var theme
     @State private var draft: String
 
-    init(value: String, multiline: Bool, bold: Bool, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void) {
-        self.value = value; self.multiline = multiline; self.bold = bold
+    init(value: String, multiline: Bool, bold: Bool, placeholder: String = "", onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void) {
+        self.value = value; self.multiline = multiline; self.bold = bold; self.placeholder = placeholder
         self.onSave = onSave; self.onCancel = onCancel
         _draft = State(initialValue: value)
     }
@@ -683,7 +714,7 @@ private struct EditBox: View {
         VStack(alignment: .trailing, spacing: 8) {
             Group {
                 if multiline { TextEditor(text: $draft).frame(minHeight: 140) }
-                else { TextField("", text: $draft) }
+                else { TextField(placeholder, text: $draft) }
             }
             .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
             .foregroundStyle(theme.text)
