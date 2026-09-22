@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The read, shown as it happens. Four frames, one per stage of the read,
 /// each swept once and ticked; the stage label under them names what the
@@ -25,6 +26,11 @@ struct AnalysingScreen: View {
     @State private var stage = 0
     @State private var title: String?
     @State private var task: Task<Void, Never>?
+    /// A read is short (seconds), so a background task assertion — not the
+    /// full BackgroundTransfer machinery `valuate` uses — is enough to survive
+    /// someone glancing at another app mid-read without losing the live
+    /// stream (the title landing early, the frames ticking on real events).
+    @State private var bgTask: UIBackgroundTaskIdentifier = .invalid
 
     var body: some View {
         ZStack {
@@ -37,7 +43,13 @@ struct AnalysingScreen: View {
             }
         }
         .onAppear(perform: start)
-        .onDisappear { task?.cancel() }
+        .onDisappear { task?.cancel(); endBackgroundTask() }
+    }
+
+    private func endBackgroundTask() {
+        guard bgTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(bgTask)
+        bgTask = .invalid
     }
 
     // MARK: Reading
@@ -82,7 +94,16 @@ struct AnalysingScreen: View {
         title = nil
         stage = 0
 
+        endBackgroundTask()
+        bgTask = UIApplication.shared.beginBackgroundTask(withName: "bower.analyse") {
+            // iOS is out of extra time; ending here is a courtesy so the app
+            // isn't killed early — the task itself is left to fail on its own
+            // if the stream really did get cut.
+            endBackgroundTask()
+        }
+
         task = Task {
+            defer { endBackgroundTask() }
             do {
                 let size = state.linkSize.trimmingCharacters(in: .whitespacesAndNewlines)
                 let result = try await state.api.analyse(
