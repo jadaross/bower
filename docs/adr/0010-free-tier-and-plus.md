@@ -1,7 +1,8 @@
 # ADR-0010: A free tier of 5 and 1, a 99p listing pack, and bower Plus at £4.99
 
 **Status:** Accepted · 12 September 2026 · amended 23 September 2026 (one free
-market check a month, not two; a pack of 10 listings for £0.99 from launch)
+market check a month, not two; a pack of 10 listings for £0.99 from launch; the
+market check on Haiku 4.5 everywhere, 9p; the model rerun on that basis)
 **Decides:** the "payment model deliberately undecided" in ADR-0007, using
 `docs/research/pricing.md` (the study) and `docs/research/valuation-cost-speed.md`
 (the spike that changed its cost basis).
@@ -17,6 +18,13 @@ check v2 in `docs/roadmap.md` ships before the paywall.** Without it, Plus loses
 money on a heavy user (see §Margins), and that is the whole reason the roadmap
 puts it first.
 
+On 23 September the market check moved to **Haiku 4.5 on every platform,
+Depop included**, without waiting for the Sonnet-on-Depop baseline. The spike
+found Haiku weak on Depop (0.7 comparables a call, every band "low"
+confidence), and that is accepted: a Depop band will often be a wide,
+honestly-labelled estimate, and the check costs 9p instead of 19p. Every table
+below is on the 9p basis, from `scripts/pricing-model.mjs`.
+
 ## Decision
 
 ### Free — 5 listings and 1 market check a month
@@ -27,7 +35,7 @@ puts it first.
   once ever: a returning free user should see the differentiator again. It
   was 2 until the pack came in; the pack sells listings only, so every free
   check is pure cost, and one a month still shows it off. It cuts a free
-  user at the ceiling from 48p to 29p a month.
+  user at the ceiling from 28p to 19p a month on the Haiku check.
 - Chips and platform switching stay free, **and the app says so** — users meter
   themselves anxiously and stop exploring when they think a switch costs.
 - The meters already exist (`reads_limit`, `searches_limit`, migration 0011).
@@ -70,8 +78,9 @@ puts it first.
   user at the ceiling, so it waits until the dashboard says how common that is).
 - **No market-check top-up at launch** (the listing pack above is a different
   thing). Add **10 market checks for £3.49**, subscribers only,
-  once the dashboard shows burst sellers. At 19p a check the pack nets 52p; at
-  £2.99 it nets 18p, which is too thin unless Depop also moves to Haiku.
+  once the dashboard shows burst sellers. At 9p a check the pack nets £1.52
+  (£1.18 at £2.99), so the price is no longer forced; £3.49 stays because it
+  is the category's number, not because the margin needs it.
 - No weekly plan, no free trial of Plus, no ads, no commission. The study and the
   competitor research each rule these out independently.
 
@@ -90,32 +99,33 @@ then.
 
 ## Unit costs
 
-GBP at 1.35. Listing and today's check are measured in Langfuse (2026-09-11);
-the "after" checks are the spike's per-platform averages (2026-09-12).
+GBP at 1.35. Listing and the Sonnet check are measured in Langfuse
+(2026-09-11); the Haiku checks are the spike's per-platform averages
+(2026-09-12).
 
 | Call | Cost |
 |---|---|
 | Listing (Sonnet 5, up to 5 photos) | 2p |
 | Chip or platform switch (Haiku 4.5) | 0.2p |
-| Market check, 3 platforms, **today** (Sonnet everywhere) | **46p** |
-| Market check, 3 platforms, **after v2** (Haiku on eBay and Vinted, Sonnet on Depop) | **19p** |
-| Market check, 3 platforms, all Haiku (if the Depop baseline allows it) | 9p |
+| Market check, 3 platforms, Sonnet everywhere (until 23 September) | 46p |
+| Market check, 3 platforms, Haiku on eBay and Vinted, Sonnet on Depop (the v2 plan) | 19p |
+| **Market check, 3 platforms, Haiku everywhere (now)** | **9p** |
 
-A free user at the ceiling costs 29p a month after v2 (48p when the free tier
-had 2 checks); an average active free user (say 3 listings and 1 check) about
-25p, and a lingering one about 15p. A pack's 10 listings cost 20p.
+A free user at the ceiling costs 19p a month (5 listings, 1 check); an average
+active free user (3 listings and 1 check) about 15p, and a lingering one about
+8p. A pack's 10 listings cost 20p.
 
 ## Margins per Plus subscriber
 
 Net of Apple at £4.99: **£3.46** in the Small Business Program, £2.85 at the
 standard 30%. (£4.99 ÷ 1.2 VAT, less 2% UK DST, less commission.)
 
-| Plus user | Cost after v2 | Margin (SBP) | Cost today | Margin today |
+| Plus user | Cost, all Haiku | Margin (SBP) | Cost, Sonnet check | Margin, Sonnet check |
 |---|---|---|---|---|
-| Typical — 20 listings, 6 checks | £1.54 | **£1.92** | £3.16 | £0.30 |
-| At the ceiling — 40 listings, 10 checks | £2.70 | £0.76 | £5.40 | **−£1.94** |
+| Typical — 20 listings, 6 checks | 94p | **£2.52** | £3.16 | £0.30 |
+| At the ceiling — 40 listings, 10 checks | £1.70 | **£1.76** | £5.40 | −£1.94 |
 
-Every cell in the "today" columns is why market check v2 ships first.
+The right-hand columns are why the check had to move before the paywall.
 
 ## What it costs to run
 
@@ -150,79 +160,90 @@ it; monthly-plan retention ~17% at a year, so a subscriber lasts about six month
 
 The right unit is **an install**, because the free tier is paid for per install
 and the subscribers arrive per install. Over its life (a subscriber lasts ~7
-months at 14% monthly churn; a lingering free user about the same):
+months at 14% monthly churn; a lingering free user about the same). The pack
+line assumes 3% of installs buy 1.5 packs — a guess until the dashboard has one:
 
-| Per install, lifetime | Depop on Sonnet (19p check) | All Haiku (9p check) |
-|---|---|---|
-| Revenue net of the subscriber's own usage (2% × £1.92 × 7) | 27p | 36p |
-| Free tier: month one (30% × 25p) + lingering (10% × 15p × 7) | 18p | 10p |
-| **Net per install** | **10p** | **26p** |
-| Installs a month to cover £22 fixed | ~220 | ~85 |
-| Installs a month to cover £41 fixed | ~410 | ~160 |
-| Subscribers that many installs holds at steady state | ~30 / ~58 | ~12 / ~23 |
+| Per install, lifetime, all Haiku | |
+|---|---|
+| Revenue net of the subscriber's own usage (2% × £2.52 × 7) | 35p |
+| Listing packs (3% × 1.5 × 49p) | 2p |
+| Free tier: month one (30% × 15p) + lingering (10% × 8p × 7) | 10p |
+| **Net per install** | **27p** |
+| Installs a month to cover £22 fixed | ~80 |
+| Installs a month to cover £41 fixed | ~150 |
+| Subscribers that many installs holds at steady state | ~12 / ~22 |
 
-A cohort of 100 installs is £5 down after month one and pays itself back in
-month four. **The free tier costs more than serving the subscribers does**,
-which makes it the second dial after the model choice. The tables in this
-section and the next were modelled at 2 free checks a month and without the
-pack; the amendment moves every row slightly up (somewhere between rows A and E
-below, so under +£110 a year), and the pack adds 49p for each one sold. The
-90-day review should redo them with real numbers.
+A cohort of 100 installs roughly pays its way from its first month in what it
+earns (30 free users cost £4.50, 2 subscribers net £5); in cash it waits five
+weeks for Apple. **The
+free tier still costs a third of what the subscribers bring in**, even at 9p a
+check. Cutting it from 2 checks a month to 1 changes the ceiling (28p to 19p)
+but not the model's averages, which already had free users under one check a
+month; it is a bound on the worst case, not a saving in the typical one.
 
 ## Year one
 
-A month-by-month model (2% conversion, 14% monthly churn, Plus from launch,
-Supabase Pro from month 2, Apple paying five weeks after month end, £12 for a
-domain). "Cash" is what has actually left or reached the bank by month 12;
-"earned" counts what Apple still owes.
+A month-by-month model (`scripts/pricing-model.mjs`: 2% conversion, 14% monthly
+churn, Plus from launch, Supabase Pro from month 2, Apple paying five weeks after
+month end, £12 for a domain, heavy usage). "Cash" is what has actually left or
+reached the bank by month 12; "earned" counts what Apple still owes. The pack
+column adds 3% of installs buying 1.5 packs.
 
-| Scenario | Installs, year | Subscribers at m12 | Earned, year | Cash at m12 | Apple still owes |
-|---|---|---|---|---|---|
-| Quiet — 100 a month, no marketing | 1,200 | 12 | −£420 | −£520 | £80 |
-| Works — 200 a month, +20% a month | 7,900 | 104 | −£430 | −£1,100 | £660 |
-| Wishful — 300 a month, +35%, France in | 30,600 | 448 | −£930 | −£3,640 | £2,700 |
-| Same three, all-Haiku check | | | −£290 / **+£280** / **+£1,500** | −£390 / −£390 / −£1,210 | |
+| Scenario | Installs, year | Subscribers at m12 | Earned, year | …with the pack | Cash at m12 | …with the pack | Apple still owes |
+|---|---|---|---|---|---|---|---|
+| Quiet — 100 a month, no marketing | 1,200 | 12 | −£320 | −£290 | −£400 | −£380 | £80 |
+| Works — 200 a month, +20% a month | 7,900 | 103 | **+£250** | **+£420** | −£400 | −£320 | £650 |
+| Wishful — 300 a month, +35%, France in | 30,600 | 447 | **+£1,700** | **+£2,370** | −£990 | −£760 | £2,700 |
+| *Works on the 19p check, 2 free checks (12 September)* | | | *−£400* | | *−£1,060* | | |
 
-Read it this way. **Year one costs you money in every scenario**, somewhere
-between £400 and £1,000 of your own cash on the cost basis this ADR assumes,
-because growth is paid for up front through the free tier and Apple pays late.
-What you buy with it is the run-rate you exit the year with: the "Works" case
-ends at 103 subscribers and would net about £150 a month the moment growth
-levelled off; "Wishful" ends at 447 and about £420. Nothing here pays a salary
-in year one. The number that moves the whole table is the cost of a market
-check, not the price of Plus.
+Read it this way. On the Haiku check, **year one earns in every scenario that
+grows**; only the flat, unmarketed Quiet case loses, by about £300. **Cash is
+still negative at month 12 in all three**, by £300–£1,000, because growth is
+paid for up front and Apple pays late; the "Works" case turns cash-positive in
+year two. The exit run-rate is what the year buys: "Works" leaves at about
+£110–£150 a month, "Wishful" at £570–£750. Nothing here pays a salary. The move
+to Haiku is worth about £650 a year in "Works" on its own; the pack adds
+£50–£400 more, depending entirely on how many people buy it.
 
 ### Levers, in the "Works" scenario (200 installs a month growing 20%)
 
-Same model, one change at a time. "Earned" is the year; "m12" is the monthly
-run-rate at the end of it. Usage "heavy" is 20 listings and 6 checks a month
-for a subscriber; "light" is two runs a month (2 listings, 2 checks), with free
-users at half that, which is probably closer to a real wardrobe-clearer.
+Same model, one change at a time from row A. "Earned" is the year; "m12" is the
+monthly run-rate at the end of it. Usage "heavy" is 20 listings and 6 checks a
+month for a subscriber; "light" is two runs a month (2 listings, 2 checks), with
+free users at half that, which is probably closer to a real wardrobe-clearer.
 
-| | Check | Free tier | Price | Conv. | Fixed | Usage | Earned | m12 |
-|---|---|---|---|---|---|---|---|---|
-| A · this ADR as written | 19p | 5L + 2C/mo | £4.99 | 2% | £41 | heavy | −£440 | −£22 |
-| B · all-Haiku | **9p** | 5L + 2C/mo | £4.99 | 2% | £41 | heavy | **+£220** | +£109 |
-| E · B, one free check ever | 9p | 5L + 1C ever | £4.99 | 2% | £41 | heavy | +£330 | +£132 |
-| F · B at £5.99 | 9p | 5L + 2C/mo | **£5.99** | 2% | £41 | heavy | +£570 | +£181 |
-| H · B at 3% conversion | 9p | 5L + 2C/mo | £4.99 | **3%** | £41 | heavy | +£850 | +£239 |
-| K · no Haiku on Depop, but £5.99 and one free check ever | 19p | 5L + 1C ever | £5.99 | 2% | £41 | heavy | +£140 | +£97 |
-| M · this ADR, light usage | 19p | 5L + 2C/mo | £4.99 | 2% | £41 | **light** | +£310 | +£131 |
-| N · all-Haiku, light usage | 9p | 5L + 2C/mo | £4.99 | 2% | £41 | light | **+£720** | +£211 |
-| P · N at £5.99 | 9p | 5L + 2C/mo | £5.99 | 2% | £41 | light | +£1,070 | +£283 |
-| J · everything: 9p, 1C ever, £5.99, 3%, Supabase Free | 9p | 5L + 1C ever | £5.99 | 3% | £22 | heavy | +£1,690 | +£388 |
+| | Change from A | Subscribers | Earned | m12 |
+|---|---|---|---|---|
+| *was* | *19p check, 2 free checks, no pack (12 September's row A)* | 103 | *−£400* | *−£20* |
+| A | All Haiku (9p), 1 free check, £4.99, 2%, £41 fixed, heavy, no pack | 103 | +£250 | +£110 |
+| P1 | Pack bought by 1% of installs | 103 | +£300 | +£120 |
+| P3 | Pack bought by 3% of installs | 103 | +£420 | +£150 |
+| P5 | Pack bought by 5%, 2 packs each | 103 | +£630 | +£190 |
+| C25 | P3, but a quarter of would-be subscribers buy a pack a month instead | 77 | +£170 | +£90 |
+| C50 | P3, but half of them do | 51 | −£90 | +£40 |
+| L | P3, light usage | 103 | +£930 | +£250 |
+| F | P3 at £5.99 | 103 | +£770 | +£220 |
+| H | P3 at 3% conversion | 154 | +£1,050 | +£280 |
+| S | P3 on Supabase Free, no domain (£22 fixed) | 103 | +£640 | +£160 |
 
-What the table says, in order of leverage: the **check cost** (A→B, +£660),
-then **conversion** (+£630 a point), then **price** (+£350 for £1), then
-**fixed costs** (+£210 for staying on Supabase Free), and last the **free tier**
-(+£110 for one check ever instead of two a month — not worth the meaner
-product). In the Quiet scenario (100 installs a month, no marketing) no
-combination is profitable except J, barely: **marketing is not optional.**
+What the table says, in order of leverage now the check is cheap:
+**conversion** (+£630 a point), **usage** (light users are worth +£510 over
+heavy), **fixed costs** and **price** (+£220 and +£350), and then the pack.
 
-Two more honest readings. Paid acquisition cannot work at 10–26p an install
-against a £1–3 cost per install; growth has to be organic (TikTok, the seller
-subreddits, France). And the UK storefront for this category tops out at ~40
-ratings today; "Wishful" is a multi-market number by construction.
+The pack is the only lever with a downside. It is worth +£50 to +£380 from
+people who would never subscribe, and it costs about £1 a month for every
+would-be subscriber who buys a pack a month instead. **The two cancel at
+roughly one would-be subscriber in six taking the pack instead** (C25 is already
+below A). So the paywall has to put Plus first and the pack second, and the
+90-day review watches pack-buyers-per-month against Plus conversion before
+anything else.
+
+In the Quiet scenario (100 installs a month, no marketing) no single lever makes
+year one positive, though several together do: **marketing is still not
+optional** for the growth tables. Paid acquisition cannot work at ~27p an
+install against a £1–3 cost per install, so growth has to be organic (TikTok,
+the seller subreddits, France). The UK storefront for this category tops out at
+~40 ratings today; "Wishful" is a multi-market number by construction.
 
 ## Standing mode: never a negative month
 
@@ -246,22 +267,24 @@ to cover it. So:
 | Anthropic | usage, **with a monthly spend limit set in the console** | The hard ceiling on the only bill that scales. Start it at £30 |
 
 Break-even in standing mode, light usage, ~30 organic installs a month costing
-about £2 in free-tier usage:
+about £1 in free-tier usage at 9p a check:
 
 | | £4.99 | £5.99 |
 |---|---|---|
 | Net per light subscriber a month | £3.24 | £3.94 |
-| Subscribers to cover Vercel and the free users (£17) | **6** | **5** |
-| Subscribers to cover Apple's fee as well (£23.40) | 8 | 6 |
+| Subscribers to cover Vercel and the free users (£16) | **5** | **4** |
+| Subscribers to cover Apple's fee as well (£22.40) | 7 | 6 |
 
-Holding 6 subscribers at 2% conversion and 14% churn needs about 40 installs a
-month arriving on their own. That is plausible for a UK App Store listing in
-this category but not certain.
+Holding 5 subscribers at 2% conversion and 14% churn needs about 35 installs a
+month arriving on their own; clearing Apple's fee as well needs about 55
+(`scripts/pricing-model.mjs`, run to month 36). That is plausible for a UK App
+Store listing in this category but not certain.
 
 Packs count towards the same bar: about seven packs a month (49p each) are
-worth one light subscriber at £4.99, so the Vercel bill alone is some 35 packs
-a month with no subscribers at all. The pack helps the run-rate but does not
-make standing mode on its own; Plus is still what carries the fixed cost.
+worth one light subscriber at £4.99, so the Vercel bill alone is some 30 packs
+a month with no subscribers at all. At 30–55 installs a month the pack adds
+about £1 a month. It helps the run-rate but does not make standing mode on its
+own; Plus is still what carries the fixed cost.
 
 **The worst case is bounded, not a bleed.** With zero subscribers the month
 costs Vercel's £14.80 plus whatever free users spend under the Anthropic cap:

@@ -9,32 +9,31 @@ profitable. Pricing itself is decided in ADR-0010.
 
 Everything that makes bower different hangs on the market check. It is the only
 thing competitors cannot copy for free, it is the paid thing in ADR-0010, and
-Scout Mode is nothing but a market check. Today it is the weakest part of the app:
-about 100 seconds a platform, 46p for three, and the client honestly says "Takes a
-minute or two". Nobody stands in a shop for two minutes.
+Scout Mode is nothing but a market check. On Sonnet it was the weakest part of the
+app: about 100 seconds a platform, 46p for three, and the client honestly says
+"Takes a minute or two". Nobody stands in a shop for two minutes.
 
-`docs/research/valuation-cost-speed.md` measured the fix and stopped short of
-shipping it. In order:
+`docs/research/valuation-cost-speed.md` measured the fix. Where it stands:
 
-1. **The Depop baseline.** Ten Sonnet calls on Depop at the same N as the spike,
-   about three dollars. It decides whether Depop stays on Sonnet or Haiku is a
-   blanket swap (Haiku found 0.7 comparables a call there against 2.3 on eBay).
-2. **Haiku 4.5 for eBay and Vinted**, chosen per platform in
-   `src/lib/llm/client.ts`. The comment there saying Sonnet's judgement "is the
-   product" is now contradicted by measurement — rewrite it.
-3. **Forbid placeholder URLs in the prompt.** About one Haiku call in fifteen
+1. ~~**The Depop baseline.**~~ Skipped by decision (23 September): Depop goes to
+   Haiku with the rest, accepting wide, "low"-confidence Depop bands for a 9p
+   check (ADR-0010).
+2. ✅ **Haiku 4.5 for every platform** (`MODELS.valuation`), on the older
+   `web_search_20250305` tool and without `effort`, which Haiku does not take.
+   Still to do: one live check per platform, and a read of Haiku's
+   reasoning sentences for tone.
+3. ✅ **Forbid placeholder URLs in the prompt.** About one Haiku call in fifteen
    returned `itm/unknown`; `coerceBand` drops them, but the model's confidence
    label lies when it happens.
 4. **Move the comparables cache into Supabase.** `src/lib/valuation/cache.ts` is
    per process, so on Vercel it is nearly always empty and every repeat of
    "Levi's 501, 32, Good" pays full price. Same key, a table, a 7-day TTL.
-5. **Do not ship `max_uses: 1`** and leave `effort` at `low` — both measured.
+5. **Do not ship `max_uses: 1`** — measured.
 6. **Then re-scope #18 and #19.** At ~12 seconds a check, one-pass search and
-   streaming are no longer the biggest wins, and #18 would block per-platform
-   model choice. The background notification already covers the long wait.
+   streaming are no longer the biggest wins. The background notification
+   already covers the long wait.
 
-Target: a three-platform check in the time the listing takes to write, at 19p or
-less.
+Target: a three-platform check in the time the listing takes to write, at 9p.
 
 ## Then, in order
 
