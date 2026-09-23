@@ -20,15 +20,16 @@ app: about 100 seconds a platform, 46p for three, and the client honestly says
    check (ADR-0010).
 2. ✅ **Haiku 4.5 for every platform** (`MODELS.valuation`), on the older
    `web_search_20250305` tool and without `effort`, which Haiku does not take.
-   Still to do: one live check per platform, and a read of Haiku's
-   reasoning sentences for tone.
+   Live-checked on all three platforms (research §13). Still to do: a read of
+   Haiku's reasoning sentences for tone.
 3. ✅ **Forbid placeholder URLs in the prompt.** About one Haiku call in fifteen
    returned `itm/unknown`; `coerceBand` drops them, but the model's confidence
    label lies when it happens.
 4. **Move the comparables cache into Supabase.** `src/lib/valuation/cache.ts` is
    per process, so on Vercel it is nearly always empty and every repeat of
    "Levi's 501, 32, Good" pays full price. Same key, a table, a 7-day TTL.
-5. **Do not ship `max_uses: 1`** — measured.
+5. **Keep `max_uses: 2`.** 1 loses comparables (§6); 3 and 5 on Haiku buy little
+   and do not help Depop at all (§13).
 6. **Then re-scope #18 and #19.** At ~12 seconds a check, one-pass search and
    streaming are no longer the biggest wins. The background notification
    already covers the long wait.

@@ -26,12 +26,27 @@ export function jsonSchemaFormat(
 export function parseStructuredContent<T>(
   content: Anthropic.Messages.ContentBlock[],
 ): T {
-  const text = content
+  const blocks = content
     .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-    .map((b) => b.text)
-    .join("");
+    .map((b) => b.text);
+  const text = blocks.join("");
   if (!text.trim()) throw new Error("Structured response carried no text content");
-  return JSON.parse(text) as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch (err) {
+    // With web search, Haiku sometimes writes its answer, searches again and
+    // writes a second one; joined, the two do not parse. The last complete
+    // document is the answer. It can itself span several blocks (citations
+    // split text), so try ever-longer tails before giving up.
+    for (let i = blocks.length - 1; i > 0; i--) {
+      try {
+        return JSON.parse(blocks.slice(i).join("")) as T;
+      } catch {
+        // keep widening
+      }
+    }
+    throw err;
+  }
 }
 
 /**

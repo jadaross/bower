@@ -455,3 +455,49 @@ third-party route, consistent with `docs/adr/0005-asking-price-valuation.md`
 Repo:
 `src/lib/valuation/asking-price.ts`, `src/lib/valuation/index.ts`, `src/lib/llm/client.ts`,
 `docs/research/pricing.md` §2, §7.6, §8, `docs/adr/0005-asking-price-valuation.md`
+
+## 13. Pass 3 — how many searches should Haiku get? (23 September 2026)
+
+After the switch to Haiku 4.5 on every platform: does a bigger `max_uses` buy better
+bands, and does it rescue Depop? Same 10 items as pass 2, all three platforms, `max_uses`
+2 (production), 3 and 5 — 90 calls, **$5.38**. Real `buildValuationPrompt` (with the new
+no-placeholder line), `priceBandSchema`, `coerceBand` and the `pause_turn` resume loop;
+only `max_uses` varied. ✅ measured, N=10 per cell, so read it as direction, not proof.
+
+| Platform | `max_uses` | valid comps | zero comps | confidence l/m/h | searches used | cost/call | p90 latency |
+|---|---|---|---|---|---|---|---|
+| eBay | 2 | 2.40 | 2 | 7 / 3 / 0 | 1.8 | $0.049 | 9s |
+| eBay | 3 | 2.44 | 0 | 5 / 3 / 1 | 2.1 | $0.061 | 9s |
+| eBay | 5 | 3.22 | 1 | 5 / 4 / 0 | 2.8 | $0.093 | 17s |
+| Vinted | 2 | 2.30 | 1 | 4 / 6 / 0 | 1.6 | $0.040 | 8s |
+| Vinted | 3 | 2.22 | 1 | 4 / 5 / 0 | 1.5 | $0.040 | 10s |
+| Vinted | 5 | 2.75 | 1 | 4 / 4 / 0 | 3.2 | $0.107 | 15s |
+| Depop | 2 | 1.30 | 6 | 9 / 1 / 0 | 1.6 | $0.030 | 7s |
+| Depop | 3 | 0.89 | 6 | 8 / 1 / 0 | 2.4 | $0.046 | 8s |
+| Depop | 5 | 0.60 | 6 | 10 / 0 / 0 | 3.5 | $0.071 | 11s |
+| **Check, 3 platforms** | 2 / 3 / 5 | 2.00 / 1.85 / 2.11 | | | | **$0.12 / $0.15 / $0.27** | 8 / 9 / 15s |
+
+What it says:
+
+- **More searches do not rescue Depop.** Six items in ten found nothing at every
+  allowance, and the average fell as the allowance rose. Depop's weakness is the index —
+  the search engine sees few Depop listings — not Haiku's budget. That settles §12's
+  "hard for Haiku or hard for everything" question as far as search count goes.
+- **eBay gains a little at 5** (+0.8 comparables) for nearly double the cost and latency,
+  and no fewer empty bands; Vinted gains less. Inside N=10 noise. The eBay Browse API
+  (§9) is the better lever for eBay.
+- **Haiku rarely uses the whole allowance** (2.8–3.5 of 5), and never needed a resume.
+- **At 2, the check costs $0.12 (~9p)**, matching ADR-0010's basis. Search fees are
+  about a third of it.
+- **Placeholder URLs persist** despite the new prompt line (4 of 60 comparables at
+  `max_uses: 2`); `coerceBand` drops them as before.
+- **A parser bug, now fixed.** Twice, Haiku wrote its JSON answer, searched again and wrote
+  a second one; `parseStructuredContent` joined every text block and `JSON.parse` failed,
+  so that platform's band would have errored. It now falls back to the last complete
+  document (`structured.test.ts`). The other 5 failures were API 500s/400s before any
+  search, clustered in time.
+
+**Decision: keep `max_uses: 2` on every platform.**
+
+Also found: `src/test/setup.ts` sets `ANTHROPIC_API_KEY` to a dummy for every Vitest run,
+so a live call from inside a test file must build its own client with the real key.
