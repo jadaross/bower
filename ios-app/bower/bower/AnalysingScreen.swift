@@ -120,6 +120,7 @@ struct AnalysingScreen: View {
                 state.analysis = result
                 state.reads.used += 1
                 Notifications.scheduleNudge()
+                Notifications.listingIsReady(result.listing.title)
                 stage = stages.count
                 try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing

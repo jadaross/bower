@@ -24,6 +24,26 @@ enum Notifications {
         _ = try? await center.requestAuthorization(options: [.alert, .sound])
     }
 
+    /// A read finished while the app was not on screen — reachable now that
+    /// `AnalysingScreen` survives a brief backgrounding instead of dying.
+    @MainActor
+    static func listingIsReady(_ title: String) {
+        let state = UIApplication.shared.applicationState
+        #if DEBUG
+        print("[bower notifications] listingIsReady state=\(state.rawValue)")
+        #endif
+        guard state != .active else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "Your listing is ready"
+        content.body = title
+        content.sound = .default
+        center.add(UNNotificationRequest(identifier: "bower.listing.\(UUID().uuidString)", content: content, trigger: nil)) { error in
+            #if DEBUG
+            print("[bower notifications] listingIsReady added, error=\(error.map { "\($0)" } ?? "none")")
+            #endif
+        }
+    }
+
     /// The deep research came back while the app was not on screen.
     @MainActor
     static func priceIsIn(_ body: String) {
