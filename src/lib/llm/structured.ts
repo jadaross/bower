@@ -37,7 +37,7 @@ export function parseStructuredContent<T>(
 /**
  * A single non-streaming structured request: the common case for format and
  * refine. Callers pass the usual create params (model, max_tokens, messages,
- * and — for valuate — tools/effort) plus the schema; the format directive is
+ * and — for valuate — tools) plus the schema; the format directive is
  * merged into `output_config`.
  */
 export async function createStructured<T>(

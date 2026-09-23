@@ -262,7 +262,7 @@ describe("askingPriceProvider.band", () => {
   it("declares the web search tool", async () => {
     await askingPriceProvider.band(item, "vinted", "GB");
     const tools = create.mock.calls.at(-1)![0].tools;
-    expect(tools[0].type).toBe("web_search_20260209");
+    expect(tools[0].type).toBe("web_search_20250305");
     expect(tools[0].user_location.country).toBe("GB");
   });
 

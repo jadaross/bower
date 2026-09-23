@@ -8,15 +8,16 @@ import Anthropic from "@anthropic-ai/sdk";
  *   Haiku 4.5  $1 / $5    — older web_search_20250305 only, 200k context
  *   Opus 5     $5 / $25
  *
- * Valuation stays on Sonnet 5 rather than Haiku: it has to judge whether a
- * search result is genuinely comparable to the item, and that judgement IS
- * the product. Everything downstream inherits its mistakes.
+ * Valuation moved to Haiku on 2026-09-23. The spike in
+ * docs/research/valuation-cost-speed.md found it cheaper, faster and with more
+ * valid comparables than Sonnet on eBay and Vinted; Depop is its weak spot
+ * (few comparables, all "low" confidence), accepted for a 9p check (ADR-0010).
  */
 export const MODELS = {
   analyse: "claude-sonnet-5",
   format: "claude-haiku-4-5-20251001",
   refine: "claude-haiku-4-5-20251001",
-  valuation: "claude-sonnet-5",
+  valuation: "claude-haiku-4-5-20251001",
   /** The product-page read behind a pasted link: needs web fetch, so Sonnet. */
   link: "claude-sonnet-5",
 } as const;

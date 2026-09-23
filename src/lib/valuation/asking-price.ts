@@ -19,9 +19,10 @@ import type { ValuationProvider } from "./provider";
  * was allowed to "fall back to other UK marketplaces", and the eBay band came
  * back with five Vinted listings under an eBay heading.
  */
-function webSearchTool(site: MarketPresence, market: Market): Anthropic.Messages.WebSearchTool20260209 {
+function webSearchTool(site: MarketPresence, market: Market): Anthropic.Messages.WebSearchTool20250305 {
   return {
-    type: "web_search_20260209",
+    // Haiku 4.5 only takes the older search tool.
+    type: "web_search_20250305",
     name: "web_search",
     max_uses: 2,
     user_location: { type: "approximate", country: MARKETS[market].searchCountry },
@@ -90,7 +91,7 @@ CRITICAL CONSTRAINTS:
 - Prices are in ${currency}. Convert if a source is in another currency, and say so in the reasoning.
 - If you find fewer than three genuinely comparable items, return "low" confidence and a wider band. A low-confidence answer is useful; a confident guess is not.
 - Never invent a comparable. Every entry must correspond to a real listing you actually saw.
-- Every comparable's "url" must open THAT ONE LISTING — a page of the form ${here.itemUrlExample}. A brand page, a search or catalogue page, or the homepage is not a listing and will be discarded, so do not list an item unless you have its own page.
+- Every comparable's "url" must open THAT ONE LISTING — a page of the form ${here.itemUrlExample}. A brand page, a search or catalogue page, or the homepage is not a listing and will be discarded, so do not list an item unless you have its own page. Never write a placeholder such as ".../itm/unknown" or ".../items/xxxx": if you do not have a listing's real URL, leave it out, and let your confidence reflect what is left.
 
 Return ONLY a valid JSON object — no markdown fences, no commentary:
 
@@ -182,10 +183,8 @@ export function coerceBand(raw: RawBand, platform: Platform, market: Market, sit
 const MAX_RESUMES = 3;
 
 /**
- * Sonnet 5 defaults to `effort: "high"` on the API, which on this task meant
- * ~8 minutes per platform — unusable for someone standing in a shop. This is
- * "search, read prices, average them", not a reasoning problem: low effort
- * also makes the model consolidate its tool calls instead of trickling them.
+ * No `effort`: Haiku 4.5 does not take it. On Sonnet it had to be pinned to
+ * "low", because the default "high" meant ~8 minutes a platform.
  */
 function request(
   site: MarketPresence,
@@ -194,7 +193,7 @@ function request(
   return {
     model: MODELS.valuation,
     max_tokens: 4000,
-    output_config: { effort: "low", format: jsonSchemaFormat(priceBandSchema) },
+    output_config: { format: jsonSchemaFormat(priceBandSchema) },
     tools: [webSearchTool(site, market)],
   };
 }
