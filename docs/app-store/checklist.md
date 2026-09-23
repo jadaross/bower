@@ -41,7 +41,8 @@ titled "App Store submission — human steps".
    The six placeholders currently on the record are the raw captures.
 3. **Pricing.** Decided in ADR-0010: the app is free to download
    (`appPriceSchedules` with the GBR £0 price point) with a **bower Plus**
-   subscription at £4.99 a month inside it, and it does not go to the App
+   subscription at £4.99 a month and a 10-listing pack at £0.99 inside it
+   (free tier: 5 listings and 1 check a month), and it does not go to the App
    Store until Plus is in the build. The UK availability row shows
    `CANNOT_SELL` until the price is set. See *Plus before launch*.
 4. **Review contact.** Set `ASC_CONTACT_FIRST`, `ASC_CONTACT_LAST`,
@@ -87,6 +88,9 @@ tiers; `docs/roadmap.md` has the order):
 - An **auto-renewable subscription** in ASC (Monetisation → In-App Purchases),
   one subscription group, monthly only at launch, with its own metadata,
   screenshot and review notes.
+- A **consumable** in ASC for the listing pack, 10 listings at £0.99, with its
+  own screenshot and review notes. Consumables are not restored by Restore
+  Purchases; the balance lives on the account, server-side.
 - **Small Business Program** enrolment as Account Holder, before the first
   sale — 15% instead of 30% on every month.
 - **Vercel Pro** on launch day; Hobby is non-commercial by policy.

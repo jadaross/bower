@@ -1,6 +1,7 @@
-# ADR-0010: A free tier of 5 and 2, and bower Plus at £4.99
+# ADR-0010: A free tier of 5 and 1, a 99p listing pack, and bower Plus at £4.99
 
-**Status:** Accepted · 12 September 2026
+**Status:** Accepted · 12 September 2026 · amended 23 September 2026 (one free
+market check a month, not two; a pack of 10 listings for £0.99 from launch)
 **Decides:** the "payment model deliberately undecided" in ADR-0007, using
 `docs/research/pricing.md` (the study) and `docs/research/valuation-cost-speed.md`
 (the spike that changed its cost basis).
@@ -18,17 +19,41 @@ puts it first.
 
 ## Decision
 
-### Free — 5 listings and 2 market checks a month
+### Free — 5 listings and 1 market check a month
 
 - **5 listings** a month (the read). One evening of a clear-out, which is the
-  moment a seller hits the wall.
-- **2 market checks** a month, each across every Enabled Platform. Monthly, not
-  once ever: a returning free user should see the differentiator again.
+  moment a seller hits the wall — and where the listing pack below meets them.
+- **1 market check** a month, across every Enabled Platform. Monthly, not
+  once ever: a returning free user should see the differentiator again. It
+  was 2 until the pack came in; the pack sells listings only, so every free
+  check is pure cost, and one a month still shows it off. It cuts a free
+  user at the ceiling from 48p to 29p a month.
 - Chips and platform switching stay free, **and the app says so** — users meter
   themselves anxiously and stop exploring when they think a switch costs.
 - The meters already exist (`reads_limit`, `searches_limit`, migration 0011).
   These are the numbers from the first App Store build. Never take an
   allowance away from people who have it.
+
+### The listing pack — 10 listings for £0.99
+
+- One **consumable** in-app purchase, on sale from 1.0 to anyone not on Plus.
+  It is for the seller who runs out mid clear-out and will never subscribe —
+  most of them, if the "light usage" profile below is right.
+- **Listings only.** Market checks are what Plus sells; a pack of them would
+  undercut it.
+- Bought listings **do not expire** and are spent only after the month's free
+  five, so the monthly reset never takes back something paid for. They go
+  with the account if it is deleted, and the terms say so.
+- **£0.99**, not £1: the price point sellers recognise from every other app.
+- Nets **49p** a pack in the Small Business Program (£0.99 ÷ 1.2 VAT, less 2%
+  DST, less 15% = 69p, less 20p of listings); 37p at the standard 30%.
+- It sits *below* Plus, not beside it. Four packs (40 listings, £3.96) cost
+  less than a month of Plus but buy no checks, and the paywall shows both with
+  that as the line between them. A pack bought by someone who would otherwise
+  have subscribed costs about £1.43 against a typical Plus month; one bought by
+  someone who never would is 49p found. If the dashboard shows people buying
+  three or more packs a month, that is the cue to point them at Plus, not to
+  raise the pack.
 
 ### bower Plus — £4.99 a month
 
@@ -43,7 +68,8 @@ puts it first.
 - **No annual plan at launch.** Add it at **£34.99** after 90 days of usage data
   (the cluster is £29.99–£34.99; annual nets £2.02 a month and loses money on a
   user at the ceiling, so it waits until the dashboard says how common that is).
-- **No top-up at launch.** Add **10 market checks for £3.49**, subscribers only,
+- **No market-check top-up at launch** (the listing pack above is a different
+  thing). Add **10 market checks for £3.49**, subscribers only,
   once the dashboard shows burst sellers. At 19p a check the pack nets 52p; at
   £2.99 it nets 18p, which is too thin unless Depop also moves to Haiku.
 - No weekly plan, no free trial of Plus, no ads, no commission. The study and the
@@ -58,8 +84,9 @@ bower does not go to the App Store until Plus is in the build. A free launch
 with a paywall to follow means either cutting an allowance later or carrying
 every install as pure cost with nowhere to send the people who hit the wall;
 the competitor research says billing surprises are what kill ratings, so the
-purchase flow gets one launch and one review. TestFlight keeps the 10-and-3
-meters until then.
+purchase flow gets one launch and one review. The listing pack goes through
+that same review, in the same build. TestFlight keeps the 10-and-3 meters until
+then.
 
 ## Unit costs
 
@@ -74,8 +101,9 @@ the "after" checks are the spike's per-platform averages (2026-09-12).
 | Market check, 3 platforms, **after v2** (Haiku on eBay and Vinted, Sonnet on Depop) | **19p** |
 | Market check, 3 platforms, all Haiku (if the Depop baseline allows it) | 9p |
 
-A free user at the ceiling costs 48p a month after v2; an average active free
-user (say 3 listings and 1 check) about 25p, and a lingering one about 15p.
+A free user at the ceiling costs 29p a month after v2 (48p when the free tier
+had 2 checks); an average active free user (say 3 listings and 1 check) about
+25p, and a lingering one about 15p. A pack's 10 listings cost 20p.
 
 ## Margins per Plus subscriber
 
@@ -135,8 +163,11 @@ months at 14% monthly churn; a lingering free user about the same):
 
 A cohort of 100 installs is £5 down after month one and pays itself back in
 month four. **The free tier costs more than serving the subscribers does**,
-which makes it the second dial after the model choice: 2 free checks a month
-is generous by design, and the 90-day review should look at it with real numbers.
+which makes it the second dial after the model choice. The tables in this
+section and the next were modelled at 2 free checks a month and without the
+pack; the amendment moves every row slightly up (somewhere between rows A and E
+below, so under +£110 a year), and the pack adds 49p for each one sold. The
+90-day review should redo them with real numbers.
 
 ## Year one
 
@@ -201,7 +232,7 @@ the first couple of months are past. That rules the design more than the
 growth tables above do.
 
 With no marketing, usage cost is not the risk: every user's cost is bounded by
-their meter (a free user at most 28p a month at 9p a check, a light subscriber
+their meter (a free user at most 19p a month at 9p a check, a light subscriber
 about 22p against £3.46 in). The risk is a fixed bill with too few subscribers
 to cover it. So:
 
@@ -227,6 +258,11 @@ Holding 6 subscribers at 2% conversion and 14% churn needs about 40 installs a
 month arriving on their own. That is plausible for a UK App Store listing in
 this category but not certain.
 
+Packs count towards the same bar: about seven packs a month (49p each) are
+worth one light subscriber at £4.99, so the Vercel bill alone is some 35 packs
+a month with no subscribers at all. The pack helps the run-rate but does not
+make standing mode on its own; Plus is still what carries the fixed cost.
+
 **The worst case is bounded, not a bleed.** With zero subscribers the month
 costs Vercel's £14.80 plus whatever free users spend under the Anthropic cap:
 about £15–£20 a month, £180–£240 a year, and it cannot grow past that without
@@ -249,11 +285,19 @@ $150 ⚠️), so at 6 subscribers the money arrives every few months, not monthl
 - The meter needs an entitlement writer: App Store Server Notifications v2 (or
   RevenueCat) setting `reads_limit = null` and `searches_limit = 10` on the
   profile, server-side, never from the client — the same rule as Enabled
-  Platforms. The schema needs nothing.
+  Platforms. Plus needs nothing new in the schema.
+- The pack does. It needs a balance of bought listings that the monthly reset
+  leaves alone, spent after the free ones (and refunded to whichever pool a
+  rejected read came out of), plus a ledger of Apple transaction IDs so a
+  purchase is credited exactly once. The server verifies the signed StoreKit 2
+  transaction before crediting it, and a `REFUND` notification takes back
+  whatever is left of it. `/api/profile`'s `allowance` gains the bought balance
+  and `Wire.swift` follows.
 - Vercel moves to Pro on launch day, not before.
 - `docs/research/pricing.md` §7 stands as the study; where it and this ADR
-  differ (annual price and timing, the pack, monthly free checks, the
+  differ (annual price and timing, the packs, monthly free checks, the
   multi-platform check), this ADR wins.
 - Revisit at 90 days with the dashboard's checks-per-user distribution: the
-  annual plan, the pack, the 10-check cap and the 5-listing free cap all hang
-  on it.
+  annual plan, the market-check pack, the 10-check cap and the 5-listing free
+  cap all hang on it. Add packs per buyer per month and pack-then-Plus
+  conversions, which say whether the listing pack feeds Plus or replaces it.
