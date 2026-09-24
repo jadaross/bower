@@ -26,7 +26,7 @@ struct PlatformsScreen: View {
             }
 
             if needsMarket, let country = Market.deviceRegionName {
-                Text("bower doesn't cover \(country) yet. If you sell on one of these, pick it.")
+                Text("bower doesn't cover \(country) yet. Pick the closest country we do.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.text)
             }
@@ -48,7 +48,7 @@ struct PlatformsScreen: View {
                     .foregroundStyle(theme.muted)
             }
 
-            BowerButton(title: needsMarket ? "Pick where you sell" : saving ? "Saving…" : "Continue with \(countLabel)",
+            BowerButton(title: needsMarket ? "Select a country" : saving ? "Saving…" : "Continue with \(countLabel)",
                         disabled: saving || needsMarket) {
                 Task { await save() }
             }
