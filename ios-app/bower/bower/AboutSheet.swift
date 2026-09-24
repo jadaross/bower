@@ -10,7 +10,7 @@ struct AboutSheet: View {
             HStack {
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }

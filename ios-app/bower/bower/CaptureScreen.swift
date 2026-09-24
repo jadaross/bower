@@ -46,9 +46,12 @@ struct CaptureScreen: View {
             }
         }
         .safeAreaInset(edge: .bottom) { if !empty || state.trimmedLink != nil { footer } }
-        .animation(.snappy(duration: 0.22), value: empty)
-        .animation(.snappy(duration: 0.22), value: state.trimmedLink != nil)
-        .animation(.snappy(duration: 0.22), value: state.analysis == nil)
+        .animation(Motion.move, value: empty)
+        .animation(Motion.move, value: state.trimmedLink != nil)
+        .animation(Motion.move, value: state.analysis == nil)
+        .animation(Motion.quick, value: importing)
+        .animation(Motion.quick, value: turnedAway)
+        .animation(Motion.quick, value: overLimit)
         .sheet(isPresented: $showTips) {
             TipsSheet()
                 .environment(\.bower, theme)
@@ -114,7 +117,7 @@ struct CaptureScreen: View {
                     .font(BowerFont.serif(36))
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.bowerPress)
             .accessibilityLabel("About bower")
             Spacer()
             HStack(spacing: 8) {
@@ -131,7 +134,7 @@ struct CaptureScreen: View {
                     .clipShape(Capsule())
                     .overlay(Capsule().stroke(theme.line, lineWidth: 0.5))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bowerPress)
                 .accessibilityLabel("What photographs well")
 
                 Button { showHelp = true } label: {
@@ -143,7 +146,7 @@ struct CaptureScreen: View {
                         .clipShape(Circle())
                         .overlay(Circle().stroke(theme.line, lineWidth: 0.5))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bowerPress)
                 .accessibilityLabel("How bower works")
             }
         }
@@ -160,8 +163,8 @@ struct CaptureScreen: View {
             captureZone
             BowerButton(title: "Upload from library", kind: .secondary) { showLibrary = true }
             linkRow
-            if importing { preparing }
-            if turnedAway { turnedAwayNote }
+            if importing { preparing.transition(Motion.rise) }
+            if turnedAway { turnedAwayNote.transition(Motion.rise) }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 22)
@@ -199,7 +202,7 @@ struct CaptureScreen: View {
             )
             .contentShape(RoundedRectangle(cornerRadius: 20))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPressLarge)
         .accessibilityLabel("Photograph the piece")
     }
 
@@ -210,9 +213,9 @@ struct CaptureScreen: View {
             pile
             adviceLine
             linkRow
-            if importing { preparing }
-            if turnedAway { turnedAwayNote }
-            if overLimit { overLimitNote }
+            if importing { preparing.transition(Motion.rise) }
+            if turnedAway { turnedAwayNote.transition(Motion.rise) }
+            if overLimit { overLimitNote.transition(Motion.rise) }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 16)
@@ -228,7 +231,7 @@ struct CaptureScreen: View {
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Button("Tips") { showTips = true }
-                .buttonStyle(.plain)
+                .buttonStyle(.bowerPress)
                 .font(BowerFont.ui(12.5, weight: .semibold))
                 .foregroundStyle(theme.satin)
         }
@@ -261,7 +264,7 @@ struct CaptureScreen: View {
                     Button { state.link = "" } label: {
                         Image(systemName: "xmark.circle.fill").foregroundStyle(theme.muted)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .accessibilityLabel("Clear the link")
                 } else {
                     PasteButton(payloadType: String.self) { strings in
@@ -359,7 +362,7 @@ struct CaptureScreen: View {
         .padding(.horizontal, 22)
         .padding(.top, 12)
         .padding(.bottom, 10)
-        .background(theme.chrome)
+        .background(ChromeBackground())
         .overlay(alignment: .top) { Hairline() }
     }
 
@@ -385,7 +388,7 @@ struct CaptureScreen: View {
 
     private var clearButton: some View {
         Button("Clear") { state.clearItem() }
-            .buttonStyle(.plain)
+            .buttonStyle(.bowerPress)
             .font(BowerFont.ui(12.5, weight: .medium))
             .foregroundStyle(theme.muted)
             .padding(.horizontal, 8)
@@ -439,8 +442,9 @@ struct CaptureScreen: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 3), spacing: 9) {
             ForEach(Array(state.photos.enumerated()), id: \.element.id) { i, photo in
                 PhotoTile(photo: photo, index: i + 1) {
-                    state.photos.removeAll { $0.id == photo.id }
+                    withAnimation(Motion.move) { state.photos.removeAll { $0.id == photo.id } }
                 }
+                .transition(Motion.pop)
             }
             if state.photos.count < SuggestedShot.maxPhotos {
               Button { pendingShot = nil; showSheet = true } label: {
@@ -454,7 +458,7 @@ struct CaptureScreen: View {
                     }
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(theme.line, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
               }
-              .buttonStyle(.plain)
+              .buttonStyle(.bowerPress)
             }
         }
     }
@@ -528,7 +532,7 @@ struct CaptureScreen: View {
         if let shot { batch[0].shot = shot }
         let room = max(0, SuggestedShot.maxPhotos - state.photos.count)
         if batch.count > room { overLimit = true }
-        state.photos.append(contentsOf: batch.prefix(room))
+        withAnimation(Motion.move) { state.photos.append(contentsOf: batch.prefix(room)) }
     }
 
     private func importLibrary(_ items: [PhotosPickerItem]) async {

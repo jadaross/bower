@@ -49,15 +49,16 @@ struct HistoryScreen: View {
     private func list(_ items: [HistoryItem]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Kicker("\(items.count) item\(items.count == 1 ? "" : "s")")
-            ForEach(items) { item in
+            ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
                 Button { selected = item } label: { card(item) }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPressLarge)
+                    .staggerIn(min(i, 5), step: 0.03)
             }
             VStack(spacing: 14) {
                 Text("Text only. Bower keeps no photos.")
                     .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
                 Button(clearing ? "Clearing…" : "Clear history") { confirmClear = true }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(13, weight: .medium))
                     .foregroundStyle(theme.coral)
                     .disabled(clearing)
@@ -125,7 +126,7 @@ struct HistoryScreen: View {
         defer { clearing = false }
         do {
             try await state.api.clearHistory()
-            withAnimation(.snappy(duration: 0.22)) { items = [] }
+            withAnimation(Motion.move) { items = [] }
         } catch {
             failed = true
         }

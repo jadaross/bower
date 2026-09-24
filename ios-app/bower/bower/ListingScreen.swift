@@ -266,12 +266,17 @@ private struct PriceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            switch model.priceState {
-            case .estimated: estimated
-            case .searching: searching
-            case .searched:  searched
+            Group {
+                switch model.priceState {
+                case .estimated: estimated
+                case .searching: searching
+                case .searched:  searched
+                }
             }
+            .transition(.opacity)
         }
+        .animation(Motion.move, value: model.priceState)
+        .sensoryFeedback(.success, trigger: model.priceState) { _, now in now == .searched }
     }
 
     // The guess. Openly a guess — dashed border, a badge that says where it
@@ -307,7 +312,7 @@ private struct PriceSection: View {
     }
 
     private var deepResearchNote: String {
-        let what = "Searches live listings for what this is actually going for. Takes a minute or two."
+        let what = "Searches live listings. About ten seconds."
         guard let left = state.searches.remaining else { return what + " Uses 1 market check." }
         return left > 0 ? what + " Uses 1 of your \(left) market check\(left == 1 ? "" : "s")." : what
     }
@@ -353,8 +358,8 @@ private struct PriceSection: View {
             VStack(alignment: .leading, spacing: 11) {
                 Kicker("Listed at right now")
                 VStack(spacing: 10) {
-                    ForEach(model.enabled) { p in
-                        if let band = model.bands[p] { bandRow(p, band) }
+                    ForEach(Array(model.enabled.enumerated()), id: \.element) { i, p in
+                        if let band = model.bands[p] { bandRow(p, band).staggerIn(i + 1) }
                     }
                 }
                 Text("Asking prices today. Nothing here has necessarily sold.")
@@ -369,7 +374,8 @@ private struct PriceSection: View {
             VStack(alignment: .leading, spacing: 0) {
                 Kicker("Ask")
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(Money.format(ask.listAt, state.market.currency)).font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
+                    RollingPrice(amount: ask.listAt, currency: state.market.currency)
+                        .font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
                     HStack(spacing: 6) {
                         Text("on")
                         Circle().fill(ask.platform.tint).frame(width: 7, height: 7)
@@ -389,13 +395,13 @@ private struct PriceSection: View {
                         .padding(.vertical, 7).padding(.horizontal, 12)
                         .overlay(RoundedRectangle(cornerRadius: 9).stroke(ask.platform.tint, lineWidth: 1))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .padding(.top, 12)
                 }
             }
             .padding(.vertical, 16).padding(.horizontal, 18)
         }
-        .animation(.easeOut(duration: 0.2), value: model.platform)
+        .animation(Motion.quick, value: model.platform)
     }
 
     private func bandRow(_ p: Platform, _ band: PriceBand) -> some View {
@@ -427,7 +433,7 @@ private struct PriceSection: View {
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(winner ? p.tint.opacity(0.4) : theme.line, lineWidth: 0.5))
             .contentShape(RoundedRectangle(cornerRadius: 14))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPressLarge)
         .disabled(empty)
         .overlay(alignment: .topLeading) {
             if winner {
@@ -438,6 +444,24 @@ private struct PriceSection: View {
                     .offset(x: 14, y: -8)
             }
         }
+    }
+}
+
+/// The Ask, rolling up to its number the moment it lands.
+private struct RollingPrice: View {
+    let amount: Int
+    let currency: String
+    @State private var shown = 0
+
+    var body: some View {
+        Text(Money.format(shown, currency))
+            .contentTransition(.numericText(value: Double(shown)))
+            .task {
+                guard !Motion.reduced else { shown = amount; return }
+                try? await Task.sleep(for: .milliseconds(120))
+                withAnimation(Motion.arrive) { shown = amount }
+            }
+            .onChange(of: amount) { _, new in withAnimation(Motion.quick) { shown = new } }
     }
 }
 
@@ -493,13 +517,13 @@ private struct ListingSection: View {
                     Spacer(minLength: 0)
                     if !model.chips.isEmpty || !model.extraKeywords.isEmpty {
                         Button("Reset") { model.resetChips() }
-                            .buttonStyle(.plain).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
+                            .buttonStyle(.bowerPress).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
                     }
                 }
                 FlowLayout(spacing: 7) {
                     ForEach([RefinementChip.shorter, .longer, .serious, .casual]) { chip in
                         let on = model.chips.contains(chip)
-                        Button { model.toggle(chip) } label: {
+                        Button { withAnimation(Motion.quick) { model.toggle(chip) } } label: {
                             HStack(spacing: 5) {
                                 if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
                                 Text(chip.label)
@@ -511,9 +535,9 @@ private struct ListingSection: View {
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(on ? .clear : theme.line, lineWidth: 0.5))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.bowerPress)
                     }
-                    Button { editingKeywords.toggle() } label: {
+                    Button { withAnimation(Motion.quick) { editingKeywords.toggle() } } label: {
                         HStack(spacing: 5) {
                             if !model.extraKeywords.isEmpty { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
                             Text(model.extraKeywords.isEmpty ? "+ Keywords" : "Keywords")
@@ -525,15 +549,19 @@ private struct ListingSection: View {
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(model.extraKeywords.isEmpty ? theme.line : .clear, lineWidth: 0.5))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                 }
                 if editingKeywords {
                     // Words a buyer might search for that the listing doesn't already
                     // use — woven into the title and description, not a hashtag list.
-                    EditBox(value: model.extraKeywords, multiline: false, bold: false, placeholder: "e.g. y2k, festival, streetwear") { model.setKeywords($0); editingKeywords = false } onCancel: { editingKeywords = false }
+                    EditBox(value: model.extraKeywords, multiline: false, bold: false, placeholder: "e.g. y2k, festival, streetwear") {
+                        model.setKeywords($0); withAnimation(Motion.quick) { editingKeywords = false }
+                    } onCancel: { withAnimation(Motion.quick) { editingKeywords = false } }
+                    .transition(Motion.rise)
                 }
             }
             .padding(.top, 2)
+            .sensoryFeedback(.selection, trigger: model.chips)
 
             // Straight to where it gets posted. A universal link, so the platform's
             // app opens when installed; iOS puts "◀ bower" in the status bar for
@@ -560,22 +588,25 @@ private struct ListingSection: View {
                     Button { model.thumb(up: true) } label: {
                         Image(systemName: model.thumbed[model.platform] == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
                             .font(.system(size: 15))
+                            .symbolEffect(.bounce, value: model.thumbed[model.platform] == 1)
                             .foregroundStyle(model.thumbed[model.platform] == 1 ? theme.moss : theme.muted)
                     }
-                    .buttonStyle(.plain).accessibilityLabel("Good listing")
+                    .buttonStyle(.bowerPress).accessibilityLabel("Good listing")
                     Button { model.thumb(up: false) } label: {
                         Image(systemName: model.thumbed[model.platform] == 0 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                             .font(.system(size: 15))
+                            .symbolEffect(.bounce, value: model.thumbed[model.platform] == 0)
                             .foregroundStyle(model.thumbed[model.platform] == 0 ? theme.coral : theme.muted)
                     }
-                    .buttonStyle(.plain).accessibilityLabel("Bad listing")
+                    .buttonStyle(.bowerPress).accessibilityLabel("Bad listing")
                     Button("Tell us") { feedback = true }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.bowerPress)
                         .font(BowerFont.ui(12, weight: .semibold))
                         .foregroundStyle(theme.satin)
                         .padding(.leading, 4)
                 }
                 .padding(.top, 2)
+                .sensoryFeedback(.impact(weight: .light), trigger: model.thumbed)
             }
         }
         .padding(.horizontal, 22)
@@ -662,7 +693,7 @@ private struct ListingSection: View {
                 .shadow(color: .black.opacity(0.07), radius: 7, y: 4)
             }
         }
-        .animation(.easeOut(duration: 0.2), value: model.rewriting)
+        .animation(Motion.quick, value: model.rewriting)
     }
 
     private func block(_ label: String, text: String, key: String, bold: Bool, save: @escaping (String) -> Void) -> some View {
@@ -675,7 +706,7 @@ private struct ListingSection: View {
                         HStack(spacing: 4) { Image(systemName: "pencil").font(.system(size: 9)); Text("Edit") }
                             .font(BowerFont.ui(11, weight: .semibold)).foregroundStyle(theme.muted)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                 }
                 CopyButton(text: text, onCopy: { model.recordFeedback("copied") })
             }
@@ -687,8 +718,12 @@ private struct ListingSection: View {
                     .foregroundStyle(theme.text)
                     .lineSpacing(bold ? 2 : 4)
                     .onTapGesture { editing = key }
+                    // A rewrite crossfades through a slight blur, never two texts at once.
+                    .id(text)
+                    .transition(Motion.soften)
             }
         }
+        .animation(Motion.quick, value: text)
     }
 }
 
@@ -725,10 +760,10 @@ private struct EditBox: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.satin, lineWidth: 1.5))
 
             HStack(spacing: 8) {
-                Button("Cancel", action: onCancel).buttonStyle(.plain)
+                Button("Cancel", action: onCancel).buttonStyle(.bowerPress)
                     .font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 8))
-                Button("Save") { onSave(draft) }.buttonStyle(.plain)
+                Button("Save") { onSave(draft) }.buttonStyle(.bowerPress)
                     .font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(.white)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.satin).clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -763,9 +798,9 @@ struct CopyButton: View {
             .background(big ? theme.subtle : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 8))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPress)
         .sensoryFeedback(.success, trigger: copied) { _, now in now }
-        .animation(.easeOut(duration: 0.18), value: copied)
+        .animation(Motion.quick, value: copied)
     }
 
     private func face(_ icon: String, _ label: String) -> some View {
@@ -798,7 +833,7 @@ private struct CompsSheet: View {
                     Image(systemName: "xmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.muted)
                         .frame(width: 28, height: 28).background(theme.subtle).clipShape(Circle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bowerPress)
             }
             .padding(.horizontal, 20).padding(.top, 22).padding(.bottom, 12)
             Hairline()

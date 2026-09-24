@@ -45,7 +45,7 @@ struct SettingsScreen: View {
                             .padding(.vertical, 12).padding(.horizontal, 16)
                             .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.bowerPress)
                     }
                 }
                 Text("Listings are written for this one first. Switch any time.")
@@ -73,7 +73,7 @@ struct SettingsScreen: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
                     .contentShape(RoundedRectangle(cornerRadius: 14))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bowerPress)
             }
 
             section("Account") {
@@ -101,7 +101,7 @@ struct SettingsScreen: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.bowerPress)
             .disabled(deleting)
             if deleteFailed {
                 Text("Couldn't delete the account. Check your connection and try again.")
@@ -216,7 +216,7 @@ struct SettingsScreen: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(theme.subtle)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-            .animation(.easeOut(duration: 0.18), value: line)
+            .animation(Motion.quick, value: line)
         }
         .padding(.top, 4)
     }
@@ -263,7 +263,7 @@ struct SettingsScreen: View {
                 }
                 .frame(height: 6)
                 .padding(.top, 8)
-                .animation(.easeOut(duration: 0.5), value: pct)
+                .animation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.3), value: pct)
             }
         }
     }

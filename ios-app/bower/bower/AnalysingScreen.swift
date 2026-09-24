@@ -35,13 +35,17 @@ struct AnalysingScreen: View {
     var body: some View {
         ZStack {
             theme.avenue.ignoresSafeArea()
-            switch phase {
-            case .reading:   reading
-            case .failed:    failed
-            case .allowance(let a): allowance(a)
-            case .rejected(let r): rejected(r)
+            Group {
+                switch phase {
+                case .reading:   reading
+                case .failed:    failed
+                case .allowance(let a): allowance(a)
+                case .rejected(let r): rejected(r)
+                }
             }
+            .transition(.opacity)
         }
+        .animation(.easeOut(duration: 0.2), value: phase)
         .onAppear(perform: start)
         .onDisappear { task?.cancel(); endBackgroundTask() }
     }
@@ -65,14 +69,15 @@ struct AnalysingScreen: View {
             VStack(alignment: .leading, spacing: 0) {
                 Kicker(stages[min(stage, stages.count - 1)], color: theme.pollen)
                     .contentTransition(.opacity)
-                    .animation(.easeOut(duration: 0.25), value: stage)
+                    .animation(Motion.quick, value: stage)
 
                 Group {
                     if let title {
                         Text(title)
                             .font(BowerFont.serif(44))
                             .lineSpacing(2)
-                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            // Sharpens into place from just below.
+                            .transition(Motion.sharpen)
                     } else {
                         Text(state.photos.isEmpty ? "Reading the page" : "Reading your photos")
                             .font(BowerFont.serif(36))
@@ -86,7 +91,7 @@ struct AnalysingScreen: View {
             }
         }
         .padding(.horizontal, 30)
-        .animation(.easeOut(duration: 0.45), value: title)
+        .animation(Motion.arrive, value: title)
     }
 
     private func start() {
@@ -122,6 +127,7 @@ struct AnalysingScreen: View {
                 Notifications.scheduleNudge()
                 Notifications.listingIsReady(result.listing.title)
                 stage = stages.count
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {
@@ -258,7 +264,7 @@ private struct ReadFrame: View {
                     Image(systemName: "checkmark")
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(pollen)
-                        .transition(.scale.combined(with: .opacity))
+                        .transition(.scale(scale: 0.6).combined(with: .opacity))
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -266,6 +272,6 @@ private struct ReadFrame: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(state == .active ? pollen : .white.opacity(0.14), lineWidth: 1)
             )
-            .animation(.easeOut(duration: 0.3), value: state)
+            .animation(Motion.quick, value: state)
     }
 }

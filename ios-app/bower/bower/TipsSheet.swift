@@ -21,7 +21,7 @@ struct TipsSheet: View {
                 Text("What photographs well").font(BowerFont.serif(28)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }

@@ -24,7 +24,7 @@ struct WhyBowerScreen: View {
                 .lineSpacing(4)
                 .padding(.top, 14)
 
-            BowerbirdDots()
+            BowerbirdDots(arrange: true)
                 .padding(.vertical, 26)
                 .frame(maxWidth: .infinity, alignment: .leading)
 

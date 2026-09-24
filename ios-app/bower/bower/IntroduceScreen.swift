@@ -77,7 +77,7 @@ struct IntroduceScreen: View {
             Rectangle()
                 .fill(focused == field ? theme.satin : theme.line)
                 .frame(width: 200, height: focused == field ? 1.5 : 0.5)
-                .animation(.easeOut(duration: 0.16), value: focused)
+                .animation(Motion.quick, value: focused)
         }
     }
 

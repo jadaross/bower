@@ -71,6 +71,95 @@ struct CourtDots: View {
     }
 }
 
+// MARK: - Motion
+
+/// The one motion language. Three kinds of change, three ways to move, so the
+/// same kind of change always feels the same wherever it happens. Each turns
+/// into a short fade when Reduce Motion is on.
+enum Motion {
+    static var reduced: Bool { UIAccessibility.isReduceMotionEnabled }
+
+    /// State changes: toggles, chips, banners, fills. 160ms, strong ease-out.
+    static var quick: Animation { .timingCurve(0.23, 1, 0.32, 1, duration: 0.16) }
+    /// Layout: sliding highlights, things making room, screens. No bounce.
+    static var move: Animation { reduced ? .easeOut(duration: 0.2) : .spring(response: 0.3, dampingFraction: 1) }
+    /// The few big moments: the title landing, the Ask, the notifications.
+    static var arrive: Animation { reduced ? .easeOut(duration: 0.2) : .spring(response: 0.45, dampingFraction: 0.78) }
+
+    /// Fades in and rises a few points. For anything that appears in place.
+    static var rise: AnyTransition { reduced ? .opacity : .opacity.combined(with: .offset(y: 8)) }
+    /// For things added to or taken from a set (photos in the pile).
+    static var pop: AnyTransition { reduced ? .opacity : .opacity.combined(with: .scale(scale: 0.94)) }
+    /// Sharpens into place: fades up from a short blur. For text that replaces text.
+    static var sharpen: AnyTransition {
+        reduced ? .opacity : .modifier(active: Blurred(radius: 6, y: 12), identity: Blurred(radius: 0, y: 0))
+    }
+    /// A crossfade softened by a slight blur, so old and new text never read as two layers.
+    static var soften: AnyTransition {
+        reduced ? .opacity : .modifier(active: Blurred(radius: 2, y: 0), identity: Blurred(radius: 0, y: 0))
+    }
+}
+
+private struct Blurred: ViewModifier {
+    let radius: CGFloat
+    let y: CGFloat
+    func body(content: Content) -> some View {
+        content.blur(radius: radius).opacity(radius == 0 ? 1 : 0).offset(y: y)
+    }
+}
+
+/// Rows that arrive together come in one after another, a few hundredths of
+/// a second apart, rising a few points. Decorative: nothing waits on it.
+struct StaggerIn: ViewModifier {
+    let index: Int
+    var step: Double = 0.04
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown || Motion.reduced ? 0 : 8)
+            .onAppear { withAnimation(Motion.move.delay(Double(index) * step)) { shown = true } }
+    }
+}
+
+extension View {
+    func staggerIn(_ index: Int, step: Double = 0.04) -> some View { modifier(StaggerIn(index: index, step: step)) }
+}
+
+/// Every pressable thing shrinks a touch while held, so a tap always feels
+/// heard. Big surfaces press less so they don't lurch. With Reduce Motion
+/// the press dims instead.
+struct BowerPress: ButtonStyle {
+    var scale: CGFloat = 0.97
+
+    func makeBody(configuration: Configuration) -> some View {
+        let down = configuration.isPressed
+        configuration.label
+            .scaleEffect(down && !Motion.reduced ? scale : 1)
+            .opacity(down && Motion.reduced ? 0.7 : 1)
+            .animation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.12), value: down)
+    }
+}
+
+extension ButtonStyle where Self == BowerPress {
+    static var bowerPress: BowerPress { BowerPress() }
+    static var bowerPressLarge: BowerPress { BowerPress(scale: 0.985) }
+}
+
+/// The bars' ground: the theme's chrome tint over a blur, so what scrolls
+/// underneath softens instead of reading through the labels.
+struct ChromeBackground: View {
+    @Environment(\.bower) private var theme
+    var body: some View {
+        ZStack {
+            Rectangle().fill(.ultraThinMaterial)
+            theme.chrome
+        }
+        .ignoresSafeArea(edges: .bottom)
+    }
+}
+
 // MARK: - Type
 
 /// The small uppercase mono label used above almost every block.
@@ -149,8 +238,9 @@ struct BowerButton: View {
                     .stroke(border, lineWidth: 0.5)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPress)
         .disabled(disabled)
+        .animation(Motion.quick, value: disabled)
     }
 
     private var foreground: Color {
@@ -199,7 +289,8 @@ struct BowerToggle: View {
             .frame(width: 44, height: 26)
         }
         .buttonStyle(.plain)
-        .animation(.easeOut(duration: 0.18), value: isOn)
+        .animation(Motion.move, value: isOn)
+        .sensoryFeedback(.selection, trigger: isOn)
     }
 }
 
@@ -215,12 +306,13 @@ struct Segmented: View {
     var small: Bool = false
 
     @Environment(\.bower) private var theme
+    @Namespace private var pill
 
     var body: some View {
         HStack(spacing: 2) {
             ForEach(options) { o in
                 let active = o.id == selection
-                Button { selection = o.id } label: {
+                Button { withAnimation(Motion.move) { selection = o.id } } label: {
                     HStack(spacing: 5) {
                         if let dot = o.dot {
                             Circle().fill(dot).frame(width: 6, height: 6)
@@ -231,12 +323,16 @@ struct Segmented: View {
                     .foregroundStyle(active ? theme.text : theme.muted)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, small ? 7 : 9)
-                    .background(active ? theme.card : .clear)
-                    .clipShape(RoundedRectangle(cornerRadius: 9))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 9)
-                            .stroke(active ? theme.line : .clear, lineWidth: 0.5)
-                    )
+                    .background {
+                        // One highlight that slides to the chosen segment.
+                        if active {
+                            RoundedRectangle(cornerRadius: 9)
+                                .fill(theme.card)
+                                .overlay(RoundedRectangle(cornerRadius: 9).stroke(theme.line, lineWidth: 0.5))
+                                .matchedGeometryEffect(id: "pill", in: pill)
+                        }
+                    }
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
@@ -245,7 +341,7 @@ struct Segmented: View {
         .background(theme.subtle)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(theme.line, lineWidth: 0.5))
-        .animation(.easeOut(duration: 0.16), value: selection)
+        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 
@@ -311,7 +407,7 @@ struct NewItemButton: View {
             .clipShape(Capsule())
             .overlay(Capsule().stroke(theme.line, lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPress)
     }
 }
 
@@ -334,13 +430,30 @@ enum BowerOrigin {
 
 /// Three blues, smallest to largest, the shiny things a bowerbird would prize.
 struct BowerbirdDots: View {
+    /// Lands them one by one, smallest to largest, the way she'd place them.
+    var arrange = false
+
     @Environment(\.bower) private var theme
+    @State private var placed = 0
 
     var body: some View {
         HStack(spacing: 10) {
-            Circle().fill(theme.shell).frame(width: 14, height: 14)
-            Circle().fill(theme.sheen).frame(width: 20, height: 20)
-            Circle().fill(theme.satin).frame(width: 28, height: 28)
+            dot(theme.shell, 14, 1)
+            dot(theme.sheen, 20, 2)
+            dot(theme.satin, 28, 3)
         }
+        .task {
+            guard arrange else { placed = 3; return }
+            for n in 1...3 {
+                try? await Task.sleep(for: .milliseconds(n == 1 ? 250 : 80))
+                withAnimation(Motion.arrive) { placed = n }
+            }
+        }
+    }
+
+    private func dot(_ color: Color, _ size: CGFloat, _ n: Int) -> some View {
+        Circle().fill(color).frame(width: size, height: size)
+            .scaleEffect(placed >= n || Motion.reduced ? 1 : 0.9)
+            .opacity(placed >= n ? 1 : 0)
     }
 }

@@ -116,9 +116,12 @@ struct PhotoTile: View {
                             .frame(width: 22, height: 22)
                             .background(.black.opacity(0.55))
                             .clipShape(Circle())
+                            // 22pt to look at, 44pt to hit.
+                            .padding(5)
+                            .frame(width: 44, height: 44, alignment: .topTrailing)
+                            .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .padding(5)
+                    .buttonStyle(.bowerPress)
                     .accessibilityLabel("Remove")
                 }
             }

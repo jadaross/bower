@@ -124,10 +124,9 @@ struct NotificationsSheet: View {
     }
 
     private func arrive() async {
-        let spring = Animation.spring(response: 0.45, dampingFraction: 0.78)
         try? await Task.sleep(for: .milliseconds(350))
-        withAnimation(reduceMotion ? .easeOut(duration: 0.2) : spring) { shown = 1 }
+        withAnimation(Motion.arrive) { shown = 1 }
         try? await Task.sleep(for: .milliseconds(900))
-        withAnimation(reduceMotion ? .easeOut(duration: 0.2) : spring) { shown = 2 }
+        withAnimation(Motion.arrive) { shown = 2 }
     }
 }

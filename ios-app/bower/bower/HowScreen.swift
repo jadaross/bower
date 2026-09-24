@@ -6,6 +6,7 @@ import SwiftUI
 struct HowScreen: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
+    @State private var shown = false
 
     private static let beats: [(String, String)] = [
         ("Photograph your clothes", "Any photos you already have will do."),
@@ -54,9 +55,14 @@ struct HowScreen: View {
                         .padding(.bottom, last ? 0 : 28)
                     }
                     .fixedSize(horizontal: false, vertical: true)
+                    // In order, 60ms apart. Never holds up the button.
+                    .opacity(shown ? 1 : 0)
+                    .offset(y: shown || Motion.reduced ? 0 : 8)
+                    .animation(Motion.move.delay(0.12 + Double(i) * 0.06), value: shown)
                 }
             }
             .padding(.top, 24)
+            .onAppear { shown = true }
 
             Spacer(minLength: 24)
 

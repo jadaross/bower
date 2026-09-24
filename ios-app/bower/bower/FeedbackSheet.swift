@@ -29,7 +29,7 @@ struct FeedbackSheet: View {
                 Text("Tell bower").font(BowerFont.serif(28)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
@@ -91,7 +91,7 @@ struct FeedbackSheet: View {
         do {
             try await state.api.feedbackNote(FeedbackNote(message: trimmed, screen: screen, platform: platform, traceId: traceId))
             failed = false
-            withAnimation(.easeOut(duration: 0.2)) { sent = true }
+            withAnimation(Motion.quick) { sent = true }
             try? await Task.sleep(for: .seconds(1.1))
             dismiss()
         } catch {

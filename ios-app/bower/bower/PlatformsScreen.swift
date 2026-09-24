@@ -32,14 +32,15 @@ struct PlatformsScreen: View {
                     .foregroundStyle(theme.text)
             }
 
-            MarketPicker(unchosen: needsMarket) { needsMarket = false }
+            MarketPicker(unchosen: needsMarket) { withAnimation(Motion.move) { needsMarket = false } }
 
             if !needsMarket {
                 VStack(spacing: 10) { ForEach(state.market.platforms) { row(for: $0) } }
                     .padding(.top, 2)
+                    .transition(Motion.rise)
             }
 
-            if blocked != nil { keepOne }
+            if blocked != nil { keepOne.transition(Motion.rise) }
 
             Spacer(minLength: 20)
 
@@ -140,7 +141,7 @@ struct PlatformsScreen: View {
                     lineWidth: 1
                 )
         )
-        .animation(.easeOut(duration: 0.2), value: blocked)
+        .animation(Motion.quick, value: blocked)
     }
 
     private var keepOne: some View {
@@ -166,10 +167,10 @@ struct PlatformsScreen: View {
     }
 
     private func flash(_ platform: Platform) {
-        blocked = platform
+        withAnimation(Motion.quick) { blocked = platform }
         Task {
             try? await Task.sleep(for: .seconds(2.6))
-            if blocked == platform { blocked = nil }
+            if blocked == platform { withAnimation(Motion.quick) { blocked = nil } }
         }
     }
 }

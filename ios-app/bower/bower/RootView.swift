@@ -40,7 +40,7 @@ struct BowerNav<Leading: View, Trailing: View>: View {
         }
         .padding(.horizontal, large ? 20 : 12)
         .padding(.top, 4)
-        .background(theme.chrome)
+        .background(ChromeBackground())
     }
 }
 
@@ -66,7 +66,7 @@ struct BackButton: View {
             .font(BowerFont.ui(16, weight: .medium))
             .foregroundStyle(theme.satin)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.bowerPress)
     }
 }
 
@@ -75,6 +75,12 @@ struct RootView: View {
     @Environment(\.colorScheme) private var scheme
 
     @State private var showSplash = true
+    /// The screen on display. Follows `state.screen`, with the motion chosen
+    /// by where it came from (see `move(to:)`).
+    @State private var shown: Screen?
+    /// Onboarding is a sequence: forward slides in from the right, back from the left.
+    @State private var forward = true
+    private let launched = Date()
 
     private var theme: BowerTheme { .of(scheme) }
 
@@ -82,7 +88,7 @@ struct RootView: View {
         ZStack {
             theme.bg.ignoresSafeArea()
 
-            switch state.screen {
+            switch current {
             case .analysing:
                 AnalysingScreen()
             case .signin:
@@ -100,8 +106,10 @@ struct RootView: View {
                     nav
                     GeometryReader { geo in
                         ScrollView {
-                            body(for: state.screen)
+                            body(for: current)
                                 .frame(maxWidth: .infinity, minHeight: fillsHeight ? geo.size.height : 0, alignment: .top)
+                                .id(current)
+                                .transition(pageTransition)
                         }
                         .scrollBounceBehavior(.basedOnSize)
                     }
@@ -119,38 +127,67 @@ struct RootView: View {
             }
         }
         .environment(\.bower, theme)
-        .animation(.snappy(duration: 0.22), value: state.screen)
+        .onChange(of: state.screen) { old, new in move(from: old, to: new) }
         .task {
             await state.loadProfileIfSignedIn()
             hideSplashSoon()
         }
     }
 
+    private var current: Screen { shown ?? state.screen }
+
+    /// Tabs and the listing flow switch instantly: they are used many times a
+    /// day. Onboarding slides in its direction. Going into or out of a
+    /// full-bleed page (sign-in, the read) fades.
+    private func move(from old: Screen, to new: Screen) {
+        let steps: [Screen] = [.introduce, .whyBower, .how, .platforms]
+        if let a = steps.firstIndex(of: old), let b = steps.firstIndex(of: new) {
+            forward = b > a
+            withAnimation(Motion.move) { shown = new }
+        } else if [old, new].contains(where: { $0 == .signin || $0 == .analysing }) || steps.contains(new) {
+            forward = true
+            withAnimation(.easeOut(duration: 0.25)) { shown = new }
+        } else {
+            var t = Transaction(); t.disablesAnimations = true
+            withTransaction(t) { shown = new }
+        }
+    }
+
+    private var pageTransition: AnyTransition {
+        guard !Motion.reduced, [.introduce, .whyBower, .how, .platforms].contains(current) else { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: forward ? .leading : .trailing).combined(with: .opacity)
+        )
+    }
+
+    /// Off as soon as the profile is in, but never a flash: at least 0.3s on screen.
     private func hideSplashSoon() {
         Task {
-            try? await Task.sleep(for: .seconds(0.9))
-            withAnimation(.easeOut(duration: 0.35)) { showSplash = false }
+            let left = 0.3 - Date().timeIntervalSince(launched)
+            if left > 0 { try? await Task.sleep(for: .seconds(left)) }
+            withAnimation(.easeOut(duration: 0.2)) { showSplash = false }
         }
     }
 
     /// Pages whose primary button sits at the foot, with the content filling
     /// the height above it. The rest are lists and read from the top.
     private var fillsHeight: Bool {
-        switch state.screen {
+        switch current {
         case .introduce, .whyBower, .how, .platforms: return true
         default: return false
         }
     }
 
     private var showsTabBar: Bool {
-        switch state.screen {
+        switch current {
         case .listing, .history, .settings: return true
         default: return false
         }
     }
 
     private var activeTab: BowerTab? {
-        switch state.screen {
+        switch current {
         case .capture, .listing: return .home
         case .history: return .history
         case .settings: return .profile
@@ -167,7 +204,7 @@ struct RootView: View {
     }
 
     @ViewBuilder private var nav: some View {
-        switch state.screen {
+        switch current {
         case .signin, .analysing:
             EmptyView()
         case .introduce:
@@ -244,7 +281,7 @@ struct BowerTabBar: View {
         }
         .padding(.top, 8)
         .padding(.bottom, 4)
-        .background(theme.chrome)
+        .background(ChromeBackground())
         .overlay(alignment: .top) { Hairline() }
     }
 

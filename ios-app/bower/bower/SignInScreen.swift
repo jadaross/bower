@@ -23,6 +23,8 @@ struct SignInScreen: View {
     @State private var signingUp = true
     @State private var email = ""
     @State private var password = ""
+    @FocusState private var focusedField: String?
+    @Namespace private var modeTab
 
     private var canSubmitEmail: Bool {
         !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
@@ -59,11 +61,12 @@ struct SignInScreen: View {
                 Spacer(minLength: 28)
 
                 VStack(spacing: 12) {
-                    if let failure { rejection(failure) }
+                    if let failure { rejection(failure).transition(Motion.rise) }
 
                     if showEmail {
-                        emailForm
+                        emailForm.transition(Motion.rise)
                     } else {
+                    VStack(spacing: 12) {
                         SignInWithAppleButton(.signIn) { request in
                             let fresh = SupabaseSession.AppleNonce()
                             nonces.current = fresh
@@ -84,7 +87,10 @@ struct SignInScreen: View {
                             }
                         }
 
-                        Button { showEmail = true; notice = nil; failure = nil } label: {
+                        Button {
+                            withAnimation(Motion.move) { showEmail = true; notice = nil; failure = nil }
+                            focusedField = "Email"
+                        } label: {
                             Text("Continue with email")
                                 .font(BowerFont.ui(15, weight: .semibold))
                                 .foregroundStyle(Self.paper)
@@ -92,7 +98,9 @@ struct SignInScreen: View {
                                 .padding(.vertical, 14)
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Self.paper.opacity(0.35), lineWidth: 1))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.bowerPress)
+                    }
+                    .transition(Motion.rise)
                     }
 
                     Text("Photos are read and thrown away. Bower keeps no images.")
@@ -104,6 +112,8 @@ struct SignInScreen: View {
             }
             .padding(.horizontal, 26)
             .padding(.bottom, 30)
+            .animation(Motion.quick, value: failure)
+            .animation(Motion.quick, value: notice)
         }
     }
 
@@ -151,7 +161,7 @@ struct SignInScreen: View {
 
     private var emailForm: some View {
         VStack(spacing: 10) {
-            Button { showEmail = false; notice = nil; failure = nil } label: {
+            Button { withAnimation(Motion.move) { showEmail = false; notice = nil; failure = nil } } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
                     Text("Back")
@@ -159,15 +169,15 @@ struct SignInScreen: View {
                 .font(BowerFont.ui(13, weight: .medium))
                 .foregroundStyle(Self.paper.opacity(0.6))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.bowerPress)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, 2)
 
-            if let notice { noticeBanner(notice) }
+            if let notice { noticeBanner(notice).transition(Motion.rise) }
 
             HStack(spacing: 3) {
-                emailModeTab("Sign up", active: signingUp) { signingUp = true }
-                emailModeTab("Log in", active: !signingUp) { signingUp = false }
+                emailModeTab("Sign up", active: signingUp) { withAnimation(Motion.move) { signingUp = true } }
+                emailModeTab("Log in", active: !signingUp) { withAnimation(Motion.move) { signingUp = false } }
             }
             .padding(3)
             .background(.white.opacity(0.06))
@@ -199,7 +209,7 @@ struct SignInScreen: View {
                         }
                     }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.bowerPress)
             .disabled(!canSubmitEmail || working)
         }
         .padding(.top, 4)
@@ -212,8 +222,14 @@ struct SignInScreen: View {
                 .foregroundStyle(active ? theme.avenue : Self.paper.opacity(0.6))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(active ? Self.paper : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 9))
+                .background {
+                    // One highlight that slides between the two modes.
+                    if active {
+                        RoundedRectangle(cornerRadius: 9).fill(Self.paper)
+                            .matchedGeometryEffect(id: "mode", in: modeTab)
+                    }
+                }
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -236,6 +252,7 @@ struct SignInScreen: View {
             .tint(theme.sheen)
             .keyboardType(keyboard)
             .textContentType(contentType)
+            .focused($focusedField, equals: placeholder)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
         }

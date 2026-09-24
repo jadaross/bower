@@ -10,6 +10,8 @@ struct HelpSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var step = 0
+    /// Which way the steps are moving, so each slides in from the side it came from.
+    @State private var forward = true
 
     private enum Figure { case meters, angles, listing, ask, platforms, none }
 
@@ -54,7 +56,7 @@ struct HelpSheet: View {
                 Text("How bower works").font(BowerFont.serif(28)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
@@ -65,11 +67,11 @@ struct HelpSheet: View {
                         .fill(n <= step ? theme.satin : theme.line)
                         .frame(height: 3)
                         .contentShape(Rectangle().inset(by: -8))
-                        .onTapGesture { step = n }
+                        .onTapGesture { go(to: n) }
                 }
             }
             .padding(.top, 16)
-            .animation(.easeOut(duration: 0.2), value: step)
+            .animation(Motion.quick, value: step)
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
@@ -98,17 +100,20 @@ struct HelpSheet: View {
             .padding(.top, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
             .id(step)
-            .transition(.opacity)
+            .transition(Motion.reduced ? .opacity : .asymmetric(
+                insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+                removal: .move(edge: forward ? .leading : .trailing).combined(with: .opacity)
+            ))
 
             Spacer(minLength: 20)
 
             HStack(spacing: 9) {
                 if step > 0 {
-                    BowerButton(title: "Back", kind: .secondary) { step -= 1 }
+                    BowerButton(title: "Back", kind: .secondary) { go(to: step - 1) }
                         .frame(width: 118)
                 }
                 if step < steps.count - 1 {
-                    BowerButton(title: "Next") { step += 1 }
+                    BowerButton(title: "Next") { go(to: step + 1) }
                 } else {
                     BowerButton(title: "Start selling") { dismiss() }
                 }
@@ -117,8 +122,14 @@ struct HelpSheet: View {
         .padding(.horizontal, 22)
         .padding(.top, 18)
         .padding(.bottom, 30)
-        .animation(.easeOut(duration: 0.18), value: step)
+        .animation(Motion.move, value: step)
         .background(theme.bg)
+        .clipped()
+    }
+
+    private func go(to n: Int) {
+        forward = n > step
+        step = n
     }
 
     // MARK: Pieces
