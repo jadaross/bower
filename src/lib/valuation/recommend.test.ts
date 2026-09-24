@@ -174,6 +174,13 @@ describe("recommend — output", () => {
     expect(result!.reasoning).toContain("less its 13.6% + $0.40 fee");
   });
 
+  it("takes Depop Ireland's 10% and processing off the net, in euros", () => {
+    const result = recommend(valuation({ depop: band(100, 100), vinted: band(10, 20) }), "IE");
+    expect(result!.net).toBe(87); // 100 × 0.871 − 0.30 = 86.8
+    expect(result!.reasoning).toContain("€");
+    expect(result!.reasoning).toContain("less its 10% + processing fee");
+  });
+
   it("takes Depop US's payment processing off the net", () => {
     const result = recommend(valuation({ depop: band(50, 50), vinted: band(10, 20) }), "US");
     expect(result!.net).toBe(48); // 50 × 0.967 − 0.45 = 47.9

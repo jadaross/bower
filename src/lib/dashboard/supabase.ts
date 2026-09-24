@@ -18,7 +18,7 @@ export interface Account {
   lastName: string | null;
   createdAt: string;
   lastSignInAt: string | null;
-  /** Where they sell: GB, AU or US. */
+  /** Where they sell: GB, IE, AU or US. */
   market: string;
   enabledPlatforms: Platform[];
   preferredPlatform: Platform | null;

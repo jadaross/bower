@@ -330,7 +330,7 @@ describe("askingPriceProvider.band", () => {
 describe("in Australia", () => {
   it("searches the Australian site in Australian dollars", () => {
     const prompt = buildValuationPrompt(item, "ebay", "AU");
-    expect(prompt).toContain("seller in the Australia who");
+    expect(prompt).toContain("seller in Australia who");
     expect(prompt).toContain("ebay.com.au");
     expect(prompt).toContain("Prices are in AUD");
     expect(prompt).toContain("https://www.ebay.com.au/itm/<id>");
@@ -477,5 +477,33 @@ describe("in the United States", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].tools[0].allowed_domains).toEqual(["vinted.com"]);
     expect(calls[0].tools[0].user_location.country).toBe("US");
+  });
+});
+
+describe("in Ireland", () => {
+  it("searches the Irish sites in euros", () => {
+    const prompt = buildValuationPrompt(item, "ebay", "IE");
+    expect(prompt).toContain("seller in Ireland who");
+    expect(prompt).toContain("https://www.ebay.ie/");
+    expect(prompt).toContain("Prices are in EUR");
+    expect(prompt).toContain("€55");
+    expect(prompt).not.toContain("co.uk");
+  });
+
+  it("only accepts listings from the Irish sites", () => {
+    expect(listingUrl("https://www.vinted.ie/items/6449236214-carhartt", "vinted", "IE")).toBeDefined();
+    expect(listingUrl("https://www.vinted.fr/items/6449236214-carhartt", "vinted", "IE")).toBeUndefined();
+    expect(listingUrl("https://www.ebay.ie/itm/405578781395", "ebay", "IE")).toBeDefined();
+    expect(listingUrl("https://www.ebay.co.uk/itm/405578781395", "ebay", "IE")).toBeUndefined();
+  });
+
+  it("searches Vinted once, from Ireland", async () => {
+    create.mockClear();
+    await askingPriceProvider.band(item, "vinted", "IE");
+    const calls = create.mock.calls.map((c) => c[0]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].tools[0].allowed_domains).toEqual(["vinted.ie"]);
+    // The search tool rejects "IE" as a location; the domain does the work.
+    expect(calls[0].tools[0].user_location).toBeUndefined();
   });
 });

@@ -8,10 +8,13 @@ import type { PlatformMetadata } from "../types";
 // which, with the Australian site weeks old, it usually is.
 // The United States launched in January 2026 at vinted.com, in dollars, with
 // no corridor: US sellers sell only to US buyers.
+// Ireland is vinted.ie, in euros. Its catalogue is shared with Vinted's
+// other Western European sites, but the search is confined to vinted.ie: a
+// listing on vinted.fr is priced for a French buyer.
 export const metadata: PlatformMetadata = {
   id: "vinted",
   name: "Vinted",
-  audience: "Resale-first · UK, Europe, US, Australia",
+  audience: "Resale-first · UK, Ireland, Europe, US, Australia",
   color: "#09b1ba",
   appUrl: "vinted://",
   markets: {
@@ -40,6 +43,14 @@ export const metadata: PlatformMetadata = {
         note: "This seller is in Australia, and Vinted ships between the UK and Australia, so these UK listings are comparables for them: give every price and the band in AUD, converted from GBP, and say so in the reasoning.",
         reasoningPrefix: "Vinted UK (ships to Australia):",
       },
+    },
+    IE: {
+      feeLabel: "0%",
+      feePct: 0,
+      webUrl: "https://www.vinted.ie/",
+      searchDomains: ["vinted.ie"],
+      itemUrl: /^https?:\/\/(?:www\.)?vinted\.ie\/items\/\d+/i,
+      itemUrlExample: "https://www.vinted.ie/items/<id>-<slug>",
     },
     US: {
       feeLabel: "0%",

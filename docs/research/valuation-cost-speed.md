@@ -534,3 +534,32 @@ What it says:
   `…002` for the Patagonia fleece, which matched the item-URL pattern. `listingUrl` now
   rejects an id that starts with a zero or has fewer than six digits, in every market
   (`asking-price.test.ts`). Vinted's 2.10 above includes those two; it is 1.90 without.
+
+## 15. Pass 5: Ireland (24 September 2026)
+
+The same ten items (the Burberry at UK 10), `market: "IE"`, production settings. ✅
+measured, N=10 per platform.
+
+**First run: 30 of 30 calls failed** with `Country code IE is not supported` from the
+web search tool's `user_location`. Every Irish market check would have errored in
+production. `searchCountry` is now optional and left out for Ireland; the allowed
+domains keep the search on the Irish sites.
+
+| Platform | valid comps | zero comps | confidence l/m/h | cost/call |
+|---|---|---|---|---|
+| eBay, `ebay.ie` only | 0.22 | 7 of 9 | 8 / 1 / 0 | $0.041 |
+| **eBay, with the UK corridor** | **2.20** | **2 of 10** | 6 / 4 / 0 | $0.114 |
+| Vinted, `vinted.ie` | 0.70 | 5 of 10 | 10 / 0 / 0 | $0.052 |
+| Depop, `depop.com` from Ireland | 1.30 | 3 of 10 | 10 / 0 / 0 | $0.031 |
+
+- **The Irish sites are barely indexed.** Without a corridor, eBay Ireland found almost
+  nothing. Irish buyers see and buy UK sellers' listings on ebay.ie, so eBay Ireland
+  now searches eBay UK beside it (the Vinted AU/GB corridor mechanism), converting to
+  EUR. That is the only change here that moved the numbers.
+- **Vinted Ireland stays thin and honest**: every band "low", half empty. No corridor,
+  because whether Vinted ships between Ireland and the UK could not be confirmed.
+  Vinted Ireland shares a catalogue with Vinted's Western European sites, but those
+  are other countries' listings on other domains, priced for other buyers.
+- **An Irish check costs ~$0.20 (~15p)**, against ~10p in the UK and US, because eBay
+  runs two searches. Small enough not to change ADR-0010.
+- One eBay call was an Anthropic 500, unrelated.

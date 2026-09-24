@@ -21,7 +21,7 @@ export interface FormatInput {
 // Applies to every platform. The line between "a person who writes well" and
 // "AI" on these marketplaces is facts + honesty + plain language — see
 // docs/research/seller-voice.md.
-// The voice is British English in the UK and Australia and American English
+// The voice is British English in the UK, Ireland and Australia and American English
 // in the United States; the Market sets the spelling, the sizes and the
 // currency sign (languageRule).
 export const voiceCore = (market: Market = DEFAULT_MARKET) => `VOICE — non-negotiable, all platforms:

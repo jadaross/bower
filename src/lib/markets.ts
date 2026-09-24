@@ -12,19 +12,26 @@ import type { Platform } from "@/lib/types";
  * which platforms exist at all (every platform bower knows is in every market
  * today, but the shape allows for one that is not), and whether the listing
  * is written in British or American English with UK or US sizes. British
- * suits Australia; the United States needed its own (ADR-0009, amended).
+ * suits Ireland and Australia; the United States needed its own (ADR-0009,
+ * amended).
  */
-export type Market = "GB" | "AU" | "US";
+export type Market = "GB" | "IE" | "AU" | "US";
 
 export interface MarketInfo {
   id: Market;
   name: string;
+  /** The name as it reads after "in": "the United Kingdom", "Ireland". */
+  place: string;
   /** ISO 4217, as it appears on Price Bands and Comparables. */
   currency: string;
   /** For copy the server writes, e.g. the recommendation's reasoning. */
   symbol: string;
-  /** `user_location.country` for the web search. */
-  searchCountry: string;
+  /**
+   * `user_location.country` for the web search. Absent where the search tool
+   * does not take the country (it rejects IE); the allowed domains still
+   * confine the search to that country's sites.
+   */
+  searchCountry?: string;
   /** Platforms that operate here, in registry order. */
   platforms: readonly Platform[];
   /** The English the listing is written in, which also sets the size system. */
@@ -35,15 +42,26 @@ export const MARKETS: Record<Market, MarketInfo> = {
   GB: {
     id: "GB",
     name: "United Kingdom",
+    place: "the United Kingdom",
     currency: "GBP",
     symbol: "£",
     searchCountry: "GB",
     platforms: ["vinted", "depop", "ebay"],
     english: "British",
   },
+  IE: {
+    id: "IE",
+    name: "Ireland",
+    place: "Ireland",
+    currency: "EUR",
+    symbol: "€",
+    platforms: ["vinted", "depop", "ebay"],
+    english: "British",
+  },
   AU: {
     id: "AU",
     name: "Australia",
+    place: "Australia",
     currency: "AUD",
     symbol: "$",
     searchCountry: "AU",
@@ -53,6 +71,7 @@ export const MARKETS: Record<Market, MarketInfo> = {
   US: {
     id: "US",
     name: "United States",
+    place: "the United States",
     currency: "USD",
     symbol: "$",
     searchCountry: "US",
@@ -61,7 +80,7 @@ export const MARKETS: Record<Market, MarketInfo> = {
   },
 };
 
-export const MARKET_IDS: readonly Market[] = ["GB", "AU", "US"];
+export const MARKET_IDS: readonly Market[] = ["GB", "IE", "US", "AU"];
 export const DEFAULT_MARKET: Market = "GB";
 
 export function isMarket(v: unknown): v is Market {
@@ -75,7 +94,7 @@ export function validateMarket(input: unknown): Market {
   return input;
 }
 
-/** "£50" / "$50" — the server only ever writes whole amounts. */
+/** "£50" / "€50" / "$50": the server only ever writes whole amounts. */
 export function money(amount: number, market: Market): string {
   return `${MARKETS[market].symbol}${Math.round(amount)}`;
 }

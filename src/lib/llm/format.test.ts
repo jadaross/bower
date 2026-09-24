@@ -118,3 +118,12 @@ describe("formatListing — the Market's English", () => {
     expect(lastPrompt()).not.toContain("Parcel size");
   });
 });
+
+describe("formatListing — Ireland", () => {
+  it("writes British English in euros", async () => {
+    await formatListing({ listing, platform: "vinted", tone: "casual", market: "IE" });
+    expect(lastPrompt()).toContain("Use British English");
+    expect(lastPrompt()).toContain("Prices in € (EUR)");
+    expect(lastPrompt()).toContain('"label": "Colour"');
+  });
+});

@@ -8,6 +8,10 @@ import type { PlatformMetadata } from "../types";
 // Accessories pays a 13.6% final value fee plus $0.40 an order over $10
 // (ebay.com/help/selling/fees-credits-invoices/selling-fees?id=4822,
 // checked 24 Sep 2026). $0.30 at $10 or less is close enough to leave out.
+// eBay Ireland has no private-seller exemption either: 11% + €0.35 an order
+// over €10, plus a 0.43% regulatory operating fee, VAT included
+// (ebay.ie/help/selling/fees-credits-invoices/selling-fees?id=4822, checked
+// 24 Sep 2026).
 export const metadata: PlatformMetadata = {
   id: "ebay",
   name: "eBay",
@@ -22,6 +26,23 @@ export const metadata: PlatformMetadata = {
       searchDomains: ["ebay.co.uk"],
       itemUrl: /^https?:\/\/(?:www\.)?ebay\.co\.uk\/itm\/(?:[^/?#]+\/)?\d+/i,
       itemUrlExample: "https://www.ebay.co.uk/itm/<id>",
+    },
+    IE: {
+      feeLabel: "11.4% + €0.35",
+      feePct: 11.43,
+      feeFixed: 0.35,
+      webUrl: "https://www.ebay.ie/",
+      searchDomains: ["ebay.ie"],
+      itemUrl: /^https?:\/\/(?:www\.)?ebay\.ie\/itm\/(?:[^/?#]+\/)?\d+/i,
+      itemUrlExample: "https://www.ebay.ie/itm/<id>",
+      // ebay.ie shows UK sellers' listings, and Irish buyers buy them, so
+      // eBay UK is where most of an Irish seller's competition sits. The
+      // Irish site alone found almost nothing (valuation-cost-speed.md §15).
+      corridor: {
+        market: "GB",
+        note: "This seller is in Ireland, and ebay.ie shows UK sellers' listings to Irish buyers, so these eBay UK listings are comparables for them: give every price and the band in EUR, converted from GBP, and say so in the reasoning.",
+        reasoningPrefix: "eBay UK (sold to Ireland):",
+      },
     },
     AU: {
       feeLabel: "No seller fees",

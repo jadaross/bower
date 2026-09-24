@@ -5,6 +5,9 @@ import type { PlatformMetadata } from "../types";
 // (22 Jul 2026), moving the charge to the buyer at checkout. In the United
 // States there is no selling fee either, but the seller still pays payment
 // processing: 3.3% + $0.45 an order (Depop Help, "Seller fees and charges").
+// Everywhere else, Ireland included, Depop still takes 10%, and the seller
+// pays processing on top: 2.9% + €0.30 in the EU (secondary sources; Depop's
+// help centre blocks fetching, so check it by hand).
 const depopDotCom = {
   feeLabel: "No seller fees",
   feePct: 0,
@@ -22,6 +25,7 @@ export const metadata: PlatformMetadata = {
   appUrl: "depop://",
   markets: {
     GB: depopDotCom,
+    IE: { ...depopDotCom, feeLabel: "10% + processing", feePct: 12.9, feeFixed: 0.3 },
     AU: depopDotCom,
     US: { ...depopDotCom, feeLabel: "3.3% + $0.45 processing", feePct: 3.3, feeFixed: 0.45 },
   },

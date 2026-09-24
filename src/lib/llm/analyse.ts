@@ -177,7 +177,7 @@ ${COMMON_RULES}${languageRules(market)}${pageRules(source)}
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
 - condition: infer from visible wear, pilling, fading, stains. Be honest.
-- price_min/price_max: realistic ${currency} resale prices in the ${MARKETS[market].name}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
+- price_min/price_max: realistic ${currency} resale prices in ${MARKETS[market].place}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: ${platform === 'ebay' ? 'max 80 characters' : 'max 60 characters'}
 - description: ${platform === 'depop'
@@ -216,7 +216,7 @@ ${COMMON_RULES}${languageRules(market)}${pageRules(source)}
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
 - condition: infer from visible wear, pilling, fading, stains. Be honest.
-- price_min/price_max: realistic ${currency} resale prices in the ${MARKETS[market].name}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
+- price_min/price_max: realistic ${currency} resale prices in ${MARKETS[market].place}. Consider brand, condition, type, and typical secondhand market values. For luxury/designer, price higher. For fast fashion in good condition, price accordingly.
 - price_reasoning: one sentence explaining the price logic
 - title: max 70 characters, descriptive and search-friendly (brand + type + key feature)
 - description: 3-4 short lines, 40-70 words. Lead with the most important details. Factual, nothing padded.

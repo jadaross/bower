@@ -1,7 +1,7 @@
 # ADR-0009: A Market on the profile, starting with Australia
 
 **Status:** Accepted · 11 September 2026 · amended 24 September 2026 (the
-United States, and the listing's English follows the Market)
+United States, and the listing's English follows the Market; then Ireland)
 
 ## Context
 
@@ -87,3 +87,20 @@ is still the first guess, but where it is not a Market the where-you-sell page
 preselects nothing, says bower does not cover that country yet, and waits for a
 pick. Falling back to GB gave a Canadian British prices in pounds, which is the
 failure this ADR was written to prevent.
+
+## Amendment: Ireland (24 September 2026)
+
+The fourth Market is **`IE`** (#56): EUR, `vinted.ie`, `depop.com`, `ebay.ie`,
+written in British English like the UK, so no prompt changes. Three things were
+not the data entry this ADR expected:
+
+- **Fees.** eBay Ireland has no private-seller exemption (11% + €0.35, plus a
+  0.43% regulatory fee) and Depop takes 10% there plus processing (2.9% + €0.30,
+  from secondary sources). Ireland is the dearest market to sell in.
+- **The search location.** Anthropic's web search tool rejects `IE` as a
+  `user_location` country, which would have failed every Irish market check.
+  `searchCountry` is optional now and absent for Ireland; the allowed domains
+  still confine the search to the Irish sites.
+- **Where "the" goes.** A Market carries a `place` ("the United Kingdom",
+  "Ireland") for prompts that write "in {place}". This also fixed "in the
+  Australia", which the Australian prompts had said since they shipped.

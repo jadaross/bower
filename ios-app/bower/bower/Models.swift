@@ -20,18 +20,22 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
 
     /// Fees are display-only. Ranking never uses them — see recommend.ts.
     /// Every platform is fee-free for a private seller in the UK and Australia
-    /// (eBay UK since Oct 2024; Depop AU and Vinted AU since Jul 2026). The
-    /// United States is the exception: eBay takes its final value fee and
-    /// Depop its payment processing. Mirrors `feeLabel` in the metadata.
+    /// (eBay UK since Oct 2024; Depop AU and Vinted AU since Jul 2026). Ireland
+    /// and the United States are the exceptions: eBay takes a final value fee
+    /// in both, and Depop 10% in Ireland and its payment processing in both.
+    /// Mirrors `feeLabel` in the metadata.
     func note(in market: Market) -> String {
         switch (self, market) {
         case (.vinted, .GB): "No seller fees · EU buyers"
+        case (.vinted, .IE): "No seller fees · EU buyers"
         case (.vinted, .AU): "No seller fees · new in Australia"
         case (.vinted, .US): "No seller fees · new in the US"
         case (.depop, .GB): "No seller fees · Gen-Z UK/US"
+        case (.depop, .IE): "10% + processing · Gen-Z"
         case (.depop, .AU): "No seller fees · Gen-Z"
         case (.depop, .US): "3.3% + $0.45 processing · Gen-Z"
         case (.ebay, .GB): "No seller fees · global reach"
+        case (.ebay, .IE): "11.4% + €0.35 · Ireland-wide"
         case (.ebay, .AU): "No seller fees · Australia-wide"
         case (.ebay, .US): "13.6% + $0.40 · nationwide"
         }
@@ -56,10 +60,12 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     func sellURL(in market: Market) -> URL {
         switch (self, market) {
         case (.vinted, .GB): URL(string: "https://www.vinted.co.uk/items/new")!
+        case (.vinted, .IE): URL(string: "https://www.vinted.ie/items/new")!
         case (.vinted, .AU): URL(string: "https://www.vinted.com.au/items/new")!
         case (.vinted, .US): URL(string: "https://www.vinted.com/items/new")!
         case (.depop, _):  URL(string: "https://www.depop.com/products/create")!
         case (.ebay, .GB): URL(string: "https://www.ebay.co.uk/sl/sell")!
+        case (.ebay, .IE): URL(string: "https://www.ebay.ie/sl/sell")!
         case (.ebay, .AU): URL(string: "https://www.ebay.com.au/sl/sell")!
         case (.ebay, .US): URL(string: "https://www.ebay.com/sl/sell")!
         }
@@ -81,21 +87,33 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
 /// server reads it from there for pricing and searching, never from a request.
 /// The raw values are ISO region codes, so a device's region maps straight on.
 enum Market: String, CaseIterable, Identifiable, Codable {
-    case GB, AU, US
+    case GB, IE, US, AU
 
     var id: String { rawValue }
 
     var name: String {
         switch self {
         case .GB: "United Kingdom"
+        case .IE: "Ireland"
         case .AU: "Australia"
         case .US: "United States"
+        }
+    }
+
+    /// For the picker, where four full names do not fit.
+    var shortName: String {
+        switch self {
+        case .GB: "UK"
+        case .IE: "Ireland"
+        case .AU: "Australia"
+        case .US: "US"
         }
     }
 
     var currency: String {
         switch self {
         case .GB: "GBP"
+        case .IE: "EUR"
         case .AU: "AUD"
         case .US: "USD"
         }
@@ -105,6 +123,7 @@ enum Market: String, CaseIterable, Identifiable, Codable {
     var platforms: [Platform] {
         switch self {
         case .GB: [.vinted, .depop, .ebay]
+        case .IE: [.vinted, .depop, .ebay]
         case .AU: [.vinted, .depop, .ebay]
         case .US: [.vinted, .depop, .ebay]
         }
@@ -142,6 +161,7 @@ enum Money {
     static func symbol(_ code: String?) -> String {
         switch code {
         case "AUD", "USD": "$"
+        case "EUR": "€"
         case nil, "GBP": "£"
         case let c?: c + " "
         }

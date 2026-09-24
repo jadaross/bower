@@ -26,7 +26,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 ```
 
 ```bash
-npm test         # Vitest — 377 tests across the backend
+npm test         # Vitest — 382 tests across the backend
 ```
 
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
@@ -109,7 +109,7 @@ fanned out to.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 377 tests. Client: eight screens — the dark welcome
+the Valuation, account deletion, 382 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;

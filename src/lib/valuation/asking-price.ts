@@ -25,7 +25,9 @@ function webSearchTool(site: MarketPresence, market: Market): Anthropic.Messages
     type: "web_search_20250305",
     name: "web_search",
     max_uses: 2,
-    user_location: { type: "approximate", country: MARKETS[market].searchCountry },
+    ...(MARKETS[market].searchCountry
+      ? { user_location: { type: "approximate" as const, country: MARKETS[market].searchCountry } }
+      : {}),
     allowed_domains: [...site.searchDomains],
   };
 }
@@ -83,8 +85,8 @@ export function describeItem(item: ValuationItem): string {
 export function buildValuationPrompt(item: ValuationItem, platform: Platform, market: Market, site?: MarketPresence): string {
   const meta = platformMetadata[platform];
   const here = site ?? presence(platform, market);
-  const { name: country, currency, symbol } = MARKETS[market];
-  return `You are pricing a secondhand clothing item for a seller in the ${country} who is about to list it on ${meta.name}.
+  const { place, currency, symbol } = MARKETS[market];
+  return `You are pricing a secondhand clothing item for a seller in ${place} who is about to list it on ${meta.name}.
 
 Item:
 ${JSON.stringify(item, null, 2)}
