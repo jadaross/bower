@@ -28,8 +28,8 @@ describe("formatListing — prompt", () => {
   it("embeds the platform's own listing spec", async () => {
     const { platformListingSpec } = await import("@/platforms");
     await formatListing({ listing, platform: "vinted", tone: "casual" });
-    expect(lastPrompt()).toContain(platformListingSpec.vinted.promptFragment);
-    expect(lastPrompt()).toContain(platformListingSpec.vinted.fieldsSchema);
+    expect(lastPrompt()).toContain(platformListingSpec.vinted.promptFragment("GB"));
+    expect(lastPrompt()).toContain(platformListingSpec.vinted.fieldsSchema("GB"));
   });
 
   it("carries the source listing through verbatim", async () => {
@@ -88,5 +88,33 @@ describe("formatListing — response handling", () => {
   it("throws when the response has no text block", async () => {
     create.mockResolvedValue({ content: [{ type: "tool_use" }] });
     await expect(formatListing({ listing, platform: "vinted", tone: "casual" })).rejects.toThrow();
+  });
+});
+
+describe("formatListing — the Market's English", () => {
+  it("writes British English with UK sizes for the UK", async () => {
+    await formatListing({ listing, platform: "vinted", tone: "casual", market: "GB" });
+    expect(lastPrompt()).toContain("Use British English");
+    expect(lastPrompt()).toContain('"label": "Colour"');
+  });
+
+  it("writes American English with US sizes and US form labels for the US", async () => {
+    await formatListing({ listing, platform: "ebay", tone: "casual", market: "US" });
+    const prompt = lastPrompt();
+    expect(prompt).toContain("Use American English");
+    expect(prompt).toContain("Sizes in US format");
+    expect(prompt).toContain("Prices in $ (USD)");
+    expect(prompt).toContain("Format for eBay US");
+    expect(prompt).toContain('"label": "Color"');
+    expect(prompt).toContain("New with defects");
+    expect(prompt).not.toContain("British");
+    expect(prompt).not.toContain("eBay UK");
+  });
+
+  it("uses Vinted US's form labels", async () => {
+    await formatListing({ listing, platform: "vinted", tone: "casual", market: "US" });
+    expect(lastPrompt()).toContain('"label": "Package size"');
+    expect(lastPrompt()).toContain("Gray");
+    expect(lastPrompt()).not.toContain("Parcel size");
   });
 });

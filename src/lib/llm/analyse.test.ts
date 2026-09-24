@@ -138,7 +138,19 @@ describe("analyseListing — prompt", () => {
     await analyseListing({ photos: [PHOTO], tone: "casual", platform: "vinted" });
     const prompt = lastCall().messages[0].content.at(-1).text as string;
     expect(prompt).toContain('"fields"');
-    expect(prompt).toContain(platformListingSpec.vinted.fieldsSchema);
+    expect(prompt).toContain(platformListingSpec.vinted.fieldsSchema("GB"));
+  });
+
+  it("tells a US listing to use American English, and a UK one nothing new", async () => {
+    await analyseListing({ photos: [PHOTO], tone: "casual", platform: "depop", market: "GB" });
+    expect(lastCall().messages[0].content.at(-1).text).not.toContain("LANGUAGE:");
+    await analyseListing({ photos: [PHOTO], tone: "casual", platform: "depop", market: "US" });
+    const us = lastCall().messages[0].content.at(-1).text as string;
+    expect(us).toContain("LANGUAGE:\n- Use American English");
+    expect(us).toContain("realistic USD resale prices in the United States");
+    expect(us).toContain('"value": "<US size>"');
+    await analyseListing({ photos: [PHOTO], tone: "casual", market: "US" });
+    expect(lastCall().messages[0].content.at(-1).text).toContain("Use American English");
   });
 
   it("builds a different prompt when a platform is supplied", async () => {

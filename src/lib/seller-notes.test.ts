@@ -33,6 +33,24 @@ describe("sellerNotesLine", () => {
   });
 });
 
+describe("sellerNotesLine — in the United States", () => {
+  it("ships rather than posts, and combines shipping", () => {
+    expect(sellerNotesLine(["posts_next_day", "bundles"], "ebay", "US")).toBe(
+      "Ships within 1 business day. Happy to combine shipping on multiple items."
+    );
+    expect(sellerNotesLine(["posts_next_day"], "vinted", "US")).toBe("Ships within a day.");
+  });
+
+  it("keeps the phrasings that are already American", () => {
+    expect(sellerNotesLine(["smoke_free", "pet_free"], "vinted", "US")).toBe("From a smoke-free, pet-free home.");
+    expect(sellerNotesLine(["posts_next_day", "bundles"], "depop", "US")).toBe("ships next day, bundle for a discount");
+  });
+
+  it("says shipping, not postage, when there are none", () => {
+    expect(sellerNotesPrompt([], "ebay", "US")).toContain("shipping speed");
+  });
+});
+
 describe("sellerNotesPrompt", () => {
   it("tells the model to say nothing when nothing is on", () => {
     expect(sellerNotesPrompt([], "vinted")).toMatch(/Say nothing about the seller/);

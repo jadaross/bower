@@ -24,5 +24,6 @@ export function platformsIn(market: Market): Platform[] {
 
 /** Convert a list price into a take-home estimate after platform fees. */
 export function netPrice(price: number, platform: Platform, market: Market): number {
-  return price * (1 - presence(platform, market).feePct / 100);
+  const here = presence(platform, market);
+  return price * (1 - here.feePct / 100) - (here.feeFixed ?? 0);
 }

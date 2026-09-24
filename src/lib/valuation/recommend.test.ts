@@ -167,6 +167,18 @@ describe("recommend — output", () => {
     expect(au!.reasoning).toContain("$75");
   });
 
+  it("takes eBay US's fee, percentage and per-order, off the net", () => {
+    const result = recommend(valuation({ ebay: band(100, 100), vinted: band(20, 30) }), "US");
+    expect(result!.platform).toBe("ebay");
+    expect(result!.net).toBe(86); // 100 × 0.864 − 0.40 = 86.0
+    expect(result!.reasoning).toContain("less its 13.6% + $0.40 fee");
+  });
+
+  it("takes Depop US's payment processing off the net", () => {
+    const result = recommend(valuation({ depop: band(50, 50), vinted: band(10, 20) }), "US");
+    expect(result!.net).toBe(48); // 50 × 0.967 − 0.45 = 47.9
+  });
+
   it("takes nothing off on Vinted", () => {
     const result = recommend(valuation({ vinted: band(100, 100), depop: band(20, 30) }), "GB");
     expect(result!.net).toBe(100);

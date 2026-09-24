@@ -1,5 +1,6 @@
 import type { Platform, PlatformListing } from "@/lib/types";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
+import { DEFAULT_MARKET, isAmerican, languageRule, type Market } from "@/lib/markets";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS } from "./client";
 import { createStructured } from "./structured";
@@ -12,16 +13,18 @@ export interface RefineInput {
   instructions: string[];
   /** The seller's opt-in notes, read from their profile, never the body. */
   sellerNotes?: SellerNote[];
+  /** The seller's Market, from their profile: sets the spelling and sizes. */
+  market?: Market;
   /** Receives the Langfuse trace id so the client can attach feedback (#42). */
   onTraceId?: (traceId: string) => void;
 }
 
-function buildPrompt({ platform, listing, instructions, sellerNotes = [] }: RefineInput): string {
+function buildPrompt({ platform, listing, instructions, sellerNotes = [], market = DEFAULT_MARKET }: RefineInput): string {
   return `You are a secondhand fashion listing specialist. Refine an existing ${platformMetadata[platform].name} listing based on user feedback.
 
-${platformListingSpec[platform].promptFragment}
+${platformListingSpec[platform].promptFragment(market)}
 
-${sellerNotesPrompt(sellerNotes, platform)}
+${sellerNotesPrompt(sellerNotes, platform, market)}
 
 Current listing:
 ${JSON.stringify(listing, null, 2)}
@@ -36,7 +39,7 @@ Rules:
 - Do not add claims about the seller (smoke-free, pet-free, washed, dispatch speed) beyond the SELLER NOTES line above, or label data (country of manufacture, care instructions, RN/style numbers), unless the refinement instruction supplies that fact in its own words.
 - Do not add "rare", "deadstock" or an era unless the current listing already supports it.
 - Do NOT invent new information (no measurements unless asked; no condition claims that weren't in the source).
-- Respect platform format rules (title length, hashtag conventions).
+- Respect platform format rules (title length, hashtag conventions).${isAmerican(market) ? `\n${languageRule(market)}` : ""}
 - "fields": return the EXACT SAME array that came in unless a refinement instruction specifically changes a structured value (e.g. an instruction like "set condition to Pre-owned – Fair"). Do not rewrite labels or values gratuitously.`;
 }
 

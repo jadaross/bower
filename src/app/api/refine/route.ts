@@ -1,6 +1,6 @@
 import { withAuth } from "@/lib/auth";
 import { refineListing } from "@/lib/llm/refine";
-import { getSellerNotes } from "@/lib/profile";
+import { getListingContext } from "@/lib/profile";
 import type { Platform, PlatformListing } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -33,8 +33,8 @@ export const POST = withAuth(async (request, user) => {
 
   try {
     let traceId: string | undefined;
-    const sellerNotes = await getSellerNotes(user.token).catch(() => []);
-    const result = await refineListing({ platform, listing, instructions, sellerNotes, onTraceId: (id) => { traceId = id; } });
+    const { sellerNotes, market } = await getListingContext(user.token).catch(() => ({ sellerNotes: [], market: undefined }));
+    const result = await refineListing({ platform, listing, instructions, sellerNotes, market, onTraceId: (id) => { traceId = id; } });
     return Response.json({ ...result, trace_id: traceId });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

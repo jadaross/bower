@@ -6,7 +6,7 @@ import { jsonSchemaFormat } from "./structured";
 import { analysisResultSchema } from "./schemas";
 import { beginGeneration, flushObservability, observeGeneration, type TraceContext } from "@/lib/observability";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
-import { DEFAULT_MARKET, MARKETS, type Market } from "@/lib/markets";
+import { DEFAULT_MARKET, MARKETS, isAmerican, languageRule, type Market } from "@/lib/markets";
 import { productFactsPrompt, readProductLink } from "./link";
 export { parseAnalysisResult };
 
@@ -115,6 +115,15 @@ TAG DATA (a record for the seller, NOT material for the listing):
 - Never copy tag_data into the title or description: no country of manufacture, no RN or style number, no care instructions, no barcode. Buyers do not search for these and copying them reads as a robot reading a label.
 - The one exception is country of manufacture when it genuinely raises the price or dates the piece for THIS brand: Made in USA (Carhartt, Levi's, vintage tees), Made in England (Dr. Martens, Barbour), Made in Italy or France (designer, Ray-Ban, Lacoste), Made in Japan (denim). Then it may go in the title or first line. Never mention China, Bangladesh, Vietnam, Turkey, Cambodia or similar.`;
 
+/**
+ * The UK and Australian prompts were tuned without a language line: the
+ * British field labels and examples carry the voice. An American listing
+ * needs telling, so the line is added there and nowhere else.
+ */
+function languageRules(market: Market): string {
+  return isAmerican(market) ? `\n\nLANGUAGE:\n${languageRule(market)}` : "";
+}
+
 /** What the model is looking at: photos, a page, or both. */
 export interface Source {
   photoCount: number;
@@ -153,7 +162,7 @@ function buildPlatformPrompt(platform: Platform, tone: Tone, source: Source, not
 
 ${task(source)} and return ONLY a valid JSON object — no markdown code fences, no explanation text, just raw JSON starting with { and ending with }.
 
-${spec.promptFragment}
+${spec.promptFragment(market)}
 
 ${TONE_HINT[tone]}
 
@@ -161,9 +170,9 @@ Return exactly this JSON structure (fill in all fields):
 
 ${jsonShape(platform)}
 
-${sellerNotesPrompt(notes, platform)}
+${sellerNotesPrompt(notes, platform, market)}
 
-${COMMON_RULES}${pageRules(source)}
+${COMMON_RULES}${languageRules(market)}${pageRules(source)}
 
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"
@@ -182,7 +191,7 @@ LISTING:
 - subcategory: specific item type, e.g. "jeans", "hoodie", "midi dress", "trainers"
 
 FIELDS (the dropdowns/inputs the seller picks on the ${platformMetadata[platform].name} listing form):
-${spec.fieldsSchema}
+${spec.fieldsSchema(market)}
 
 For every field:
 - "value" MUST come from the allowed list when one is given (don't paraphrase).
@@ -202,7 +211,7 @@ Return exactly this JSON structure (fill in all fields):
 
 ${jsonShape()}
 
-${COMMON_RULES}${pageRules(source)}
+${COMMON_RULES}${languageRules(market)}${pageRules(source)}
 
 LISTING:
 - brand: from tag if visible, otherwise infer from logo/design, otherwise "Unknown"

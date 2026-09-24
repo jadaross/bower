@@ -1,4 +1,5 @@
 import type { Platform } from "@/lib/types";
+import { DEFAULT_MARKET, isAmerican, type Market } from "@/lib/markets";
 
 /**
  * The things a listing may say about the seller rather than the garment.
@@ -8,7 +9,8 @@ import type { Platform } from "@/lib/types";
  * agree.
  *
  * One phrasing per platform, in that platform's register, so the prompt is
- * handed a sentence and not a concept to improvise on.
+ * handed a sentence and not a concept to improvise on. The United States gets
+ * its own wherever British says "posted", "dispatched" or "postage".
  */
 export type SellerNote = "smoke_free" | "pet_free" | "posts_next_day" | "bundles";
 
@@ -45,15 +47,24 @@ const PHRASING: Record<Platform, Record<SellerNote, string>> = {
   },
 };
 
+const US_PHRASING: Record<Platform, Partial<Record<SellerNote, string>>> = {
+  vinted: { posts_next_day: "Ships within a day." },
+  depop: {},
+  ebay: {
+    posts_next_day: "Ships within 1 business day.",
+    bundles: "Happy to combine shipping on multiple items.",
+  },
+};
+
 /**
  * The closing line for a platform, or "" when nothing is switched on. Smoke
  * and pets fold into one sentence where the register allows, because two
  * separate lines about the seller's house is the thing that reads as padding.
  */
-export function sellerNotesLine(notes: readonly SellerNote[], platform: Platform): string {
+export function sellerNotesLine(notes: readonly SellerNote[], platform: Platform, market: Market = DEFAULT_MARKET): string {
   const on = SELLER_NOTES.filter((n) => notes.includes(n));
   if (on.length === 0) return "";
-  const p = PHRASING[platform];
+  const p = isAmerican(market) ? { ...PHRASING[platform], ...US_PHRASING[platform] } : PHRASING[platform];
   const parts: string[] = [];
   if (on.includes("smoke_free") && on.includes("pet_free")) {
     parts.push(
@@ -73,10 +84,10 @@ export function sellerNotesLine(notes: readonly SellerNote[], platform: Platform
  * the default prompts already forbid inventing these and the reminder costs
  * nothing.
  */
-export function sellerNotesPrompt(notes: readonly SellerNote[], platform: Platform): string {
-  const line = sellerNotesLine(notes, platform);
+export function sellerNotesPrompt(notes: readonly SellerNote[], platform: Platform, market: Market = DEFAULT_MARKET): string {
+  const line = sellerNotesLine(notes, platform, market);
   if (!line) {
-    return "SELLER NOTES: none. Say nothing about the seller's home, pets, postage speed or bundles.";
+    return `SELLER NOTES: none. Say nothing about the seller's home, pets, ${isAmerican(market) ? "shipping" : "postage"} speed or bundles.`;
   }
   return `SELLER NOTES (true, supplied by the seller; the ONLY things you may say about the seller): end the description with exactly this, as its own last line, word for word: "${line}"`;
 }

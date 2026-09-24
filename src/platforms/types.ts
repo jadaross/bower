@@ -6,6 +6,11 @@ import type { Market } from "@/lib/markets";
 export interface MarketPresence {
   feeLabel: string;
   feePct: number;
+  /**
+   * A fixed charge per order on top of `feePct`, in the Market's currency
+   * (eBay US's per-order fee, Depop US's payment processing). Absent is zero.
+   */
+  feeFixed?: number;
   webUrl: string;
   /**
    * Hosts the valuation search is confined to. A Price Band for this platform
@@ -51,10 +56,10 @@ export interface PlatformMetadata {
 }
 
 export interface PlatformListingSpec {
-  /** Prompt fragment for analyse/format/refine: "Format for Vinted: …". */
-  promptFragment: string;
-  /** Per-platform "fields" schema fragment used by the format prompt. */
-  fieldsSchema: string;
+  /** Prompt fragment for analyse/format/refine: "Format for Vinted: …". The Market sets the spelling and the size system. */
+  promptFragment(market: Market): string;
+  /** Per-platform "fields" schema fragment used by the format prompt, with the form's labels as they read in this Market. */
+  fieldsSchema(market: Market): string;
   /** Refinement chips that are meaningful on this platform. */
   relevantChips: ChipId[];
   /** Returns [] if the listing satisfies platform requirements, else error messages. */

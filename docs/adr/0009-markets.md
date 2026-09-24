@@ -1,6 +1,7 @@
 # ADR-0009: A Market on the profile, starting with Australia
 
-**Status:** Accepted · 11 September 2026
+**Status:** Accepted · 11 September 2026 · amended 24 September 2026 (the
+United States, and the listing's English follows the Market)
 
 ## Context
 
@@ -55,3 +56,34 @@ that the choice in Profile stands. The server never infers it from an IP.
   net figure equals the asking price. The plumbing stays for the day one of
   them charges again; the recommendation never ranked on fees anyway
   (ADR-0004).
+
+## Amendment — the United States (24 September 2026)
+
+The third Market is **`US`**: USD, `vinted.com`, `depop.com`, `ebay.com`, searched
+from the US (#64). Two things this ADR said no longer hold.
+
+**The listing prompts change with the Market.** "British English suits
+Australian listings" was true, and it is why Australia needed nothing. It is not
+true of the United States, where "jumper", "trainers", "postage", "UK 10" and
+"colour" read as foreign and buyers filter by US sizes. So a Market now carries
+its English (`british` | `american`), and one rule in `markets.ts`
+(`languageRule`) sets the spelling, the terms, the currency sign, the size system
+and the unit for measurements, for format, analyse and refine alike. The platform
+specs take the Market too, for the form's own labels (eBay US and Vinted US say
+"Color"; eBay US says "New with defects"), and so do the seller notes ("Ships
+within 1 business day") and the measurements chip (inches). The UK and Australian
+prompts are byte-for-byte what they were.
+
+**A platform charges a private seller.** eBay US takes 13.6% + $0.40 an order on
+clothing, and Depop US leaves the seller its payment processing (3.3% + $0.45), so
+the fee table grew a fixed part (`feeFixed`) and the net figure is below the
+asking price for the first time. It is still display-only; the recommendation
+still does not rank on it (ADR-0004).
+
+Vinted US has no corridor: US sellers sell only to US buyers.
+
+**A region bower does not cover no longer becomes the UK.** The device's region
+is still the first guess, but where it is not a Market the where-you-sell page
+preselects nothing, says bower does not cover that country yet, and waits for a
+pick. Falling back to GB gave a Canadian British prices in pounds, which is the
+failure this ADR was written to prevent.

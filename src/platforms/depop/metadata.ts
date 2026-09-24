@@ -2,7 +2,9 @@ import type { PlatformMetadata } from "../types";
 
 // One site worldwide; the search is confined by country, not by domain.
 // Depop dropped its seller fee in the UK (Mar 2024) and in Australia
-// (22 Jul 2026), moving the charge to the buyer at checkout.
+// (22 Jul 2026), moving the charge to the buyer at checkout. In the United
+// States there is no selling fee either, but the seller still pays payment
+// processing: 3.3% + $0.45 an order (Depop Help, "Seller fees and charges").
 const depopDotCom = {
   feeLabel: "No seller fees",
   feePct: 0,
@@ -18,5 +20,9 @@ export const metadata: PlatformMetadata = {
   audience: "Gen-Z · style-led",
   color: "#f00d2d",
   appUrl: "depop://",
-  markets: { GB: depopDotCom, AU: depopDotCom },
+  markets: {
+    GB: depopDotCom,
+    AU: depopDotCom,
+    US: { ...depopDotCom, feeLabel: "3.3% + $0.45 processing", feePct: 3.3, feeFixed: 0.45 },
+  },
 };

@@ -78,3 +78,16 @@ describe("refineListing — response handling", () => {
     ).rejects.toThrow();
   });
 });
+
+describe("refineListing — the Market's English", () => {
+  it("adds no language line for the UK", async () => {
+    await refineListing({ platform: "vinted", listing: platformListing, instructions: ["shorter"], market: "GB" });
+    expect(lastPrompt()).not.toContain("American English");
+  });
+
+  it("keeps a US listing in American English", async () => {
+    await refineListing({ platform: "ebay", listing: platformListing, instructions: ["shorter"], market: "US" });
+    expect(lastPrompt()).toContain("Use American English");
+    expect(lastPrompt()).toContain("Format for eBay US");
+  });
+});

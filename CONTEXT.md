@@ -32,7 +32,7 @@ A resale destination — Vinted, Depop, or eBay. bower writes for them and value
 _Avoid_: marketplace, channel, site
 
 **Market**:
-Where the user sells — the United Kingdom or Australia. It sets the currency, which country's edition of each Platform the market check searches, and which Platforms exist there (all three, in both, today). Chosen on the where-you-sell page, changed in Settings, and read from the profile by the server, never from a request. The listing voice does not change with it.
+Where the user sells — the United Kingdom, Australia or the United States. It sets the currency, which country's edition of each Platform the market check searches, which Platforms exist there (all three, in all three, today), and the English the listing is written in: British in the UK and Australia, American with US sizes in the United States. Chosen on the where-you-sell page, changed in Settings, and read from the profile by the server, never from a request. A device in a region that is not a Market gets no guess.
 _Avoid_: region, country, locale, territory (that is the App Store's word)
 
 **Enabled Platform**:
