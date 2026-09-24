@@ -702,7 +702,7 @@ private struct ListingSection: View {
                 Kicker(label)
                 Spacer()
                 if editing != key {
-                    Button { editing = key } label: {
+                    Button { withAnimation(Motion.quick) { editing = key } } label: {
                         HStack(spacing: 4) { Image(systemName: "pencil").font(.system(size: 9)); Text("Edit") }
                             .font(BowerFont.ui(11, weight: .semibold)).foregroundStyle(theme.muted)
                     }
@@ -711,13 +711,16 @@ private struct ListingSection: View {
                 CopyButton(text: text, onCopy: { model.recordFeedback("copied") })
             }
             if editing == key {
-                EditBox(value: text, multiline: !bold, bold: bold) { save($0); editing = nil } onCancel: { editing = nil }
+                EditBox(value: text, multiline: !bold, bold: bold) { v in
+                    save(v); withAnimation(Motion.quick) { editing = nil }
+                } onCancel: { withAnimation(Motion.quick) { editing = nil } }
+                .transition(Motion.soften)
             } else {
                 Text(text)
                     .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
                     .foregroundStyle(theme.text)
                     .lineSpacing(bold ? 2 : 4)
-                    .onTapGesture { editing = key }
+                    .onTapGesture { withAnimation(Motion.quick) { editing = key } }
                     // A rewrite crossfades through a slight blur, never two texts at once.
                     .id(text)
                     .transition(Motion.soften)

@@ -26,6 +26,7 @@ struct SettingsScreen: View {
                 if blocked != nil {
                     Text("Keep at least one. Nothing to price against otherwise.")
                         .font(BowerFont.ui(12)).foregroundStyle(theme.coral).padding(.leading, 4)
+                        .transition(Motion.rise)
                 }
             }
 
@@ -107,13 +108,14 @@ struct SettingsScreen: View {
                 Text("Couldn't delete the account. Check your connection and try again.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.coral)
                     .multilineTextAlignment(.center).frame(maxWidth: .infinity)
+                    .transition(Motion.rise)
             }
         }
         .confirmationDialog("Delete your account?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete account", role: .destructive) {
                 deleting = true
                 Task {
-                    do { try await state.deleteAccount() } catch { deleteFailed = true }
+                    do { try await state.deleteAccount() } catch { withAnimation(Motion.quick) { deleteFailed = true } }
                     deleting = false
                 }
             }
@@ -164,8 +166,11 @@ struct SettingsScreen: View {
                     if state.enable(p, v) {
                         Task { await state.savePlatforms() }
                     } else {
-                        blocked = p
-                        Task { try? await Task.sleep(for: .seconds(2.4)); if blocked == p { blocked = nil } }
+                        withAnimation(Motion.quick) { blocked = p }
+                        Task {
+                            try? await Task.sleep(for: .seconds(2.4))
+                            if blocked == p { withAnimation(Motion.quick) { blocked = nil } }
+                        }
                     }
                 }),
                 tint: p.tint

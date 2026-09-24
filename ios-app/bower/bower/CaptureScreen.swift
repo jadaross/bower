@@ -283,45 +283,48 @@ struct CaptureScreen: View {
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
 
             if state.photos.isEmpty, state.trimmedLink != nil {
-                HStack(spacing: 10) {
-                    TextField("Size", text: $state.linkSize)
-                        .font(BowerFont.ui(14))
-                        .foregroundStyle(theme.text)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .submitLabel(.done)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(theme.card)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
-                    Menu {
-                        Button("Not sure") { state.linkCondition = nil }
-                        ForEach(Self.conditions, id: \.rawValue) { c in
-                            Button(c.rawValue) { state.linkCondition = c }
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 10) {
+                        TextField("Size", text: $state.linkSize)
+                            .font(BowerFont.ui(14))
+                            .foregroundStyle(theme.text)
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled()
+                            .submitLabel(.done)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .background(theme.card)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+                        Menu {
+                            Button("Not sure") { state.linkCondition = nil }
+                            ForEach(Self.conditions, id: \.rawValue) { c in
+                                Button(c.rawValue) { state.linkCondition = c }
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(state.linkCondition?.rawValue ?? "Condition")
+                                    .font(BowerFont.ui(14))
+                                    .foregroundStyle(state.linkCondition == nil ? theme.muted : theme.text)
+                                    .lineLimit(1)
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(theme.muted)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                            .background(theme.card)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
                         }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text(state.linkCondition?.rawValue ?? "Condition")
-                                .font(BowerFont.ui(14))
-                                .foregroundStyle(state.linkCondition == nil ? theme.muted : theme.text)
-                                .lineLimit(1)
-                            Spacer(minLength: 0)
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(theme.muted)
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(theme.card)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
                     }
+                    Text("A page can't know your size or how it has worn. Left blank, bower takes the page's size and calls it Good.")
+                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, 2)
                 }
-                Text("A page can't know your size or how it has worn. Left blank, bower takes the page's size and calls it Good.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 2)
+                .transition(Motion.rise)
             }
         }
     }

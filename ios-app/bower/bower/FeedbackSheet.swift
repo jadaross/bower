@@ -68,6 +68,7 @@ struct FeedbackSheet: View {
                 if failed {
                     Text("Couldn't send that. Check your connection and try again.")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.coral).padding(.top, 8)
+                        .transition(Motion.rise)
                 }
 
                 BowerButton(title: sending ? "Sending…" : "Send", disabled: trimmed.isEmpty || sending) {
@@ -95,7 +96,7 @@ struct FeedbackSheet: View {
             try? await Task.sleep(for: .seconds(1.1))
             dismiss()
         } catch {
-            failed = true
+            withAnimation(Motion.quick) { failed = true }
         }
     }
 }
