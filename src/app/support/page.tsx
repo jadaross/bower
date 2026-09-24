@@ -1,4 +1,4 @@
-export const metadata = { title: "bower — support" };
+export const metadata = { title: "bower · support" };
 
 // The public support contact App Store Connect requires. One address, and it
 // is the same one given as the App Review contact.
@@ -15,7 +15,7 @@ export default function Support() {
       <p>
         bower values a secondhand item from photographs and writes the listing for you. If
         something is wrong, or a listing came out badly, the quickest route is the{" "}
-        <strong>Tell us</strong> button beside the thumbs on any listing — it sends the note
+        <strong>Tell us</strong> button beside the thumbs on any listing. It sends the note
         with the exact listing attached, so it can be fixed.
       </p>
 

@@ -19,14 +19,14 @@ struct PlatformsScreen: View {
                 Text("Where do you sell?")
                     .font(BowerFont.serif(38))
                     .foregroundStyle(theme.text)
-                Text("Prices come in your currency, from your country's listings. Only the platforms you switch on get priced and written for.")
+                Text("Priced from your country's listings.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.muted)
                     .padding(.top, 8)
             }
 
             if needsMarket, let country = Market.deviceRegionName {
-                Text("bower doesn't cover \(country) yet. Pick the closest country we do.")
+                Text("We don't cover \(country) yet. Pick the closest.")
                     .font(BowerFont.ui(13.5))
                     .foregroundStyle(theme.text)
             }
@@ -43,7 +43,7 @@ struct PlatformsScreen: View {
             Spacer(minLength: 20)
 
             if !state.onboardingComplete {
-                Text("Next, bower will ask to notify you — so it can tell you when a market check finishes and when your monthly limits reset.")
+                Text("Next: notifications, for finished market checks and monthly resets.")
                     .font(BowerFont.ui(12))
                     .foregroundStyle(theme.muted)
             }
@@ -150,11 +150,9 @@ struct PlatformsScreen: View {
     }
 
     private var keepOneText: AttributedString {
-        var lead = AttributedString("Keep at least one. ")
+        var lead = AttributedString("Keep at least one.")
         lead.foregroundColor = theme.text
-        var tail = AttributedString("Nothing to price against otherwise.")
-        tail.foregroundColor = theme.muted
-        return lead + tail
+        return lead
     }
 
     private func flash(_ platform: Platform) {

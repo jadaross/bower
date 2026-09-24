@@ -1,4 +1,4 @@
-export const metadata = { title: "bower — privacy" };
+export const metadata = { title: "bower · privacy" };
 
 const updated = "9 September 2026";
 
@@ -13,7 +13,7 @@ export default function Privacy() {
 
       <p>
         bower values a secondhand item from photographs and writes the listing for you. This page
-        says exactly what it collects, where that goes, and what it keeps — which is very little.
+        says exactly what it collects, where that goes, and what it keeps, which is very little.
       </p>
 
       <h2>What bower collects</h2>
@@ -25,7 +25,7 @@ export default function Privacy() {
         </li>
         <li>
           <strong>The photos you choose to send.</strong> They are sent to be read once. They are
-          not stored — not on bower&rsquo;s servers, and not anywhere else bower controls.
+          not stored, on bower&rsquo;s servers or anywhere else bower controls.
         </li>
         <li>
           <strong>Your platform preferences and usage count.</strong> Which platforms you sell on,
@@ -34,7 +34,7 @@ export default function Privacy() {
         <li>
           <strong>Your item history.</strong> The listing text bower writes for you and any price
           results are saved to your account so you can see what you have run. This is
-          <strong>text only &mdash; no photos</strong>, and it is removed when you delete your account.
+          <strong>text only, no photos</strong>, and it is removed when you delete your account.
         </li>
       </ul>
 
@@ -51,7 +51,7 @@ export default function Privacy() {
           <strong>Vercel</strong> hosts bower&rsquo;s backend.
         </li>
         <li>
-          <strong>Langfuse</strong> records how the app is performing &mdash; the listing text, token
+          <strong>Langfuse</strong> records how the app is performing: the listing text, token
           counts and timings of each request, tied to your account id for support and debugging.
           Your <strong>photos are never sent to Langfuse</strong>.
         </li>
@@ -65,7 +65,7 @@ export default function Privacy() {
       <p>
         <strong>No photos, ever.</strong> Your images are read once and discarded. What bower keeps is
         your account, your preferences, and a <strong>text history</strong> of the items you have run
-        and their prices &mdash; so you can look back at what you listed. All of it is kept until you
+        and their prices, so you can look back at what you listed. All of it is kept until you
         delete your account.
       </p>
 
