@@ -1,6 +1,6 @@
 import type { Listing, Platform, PlatformListing, Tone } from "@/lib/types";
 import { sellerNotesPrompt, type SellerNote } from "@/lib/seller-notes";
-import { DEFAULT_MARKET, languageRule, type Market } from "@/lib/markets";
+import { DEFAULT_MARKET, isAmerican, languageRule, type Market } from "@/lib/markets";
 import { platformListingSpec, platformMetadata } from "@/platforms";
 import { MODELS } from "./client";
 import { createStructured } from "./structured";
@@ -60,7 +60,7 @@ ${TONE_HINT[tone]}
 
 ${sellerNotesPrompt(sellerNotes, platform, market)}
 
-Source listing (neutral format):
+Source listing (neutral format${isAmerican(market) ? "; if it is in British English, translate it: British words and UK sizes must not survive into the title, description or fields" : ""}):
 ${JSON.stringify(source, null, 2)}
 
 Rules for title / description / hashtags:

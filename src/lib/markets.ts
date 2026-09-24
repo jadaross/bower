@@ -93,7 +93,9 @@ export function isAmerican(market: Market): boolean {
 export function languageRule(market: Market): string {
   const { symbol, currency } = MARKETS[market];
   if (isAmerican(market)) {
-    return `- Use American English and American terms throughout: color, gray, sweater, sneakers, pants (not "trousers"), overalls, shipping (not "postage"). Prices in ${symbol} (${currency}), never any other currency. Sizes in US format: women's numeric (0-16) or XS-XL, men's chest and waist in inches, US shoe sizes. If the tag gives only a UK or EU size, write the US size with the tag's size in brackets, e.g. "US 6 (UK 10)". Measurements in inches.`;
+    return `- Use American English and American terms throughout, in the title, the description AND the field values: color, gray, sweater, sneakers, pants, overalls, snaps, shipping. The source listing may be written in British English: translate every British term, never copy it (jumper -> sweater, trainers -> sneakers, trousers -> pants, poppers -> snaps, dungarees -> overalls, grey -> gray, bobbling -> pilling). Prices in ${symbol} (${currency}), never any other currency.
+- Sizes in US format, in the title and the Size field alike. Letter sizes (XS-XL) and waist/leg sizes (W32 L32) stay as they are. Convert a UK size with these rules only: women's clothing UK minus 4 (UK 10 -> US 6); men's shoes UK plus 1 (UK 8 -> US 9); women's shoes UK plus 2 (UK 5 -> US 7). Write the US size first with the original in brackets once, e.g. "US 6 (UK 10)". If no rule fits, keep the size as given.
+- Measurements the source gives in cm, convert to whole inches (58cm -> 23 in). Converting is the only change allowed: never add a measurement the source does not give.`;
   }
   return `- Use British English and British terms throughout: colour, grey, jumper, trainers, dungarees, postage (not "shipping"). Prices in ${symbol} (${currency}), never any other currency. Sizes in UK format.`;
 }

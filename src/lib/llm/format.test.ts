@@ -107,7 +107,7 @@ describe("formatListing — the Market's English", () => {
     expect(prompt).toContain("Format for eBay US");
     expect(prompt).toContain('"label": "Color"');
     expect(prompt).toContain("New with defects");
-    expect(prompt).not.toContain("British");
+    expect(prompt).not.toContain("Use British English");
     expect(prompt).not.toContain("eBay UK");
   });
 
