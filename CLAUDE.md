@@ -196,3 +196,51 @@ plainly **"Write it"** (it spends a *listing*)
 and the live price search is **"Check the market"** (a *market check*); the photo-only price is an
 *estimate*, never a guess. "Suss it out" was charming once and vague every time after;
 the verb carries the meaning and the serif title carries the voice.
+
+### Motion and interaction
+
+Every screen follows one motion language, defined once in `Kit.swift` (`Motion`,
+`BowerPress`, `ChromeBackground`, `staggerIn`). New buttons and screens use these;
+never write a one-off `.easeOut(duration:)` or `.snappy`. The reasoning, screen by
+screen, is the polish review of 24 September 2026 (Emil Kowalski's design-engineering
+rules, with Apple's fluid-interface principles).
+
+| Use | For | What it is |
+|---|---|---|
+| `Motion.quick` | State changes: toggles, chips, banners, fills, a disabled button filling in | 160ms, strong ease-out `(0.23, 1, 0.32, 1)` |
+| `Motion.move` | Layout: sliding highlights, things making room, onboarding pages | Spring, no bounce, 0.3s |
+| `Motion.arrive` | The few big moments only: the read's title, the Ask, notification banners | Spring, slight bounce, 0.45s |
+| `Motion.rise` | Anything appearing in place (notes, forms, rows) | Fade + 8pt rise |
+| `Motion.pop` | Adding to or taking from a set (photos in the pile) | Fade + 94% scale |
+| `Motion.sharpen` / `.soften` | Text replacing text: a landing title / a rewrite | Blur clearing, so two texts never overlap |
+| `.staggerIn(i)` | Rows arriving together | 30–60ms apart; decorative, never blocks input |
+
+The rules behind them:
+
+- **Every pressable thing presses.** Use `.buttonStyle(.bowerPress)` (0.97), or
+  `.bowerPressLarge` (0.985) for big surfaces such as cards and the camera area. Never
+  `.plain`, except the toggle, segmented control and tab bar, which have their own feedback.
+- **Frequency decides motion.** Things used many times a day (tabs, the listing flow)
+  switch instantly. Occasional things get Quick or Move. Only rare, first-time or payoff
+  moments get Arrive or a stagger.
+- **Nothing appears from nothing.** No `.scale` from 0: start at 0.6 or higher, with a
+  fade. Nothing pops in without a transition either.
+- **Keep it under 300ms.** The loops (court dots, read-frame sweep, pulsing dots) are the
+  only exceptions.
+- **Motion shows direction.** Forward slides in from the right and back from the left
+  (onboarding, the Help steps); a highlight slides to the chosen segment
+  (`matchedGeometryEffect`).
+- **Haptics only on a state change.** `.selection` for toggles, segments and chips;
+  `.success` when a listing or a market check lands; `.impact(.light)` for thumbs. Nowhere
+  else, or they stop meaning anything.
+- **Reduce Motion is built into the tokens.** They turn into fades; `BowerPress` dims
+  instead of scaling. A new animation that bypasses the tokens must check
+  `Motion.reduced` itself.
+- **Bars blur what's beneath them.** Anything pinned over scrolling content uses
+  `ChromeBackground()`, never the flat `theme.chrome`.
+- **Tap targets are at least 44pt**, even when the icon is smaller (see the photo ✕ in
+  `PhotoTile`).
+
+Copy follows the same restraint: no em dashes in anything a user can read (the app, the
+web pages, the store listing), and the fewest words that carry the meaning. A sentence
+the screen already explains is cut.
