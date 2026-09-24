@@ -12,6 +12,7 @@ struct PlatformsScreen: View {
     /// Set-up on a device in a region bower does not cover: nothing is
     /// preselected, and nothing continues until they pick where they sell.
     @State private var needsMarket = false
+    @State private var askNotifications = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -42,12 +43,6 @@ struct PlatformsScreen: View {
 
             Spacer(minLength: 20)
 
-            if !state.onboardingComplete {
-                Text("Next: notifications, for finished market checks and monthly resets.")
-                    .font(BowerFont.ui(12))
-                    .foregroundStyle(theme.muted)
-            }
-
             BowerButton(title: needsMarket ? "Select a country" : saving ? "Saving…" : "Continue with \(countLabel)",
                         disabled: saving || needsMarket) {
                 Task { await save() }
@@ -65,6 +60,18 @@ struct PlatformsScreen: View {
             state.enabled = state.enabled.filter { $0.operates(in: state.market) }
             if state.enabled.isEmpty { state.enabled = Set(state.market.platforms) }
             if !state.enabled.contains(state.preferred), let next = state.orderedEnabled.first { state.preferred = next }
+            #if DEBUG
+            // `-bowerSheet notifications`: open on the ask, for looking at it.
+            let args = CommandLine.arguments
+            if let i = args.firstIndex(of: "-bowerSheet"), i + 1 < args.count, args[i + 1] == "notifications" { askNotifications = true }
+            #endif
+        }
+        .sheet(isPresented: $askNotifications, onDismiss: { state.screen = .capture }) {
+            NotificationsSheet { askNotifications = false }
+                .environment(\.bower, theme)
+                .presentationDetents([.fraction(0.76)])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
         }
     }
 
@@ -76,11 +83,14 @@ struct PlatformsScreen: View {
         // Settings can re-save it. Enabled Platforms are also re-read on launch.
         await state.savePlatforms()
         state.onboardingComplete = true
-        // Asked here, at the end of set-up, with the line above explaining why —
-        // not at launch with no context, and not buried in the first market
-        // check, which someone may never run.
-        if firstTime { await Notifications.requestIfNeeded() }
-        state.screen = .capture
+        // Asked here, at the end of set-up, on a sheet that shows what bower
+        // sends: not at launch with no context, and not buried in the first
+        // market check, which someone may never run. Dismissing it goes home.
+        if firstTime, await Notifications.canAsk() {
+            askNotifications = true
+        } else {
+            state.screen = .capture
+        }
     }
 
     private var countLabel: String {
@@ -164,7 +174,7 @@ struct PlatformsScreen: View {
     }
 }
 
-/// United Kingdom, Australia or the United States. Switching drops any
+/// The United Kingdom, Ireland, the United States or Australia. Switching drops any
 /// platform that does not operate in the new market — none today, but the rows
 /// below follow the market so nothing can be switched on that cannot be priced.
 struct MarketPicker: View {
@@ -181,7 +191,7 @@ struct MarketPicker: View {
         VStack(alignment: .leading, spacing: 6) {
             Kicker("Selling in")
             Segmented(
-                options: Market.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.name) },
+                options: Market.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.shortName) },
                 selection: Binding(
                     get: { unchosen ? "" : state.market.rawValue },
                     set: { raw in

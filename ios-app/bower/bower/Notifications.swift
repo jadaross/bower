@@ -14,6 +14,11 @@ enum Notifications {
     private static let resetId = "bower.reset"
     private static let nudgeId = "bower.nudge"
 
+    /// Whether the system prompt is still unanswered, so it is worth asking.
+    static func canAsk() async -> Bool {
+        await center.notificationSettings().authorizationStatus == .notDetermined
+    }
+
     /// Asks once. Later calls are no-ops; a refusal is respected silently.
     static func requestIfNeeded() async {
         let settings = await center.notificationSettings()
@@ -69,9 +74,9 @@ enum Notifications {
         center.removePendingNotificationRequests(withIdentifiers: [resetId])
         guard reads != nil || searches != nil else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Your listings and market checks are back"
+        content.title = "Your listings are back"
         content.body = [reads.map { "\($0) listings" }, searches.map { "\($0) market checks" }]
-            .compactMap { $0 }.joined(separator: " and ") + " for the month."
+            .compactMap { $0 }.joined(separator: " and ") + "."
         content.sound = .default
         let now = Date()
         var next = Calendar.current.dateComponents([.year, .month], from: now)
