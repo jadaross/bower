@@ -501,3 +501,36 @@ What it says:
 
 Also found: `src/test/setup.ts` sets `ANTHROPIC_API_KEY` to a dummy for every Vitest run,
 so a live call from inside a test file must build its own client with the real key.
+
+## 14. Pass 4 — the United States (24 September 2026)
+
+Before the US Market opens (#64, #67): does the check hold up on `ebay.com`,
+`vinted.com` and `depop.com`, searched from the US? The same ten items (US sizes
+where it mattered: the Burberry at US 6), all three platforms, production settings —
+Haiku 4.5, `max_uses: 2`, the real `askingPriceProvider` with `market: "US"`, so the
+real prompt, schema, `coerceBand`, resume loop and URL check. 30 calls, one at a time,
+**$1.30**. ✅ measured, N=10 per platform: direction, not proof. GB is pass 3's
+`max_uses: 2` row.
+
+| Platform | valid comps (US / GB) | zero comps | confidence l/m/h | searches | cost/call | p90 latency |
+|---|---|---|---|---|---|---|
+| eBay | **3.40** / 2.40 | 1 / 2 | 3 / 5 / 2 | 1.9 | $0.051 | 12s |
+| Vinted | 2.10 / 2.30 | 1 / 1 | 5 / 5 / 0 | 2.0 | $0.045 | 9s |
+| Depop | 1.20 / 1.30 | **3 / 6** | 9 / 1 / 0 | 1.8 | $0.034 | 9s |
+| **Check, 3 platforms** | | | | | **$0.13 (~10p)** | 12s |
+
+What it says:
+
+- **The US check holds up.** eBay US is the best platform bower has measured: more
+  comparables than eBay UK and the only "high" confidence bands in any pass. Vinted US,
+  eight months old, is level with Vinted UK. Every comparable URL was on the US site;
+  none leaked to `vinted.co.uk` or another European edition.
+- **Depop is still the weak band, but less so.** Three empty bands in ten against six in
+  the UK, so Depop's biggest market is indexed a little better; the average is the
+  same. The "sell Plus on the Depop price" question in #64 stays a no: the Depop band
+  is honest and wide, not a selling point.
+- **Cost is the same as the UK** (~10p a check), so ADR-0010's numbers hold for the US.
+- **Placeholder ids got through.** Vinted returned `vinted.com/items/000000001` and
+  `…002` for the Patagonia fleece, which matched the item-URL pattern. `listingUrl` now
+  rejects an id that starts with a zero or has fewer than six digits, in every market
+  (`asking-price.test.ts`). Vinted's 2.10 above includes those two; it is 1.90 without.

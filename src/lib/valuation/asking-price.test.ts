@@ -180,8 +180,8 @@ describe("coerceBand", () => {
       {
         ...band,
         comparables: [
-          comp("vinted", "https://www.vinted.co.uk/items/1-ok"),
-          { title: "no price", url: "https://www.vinted.co.uk/items/2-x" },
+          comp("vinted", "https://www.vinted.co.uk/items/6449236211-ok"),
+          { title: "no price", url: "https://www.vinted.co.uk/items/6449236212-x" },
           "nonsense",
           null,
         ],
@@ -194,7 +194,7 @@ describe("coerceBand", () => {
 
   it("caps comparables at five", () => {
     const many = Array.from({ length: 9 }, (_, i) =>
-      comp("vinted", `https://www.vinted.co.uk/items/${100 + i}-c${i}`, 10 + i)
+      comp("vinted", `https://www.vinted.co.uk/items/${6449236200 + i}-c${i}`, 10 + i)
     );
     expect(coerceBand({ ...band, comparables: many }, "vinted", "GB").comparables).toHaveLength(5);
   });
@@ -206,7 +206,7 @@ describe("coerceBand", () => {
       {
         ...band,
         comparables: [
-          comp("vinted", "https://www.vinted.co.uk/items/1-a"),
+          comp("vinted", "https://www.vinted.co.uk/items/6449236211-a"),
           comp("ebay", "https://www.ebay.co.uk/itm/256431122334"),
           comp("depop", "https://www.depop.com/products/jo-a/"),
         ],
@@ -238,7 +238,7 @@ describe("coerceBand", () => {
 
   it("names the platform from the link, not from the model", () => {
     const result = coerceBand(
-      { ...band, comparables: [comp("other", "https://www.vinted.co.uk/items/1-a")] },
+      { ...band, comparables: [comp("other", "https://www.vinted.co.uk/items/6449236211-a")] },
       "vinted",
       "GB"
     );
@@ -391,9 +391,9 @@ describe("searchActivity", () => {
           type: "web_search_tool_result",
           tool_use_id: "t1",
           content: [
-            { type: "web_search_result", url: "https://www.vinted.com.au/items/1-a", title: "a", encrypted_content: "", page_age: null },
-            { type: "web_search_result", url: "https://www.vinted.co.uk/items/2-b", title: "b", encrypted_content: "", page_age: null },
-            { type: "web_search_result", url: "https://www.vinted.co.uk/items/3-c", title: "c", encrypted_content: "", page_age: null },
+            { type: "web_search_result", url: "https://www.vinted.com.au/items/6449236211-a", title: "a", encrypted_content: "", page_age: null },
+            { type: "web_search_result", url: "https://www.vinted.co.uk/items/6449236212-b", title: "b", encrypted_content: "", page_age: null },
+            { type: "web_search_result", url: "https://www.vinted.co.uk/items/6449236213-c", title: "c", encrypted_content: "", page_age: null },
           ],
         },
         { type: "text", text: "{}", citations: null },
@@ -439,5 +439,43 @@ describe("mergeBands", () => {
   it("ignores an empty corridor", () => {
     const m = mergeBands(band(20, 25, 1, "low"), band(0, 0, 0), note);
     expect([m.low, m.high, m.confidence]).toEqual([20, 25, "low"]);
+  });
+});
+
+describe("in the United States", () => {
+  it("searches the US sites in US dollars", () => {
+    const prompt = buildValuationPrompt(item, "ebay", "US");
+    expect(prompt).toContain("seller in the United States who");
+    expect(prompt).toContain("https://www.ebay.com/");
+    expect(prompt).toContain("Prices are in USD");
+    expect(prompt).not.toContain("co.uk");
+  });
+
+  it("tells the Vinted search that the European editions do not count", () => {
+    expect(buildValuationPrompt(item, "vinted", "US")).toContain("vinted.com is Vinted's United States site");
+  });
+
+  it("only accepts listings from the US sites", () => {
+    expect(listingUrl("https://www.ebay.com/itm/256431122334", "ebay", "US")).toBeDefined();
+    expect(listingUrl("https://www.ebay.co.uk/itm/256431122334", "ebay", "US")).toBeUndefined();
+    expect(listingUrl("https://www.vinted.com/items/9437210920-purple-prom-dress", "vinted", "US")).toBeDefined();
+    expect(listingUrl("https://www.vinted.co.uk/items/9437210920-purple-prom-dress", "vinted", "US")).toBeUndefined();
+  });
+
+  it("drops made-up listing ids", () => {
+    expect(listingUrl("https://www.vinted.com/items/000000001", "vinted", "US")).toBeUndefined();
+    expect(listingUrl("https://www.vinted.com/items/000000002-patagonia-fleece", "vinted", "US")).toBeUndefined();
+    expect(listingUrl("https://www.ebay.com/itm/12345", "ebay", "US")).toBeUndefined();
+    expect(listingUrl("https://www.ebay.com/itm/some-title/405578781395", "ebay", "US")).toBeDefined();
+    expect(listingUrl("https://www.vinted.co.uk/items/6449236214-carhartt", "vinted", "GB")).toBeDefined();
+  });
+
+  it("searches Vinted once, from the US, with no corridor", async () => {
+    create.mockClear();
+    await askingPriceProvider.band(item, "vinted", "US");
+    const calls = create.mock.calls.map((c) => c[0]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].tools[0].allowed_domains).toEqual(["vinted.com"]);
+    expect(calls[0].tools[0].user_location.country).toBe("US");
   });
 });

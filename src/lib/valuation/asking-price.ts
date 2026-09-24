@@ -63,9 +63,14 @@ export function listingUrl(url: unknown, platform: Platform, market: Market): st
   return listingUrlOn(url, presence(platform, market));
 }
 
+// A listing id the model made up rather than saw: "items/000000001",
+// "itm/12345". Real Vinted and eBay ids are long and never start with a zero.
+const PLACEHOLDER_ID = /\/(?:items|itm)\/(?:[^/?#]+\/)?(?:0\d*|\d{1,5})(?:\D|$)/;
+
 function listingUrlOn(url: unknown, site: MarketPresence): string | undefined {
   if (typeof url !== "string") return undefined;
   const trimmed = url.trim();
+  if (PLACEHOLDER_ID.test(trimmed)) return undefined;
   return site.itemUrl.test(trimmed) ? trimmed : undefined;
 }
 
