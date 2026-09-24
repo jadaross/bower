@@ -17,12 +17,23 @@ struct StubAPI: BowerAPIClient {
 
     private func wait() async { try? await Task.sleep(for: delay) }
 
+    /// `-bowerMarket US` (or AU) runs the fixtures in that market's currency.
+    /// Nil without the flag, so the profile leaves the device's guess alone.
+    static var market: Market? {
+        let args = CommandLine.arguments
+        guard let i = args.firstIndex(of: "-bowerMarket"), i + 1 < args.count else { return nil }
+        return Market(rawValue: args[i + 1])
+    }
+    private var cur: String { (Self.market ?? .GB).currency }
+    private var sym: String { Money.symbol(cur) }
+
     func profile() async throws -> ProfileResponse {
         await wait()
         let unlimited = CommandLine.arguments.contains("-bowerUnlimited")
         // `-bowerSpent`: both meters at their limit, for the zero states.
         let spent = CommandLine.arguments.contains("-bowerSpent")
         return ProfileResponse(
+            market: Self.market,
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
             allowance: AllowanceState(used: spent ? 10 : 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
@@ -121,15 +132,15 @@ struct StubAPI: BowerAPIClient {
     func history() async throws -> [HistoryItem] {
         await wait()
         func band(_ lo: Double, _ hi: Double, _ p: Platform) -> PriceBand {
-            PriceBand(low: lo, high: hi, currency: "GBP", confidence: .medium,
-                      sellLikelihood: .medium, comparables: [], reasoning: "Listed at £\(Int(lo))–£\(Int(hi)) on \(p.name).")
+            PriceBand(low: lo, high: hi, currency: cur, confidence: .medium,
+                      sellLikelihood: .medium, comparables: [], reasoning: "Listed at \(sym)\(Int(lo))–\(sym)\(Int(hi)) on \(p.name).")
         }
         return [
             HistoryItem(
                 id: "h1", createdAt: "2026-09-09T08:30:00Z", sessionId: "s1",
                 brand: "Carhartt", clothingType: "Detroit jacket", title: "Carhartt Detroit Jacket, Hamilton Brown, M",
                 colourPrimary: "Hamilton brown", size: "M", condition: "Good",
-                priceMin: 18, priceMax: 26, preferredPlatform: .depop,
+                priceMin: 18, priceMax: 26, currency: cur, preferredPlatform: .depop,
                 listing: NeutralListing(
                     brand: "Carhartt", clothingType: "Detroit jacket",
                     colourPrimary: "Hamilton brown", colourSecondary: nil,
@@ -150,14 +161,14 @@ struct StubAPI: BowerAPIClient {
                 valuation: StoredValuation(
                     perPlatform: [Platform.depop.rawValue: band(42, 58, .depop), Platform.vinted.rawValue: band(34, 46, .vinted)],
                     query: "Carhartt Detroit jacket M brown",
-                    recommendation: Recommendation(platform: .depop, listAt: 50, net: 45, currency: "GBP",
+                    recommendation: Recommendation(platform: .depop, listAt: 50, net: 45, currency: cur,
                                                    reasoning: "Vintage Carhartt moves on Depop.", runnersUp: []))
             ),
             HistoryItem(
                 id: "h2", createdAt: "2026-09-07T19:05:00Z", sessionId: "s2",
                 brand: "Levi's", clothingType: "501 jeans", title: "Levi's 501 Original, W32 L34",
                 colourPrimary: "Mid wash", size: "W32 L34", condition: "Excellent",
-                priceMin: 22, priceMax: 34, preferredPlatform: .vinted,
+                priceMin: 22, priceMax: 34, currency: cur, preferredPlatform: .vinted,
                 listing: NeutralListing(
                     brand: "Levi's", clothingType: "501 jeans",
                     colourPrimary: "Mid wash", colourSecondary: nil,
@@ -179,15 +190,15 @@ struct StubAPI: BowerAPIClient {
         try await Task.sleep(for: .seconds(3))
         func band(_ lo: Double, _ hi: Double, _ n: Int, _ p: Platform) -> PriceBand {
             PriceBand(
-                low: lo, high: hi, currency: "GBP", confidence: .medium, sellLikelihood: .medium,
+                low: lo, high: hi, currency: cur, confidence: .medium, sellLikelihood: .medium,
                 comparables: (0..<n).map {
                     ComparableListing(
                         title: "Carhartt Detroit Jacket Brown M",
-                        price: lo + Double($0) * 2, currency: "GBP",
+                        price: lo + Double($0) * 2, currency: cur,
                         platform: p.rawValue, url: "https://example.com/\($0)"
                     )
                 },
-                reasoning: "Similar jackets are listed at £\(Int(lo))–£\(Int(hi)) on \(p.name) today."
+                reasoning: "Similar jackets are listed at \(sym)\(Int(lo))–\(sym)\(Int(hi)) on \(p.name) today."
             )
         }
         return ValuationResponse(
@@ -198,7 +209,7 @@ struct StubAPI: BowerAPIClient {
             ],
             query: "Carhartt Detroit jacket M brown",
             recommendation: Recommendation(
-                platform: .depop, listAt: 50, net: 45, currency: "GBP",
+                platform: .depop, listAt: 50, net: 45, currency: cur,
                 reasoning: "Highest asking prices of the three, and vintage Carhartt moves there.",
                 runnersUp: [
                     RunnerUp(platform: .ebay, listAt: 45, net: 39),

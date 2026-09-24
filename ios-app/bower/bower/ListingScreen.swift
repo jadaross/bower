@@ -208,7 +208,7 @@ final class ListingModel {
         formatTask = Task {
             rewriting = true
             defer { rewriting = false }
-            var instructions = RefinementChip.allCases.filter { chips.contains($0) }.map(\.instruction)
+            var instructions = RefinementChip.allCases.filter { chips.contains($0) }.map { $0.instruction(in: state.market) }
             if !keywords.isEmpty {
                 instructions.append("Work these words naturally into the title and description as real search terms a buyer might type — do not just append them as hashtags: \(keywords)")
             }

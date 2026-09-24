@@ -188,7 +188,7 @@ struct HelpSheet: View {
             VStack(alignment: .leading, spacing: 4) {
                 Kicker("Ask")
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("£50").font(BowerFont.serifUpright(36)).foregroundStyle(theme.text)
+                    Text(Money.format(50, state.market.currency)).font(BowerFont.serifUpright(36)).foregroundStyle(theme.text)
                     HStack(spacing: 6) {
                         Text("on")
                         Circle().fill(Platform.depop.tint).frame(width: 7, height: 7)

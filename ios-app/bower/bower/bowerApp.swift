@@ -26,6 +26,8 @@ struct bowerApp: App {
             if let i = args.firstIndex(of: "-bowerLink"), i + 1 < args.count {
                 s.link = args[i + 1]
             }
+            // `-bowerMarket US` (or AU) selling there, in its currency.
+            if let m = StubAPI.market { s.market = m }
             _state = State(initialValue: s)
             return
         }

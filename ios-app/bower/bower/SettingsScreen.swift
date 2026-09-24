@@ -183,7 +183,7 @@ struct SettingsScreen: View {
                 ForEach(Array(SellerNote.allCases.enumerated()), id: \.element) { i, note in
                     if i > 0 { Hairline() }
                     HStack {
-                        Text(note.label).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
+                        Text(note.label(in: state.market)).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
                         Spacer()
                         BowerToggle(isOn: Binding(
                             get: { state.sellerNotes.contains(note) },
@@ -199,7 +199,7 @@ struct SettingsScreen: View {
 
     /// A listing's last lines, with the added line in the seller's own voice.
     private var sellerNotesPreview: some View {
-        let line = SellerNote.previewLine(state.sellerNotes)
+        let line = SellerNote.previewLine(state.sellerNotes, in: state.market)
         return VStack(alignment: .leading, spacing: 6) {
             Kicker("The last line of every listing")
             VStack(alignment: .leading, spacing: 3) {

@@ -26,7 +26,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 ```
 
 ```bash
-npm test         # Vitest — 332 tests across the backend
+npm test         # Vitest — 377 tests across the backend
 ```
 
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
@@ -35,7 +35,9 @@ Prefer the XcodeBuildMCP tools; call `session_show_defaults` first. Launch with
 only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,
 `platforms`, …) to open on one of the one-time pages instead of Home; `-bowerUnlimited`
 for an account with no limits, `-bowerSpent` for both meters at zero, `-bowerLink <url>` for a
-product page already pasted on Home.
+product page already pasted on Home, `-bowerMarket US` (or `AU`) to sell there in its
+currency, `-bowerRegion CA` to stand in for the device's region (with `-onboardingComplete NO`
+on `platforms`, the uncovered-region state).
 
 ## Environment
 
@@ -107,7 +109,7 @@ fanned out to.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 332 tests. Client: eight screens — the dark welcome
+the Valuation, account deletion, 377 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;

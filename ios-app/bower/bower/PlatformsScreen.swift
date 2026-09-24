@@ -9,6 +9,9 @@ struct PlatformsScreen: View {
 
     @State private var blocked: Platform?
     @State private var saving = false
+    /// Set-up on a device in a region bower does not cover: nothing is
+    /// preselected, and nothing continues until they pick where they sell.
+    @State private var needsMarket = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -22,10 +25,18 @@ struct PlatformsScreen: View {
                     .padding(.top, 8)
             }
 
-            MarketPicker()
+            if needsMarket, let country = Market.deviceRegionName {
+                Text("bower doesn't cover \(country) yet. If you sell on one of these, pick it.")
+                    .font(BowerFont.ui(13.5))
+                    .foregroundStyle(theme.text)
+            }
 
-            VStack(spacing: 10) { ForEach(state.market.platforms) { row(for: $0) } }
-                .padding(.top, 2)
+            MarketPicker(unchosen: needsMarket) { needsMarket = false }
+
+            if !needsMarket {
+                VStack(spacing: 10) { ForEach(state.market.platforms) { row(for: $0) } }
+                    .padding(.top, 2)
+            }
 
             if blocked != nil { keepOne }
 
@@ -37,7 +48,8 @@ struct PlatformsScreen: View {
                     .foregroundStyle(theme.muted)
             }
 
-            BowerButton(title: saving ? "Saving…" : "Continue with \(countLabel)", disabled: saving) {
+            BowerButton(title: needsMarket ? "Pick where you sell" : saving ? "Saving…" : "Continue with \(countLabel)",
+                        disabled: saving || needsMarket) {
                 Task { await save() }
             }
         }
@@ -47,7 +59,9 @@ struct PlatformsScreen: View {
         .onAppear {
             // A first guess from the device's Region setting — the page exists
             // so it can be corrected before anything is priced.
-            if !state.onboardingComplete { state.market = Market.device }
+            if !state.onboardingComplete {
+                if let m = Market.device { state.market = m } else { needsMarket = true }
+            }
             state.enabled = state.enabled.filter { $0.operates(in: state.market) }
             if state.enabled.isEmpty { state.enabled = Set(state.market.platforms) }
             if !state.enabled.contains(state.preferred), let next = state.orderedEnabled.first { state.preferred = next }
@@ -152,14 +166,18 @@ struct PlatformsScreen: View {
     }
 }
 
-/// United Kingdom or Australia. Switching drops any platform that does not
-/// operate in the new market — none today, but the rows below follow the
-/// market so nothing can be switched on that cannot be priced.
+/// United Kingdom, Australia or the United States. Switching drops any
+/// platform that does not operate in the new market — none today, but the rows
+/// below follow the market so nothing can be switched on that cannot be priced.
 struct MarketPicker: View {
     @Environment(AppState.self) private var state
     @Environment(\.bower) private var theme
     /// Saves to the profile on change; off during set-up, where Continue saves the lot.
     var savesOnChange = false
+    /// Shows no market selected, for a device in a region bower does not cover.
+    var unchosen = false
+    /// Called when a market is picked, including the one already held.
+    var onPick: () -> Void = {}
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -167,9 +185,11 @@ struct MarketPicker: View {
             Segmented(
                 options: Market.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.name) },
                 selection: Binding(
-                    get: { state.market.rawValue },
+                    get: { unchosen ? "" : state.market.rawValue },
                     set: { raw in
-                        guard let m = Market(rawValue: raw), m != state.market else { return }
+                        guard let m = Market(rawValue: raw) else { return }
+                        onPick()
+                        guard m != state.market else { return }
                         if savesOnChange {
                             Task { await state.saveMarket(m) }
                         } else {

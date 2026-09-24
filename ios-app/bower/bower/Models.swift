@@ -19,16 +19,21 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
     }
 
     /// Fees are display-only. Ranking never uses them — see recommend.ts.
-    /// Every platform bower knows is fee-free for a private seller in both
-    /// markets today (eBay UK since Oct 2024; Depop AU and Vinted AU since Jul 2026).
+    /// Every platform is fee-free for a private seller in the UK and Australia
+    /// (eBay UK since Oct 2024; Depop AU and Vinted AU since Jul 2026). The
+    /// United States is the exception: eBay takes its final value fee and
+    /// Depop its payment processing. Mirrors `feeLabel` in the metadata.
     func note(in market: Market) -> String {
         switch (self, market) {
         case (.vinted, .GB): "No seller fees · EU buyers"
         case (.vinted, .AU): "No seller fees · new in Australia"
+        case (.vinted, .US): "No seller fees · new in the US"
         case (.depop, .GB): "No seller fees · Gen-Z UK/US"
         case (.depop, .AU): "No seller fees · Gen-Z"
+        case (.depop, .US): "3.3% + $0.45 processing · Gen-Z"
         case (.ebay, .GB): "No seller fees · global reach"
         case (.ebay, .AU): "No seller fees · Australia-wide"
+        case (.ebay, .US): "13.6% + $0.40 · nationwide"
         }
     }
 
@@ -52,9 +57,11 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
         switch (self, market) {
         case (.vinted, .GB): URL(string: "https://www.vinted.co.uk/items/new")!
         case (.vinted, .AU): URL(string: "https://www.vinted.com.au/items/new")!
+        case (.vinted, .US): URL(string: "https://www.vinted.com/items/new")!
         case (.depop, _):  URL(string: "https://www.depop.com/products/create")!
         case (.ebay, .GB): URL(string: "https://www.ebay.co.uk/sl/sell")!
         case (.ebay, .AU): URL(string: "https://www.ebay.com.au/sl/sell")!
+        case (.ebay, .US): URL(string: "https://www.ebay.com/sl/sell")!
         }
     }
 
@@ -72,8 +79,9 @@ enum Platform: String, CaseIterable, Identifiable, Codable {
 /// Where the seller sells: which country's editions of the platforms, in
 /// which currency. Mirrors `src/lib/markets.ts`. Lives on the profile; the
 /// server reads it from there for pricing and searching, never from a request.
+/// The raw values are ISO region codes, so a device's region maps straight on.
 enum Market: String, CaseIterable, Identifiable, Codable {
-    case GB, AU
+    case GB, AU, US
 
     var id: String { rawValue }
 
@@ -81,6 +89,7 @@ enum Market: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .GB: "United Kingdom"
         case .AU: "Australia"
+        case .US: "United States"
         }
     }
 
@@ -88,6 +97,7 @@ enum Market: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .GB: "GBP"
         case .AU: "AUD"
+        case .US: "USD"
         }
     }
 
@@ -96,14 +106,32 @@ enum Market: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .GB: [.vinted, .depop, .ebay]
         case .AU: [.vinted, .depop, .ebay]
+        case .US: [.vinted, .depop, .ebay]
         }
     }
 
+    /// Whether listings here are written in American English, with US sizes
+    /// and "shipping". Mirrors `isAmerican` on the server.
+    var isAmerican: Bool { self == .US }
+
     /// The device's Region setting, which is where someone most likely sells.
     /// A first guess for the where-you-sell screen — always confirmable there
-    /// and changeable in Profile.
-    static var device: Market {
-        Locale.current.region?.identifier == "AU" ? .AU : .GB
+    /// and changeable in Profile. Nil for a region bower does not cover: a
+    /// Canadian falling back to the UK would get British prices in pounds.
+    static var device: Market? { deviceRegion.flatMap(Market.init(rawValue:)) }
+
+    /// The region code itself. `-bowerRegion CA` stands in for it in DEBUG.
+    static var deviceRegion: String? {
+        #if DEBUG
+        let args = CommandLine.arguments
+        if let i = args.firstIndex(of: "-bowerRegion"), i + 1 < args.count { return args[i + 1] }
+        #endif
+        return Locale.current.region?.identifier
+    }
+
+    /// "Canada", for the line that says bower does not cover it yet.
+    static var deviceRegionName: String? {
+        deviceRegion.flatMap { Locale.current.localizedString(forRegionCode: $0) }
     }
 }
 
@@ -113,7 +141,7 @@ enum Market: String, CaseIterable, Identifiable, Codable {
 enum Money {
     static func symbol(_ code: String?) -> String {
         switch code {
-        case "AUD": "$"
+        case "AUD", "USD": "$"
         case nil, "GBP": "£"
         case let c?: c + " "
         }
@@ -138,7 +166,11 @@ enum SellerNote: String, CaseIterable, Identifiable, Codable {
 
     var id: String { rawValue }
 
-    var label: String {
+    func label(in market: Market) -> String {
+        self == .postsNextDay && market.isAmerican ? "Ships within a day" : label
+    }
+
+    private var label: String {
         switch self {
         case .smokeFree:    "Smoke-free home"
         case .petFree:      "Pet-free home"
@@ -149,7 +181,7 @@ enum SellerNote: String, CaseIterable, Identifiable, Codable {
 
     /// The line the listing ends with, in Vinted's register, for the preview.
     /// Mirrors `sellerNotesLine` on the server; the server's wording wins.
-    static func previewLine(_ on: Set<SellerNote>) -> String {
+    static func previewLine(_ on: Set<SellerNote>, in market: Market) -> String {
         var parts: [String] = []
         if on.contains(.smokeFree) && on.contains(.petFree) {
             parts.append("From a smoke-free, pet-free home.")
@@ -157,7 +189,7 @@ enum SellerNote: String, CaseIterable, Identifiable, Codable {
             if on.contains(.smokeFree) { parts.append("From a smoke-free home.") }
             if on.contains(.petFree) { parts.append("Pet-free home.") }
         }
-        if on.contains(.postsNextDay) { parts.append("Posted within a day.") }
+        if on.contains(.postsNextDay) { parts.append(market.isAmerican ? "Ships within a day." : "Posted within a day.") }
         if on.contains(.bundles) { parts.append("Happy to bundle.") }
         return parts.joined(separator: " ")
     }
@@ -188,8 +220,15 @@ enum RefinementChip: String, CaseIterable, Identifiable {
 
     /// What actually goes over the wire — /api/refine takes natural-language
     /// instructions, and nothing server-side translates ids. Verbatim from
-    /// chip-vocab.ts.
-    var instruction: String {
+    /// chip-vocab.ts, including its US wording for measurements.
+    func instruction(in market: Market) -> String {
+        if self == .measurements, market.isAmerican {
+            return "Add a measurements line for the seller to complete, laid flat, in inches, suited to the garment (e.g. \"Pit to pit __ in, length __ in, sleeve __ in\"; waist and inseam for pants). Only if not already present. Never invent a number."
+        }
+        return instruction
+    }
+
+    private var instruction: String {
         switch self {
         case .shorter:      "Rewrite shorter — cut to the essentials, drop filler."
         case .longer:       "Add more useful detail without padding or repetition."
