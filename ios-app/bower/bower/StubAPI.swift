@@ -32,12 +32,45 @@ struct StubAPI: BowerAPIClient {
         let unlimited = CommandLine.arguments.contains("-bowerUnlimited")
         // `-bowerSpent`: both meters at their limit, for the zero states.
         let spent = CommandLine.arguments.contains("-bowerSpent")
+        // `-bowerPlus`: on bower Plus. `-bowerPack`: 7 bought listings left.
+        let plus = CommandLine.arguments.contains("-bowerPlus")
+        let pack = CommandLine.arguments.contains("-bowerPack") ? 7 : 0
         return ProfileResponse(
             market: Self.market,
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
-            allowance: AllowanceState(used: spent ? 10 : 4, limit: unlimited ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
-            searches: AllowanceState(used: spent ? 3 : 1, limit: unlimited ? nil : 3, resetsAt: "2026-10-01T00:00:00Z")
+            allowance: AllowanceState(used: spent ? 10 : 4, limit: unlimited || plus ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: spent ? 3 : 1, limit: unlimited ? nil : (plus ? 10 : 3), resetsAt: "2026-10-01T00:00:00Z"),
+            plan: plus ? "plus" : "free",
+            plusExpiresAt: plus ? "2026-10-25T12:00:00Z" : nil,
+            packListings: pack
+        )
+    }
+
+    /// Reads the product out of Xcode's locally signed transaction, unverified
+    /// (the stub is DEBUG-only; the real server refuses Xcode's signature).
+    func recordPurchase(signedTransaction: String) async throws -> ProfileResponse {
+        await wait()
+        let parts = signedTransaction.split(separator: ".")
+        var product = ""
+        if parts.count == 3 {
+            var b64 = parts[1].replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+            b64 += String(repeating: "=", count: (4 - b64.count % 4) % 4)
+            if let data = Data(base64Encoded: b64),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                product = json["productId"] as? String ?? ""
+            }
+        }
+        let plus = product == StoreProduct.plus
+        return ProfileResponse(
+            market: Self.market,
+            enabledPlatforms: [.vinted, .depop, .ebay],
+            preferredPlatform: .depop,
+            allowance: AllowanceState(used: 10, limit: plus ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: 3, limit: plus ? 10 : 3, resetsAt: "2026-10-01T00:00:00Z"),
+            plan: plus ? "plus" : "free",
+            plusExpiresAt: plus ? "2026-10-25T12:00:00Z" : nil,
+            packListings: plus ? 0 : 10
         )
     }
 

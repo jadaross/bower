@@ -110,6 +110,7 @@ fanned out to.
 | `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
 | `ios-app/bower/bower/BowerAPI.swift` | The client, behind `BowerAPIClient`. `StubAPI` is the fixture implementation |
 | `ios-app/bower/bower/Wire.swift` | Codable mirrors of `types.ts` — keep in step. The wire's `Comparable` is `ComparableListing` here |
+| `ios-app/bower/bower/Store.swift` | StoreKit 2: loads Plus and the pack, buys with the user id as `appAccountToken`, hands every signed transaction to `/api/purchases` and finishes it only once the server has it. `PaywallSheet` is the one paywall; set `state.paywall` to open it. `-bowerPaywall [listings\|checks]`, `-bowerPlus`, `-bowerPack` in the stub |
 | `ios-app/bower/Info.plist` | A *partial* plist merged with the generated one. Custom keys cannot travel via `INFOPLIST_KEY_*`; it sits outside the synced folder deliberately; changing `INFOPLIST_FILE` needs a clean build |
 | `ios/` | The **old** mock-driven SwiftUI reference. Superseded by `ios-app/`; kept for the design record. See ADR-0001. |
 
@@ -238,7 +239,7 @@ The rules behind them:
   (onboarding, the Help steps); a highlight slides to the chosen segment
   (`matchedGeometryEffect`).
 - **Haptics only on a state change.** `.selection` for toggles, segments and chips;
-  `.success` when a listing or a market check lands; `.impact(.light)` for thumbs. Nowhere
+  `.success` when a listing, a market check or a purchase lands; `.impact(.light)` for thumbs. Nowhere
   else, or they stop meaning anything.
 - **Reduce Motion is built into the tokens.** They turn into fades; `BowerPress` dims
   instead of scaling. A new animation that bypasses the tokens must check

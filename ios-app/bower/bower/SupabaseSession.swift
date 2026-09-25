@@ -28,6 +28,9 @@ final class SupabaseSession: SessionProviding, @unchecked Sendable {
     /// screen to open on launch without a network round-trip.
     var hasSession: Bool { client.currentSession != nil }
 
+    /// The signed-in user's id, or nil. Signed into purchases (`Store`).
+    var userId: UUID? { client.currentSession?.user.id }
+
     func accessToken() async -> String? {
         // `session` refreshes if it can. If it cannot, the session is gone and
         // nil is the honest answer — the caller routes to sign-in.

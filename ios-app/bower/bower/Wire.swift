@@ -251,4 +251,9 @@ struct ProfileResponse: Codable, Sendable {
     let allowance: AllowanceState
     /// Deep researches this month. Optional so a stub or older server decodes.
     var searches: AllowanceState? = nil
+    /// `plus` while a bower Plus subscription is active. Nil from an older server.
+    var plan: String? = nil
+    var plusExpiresAt: String? = nil
+    /// Bought listings left, spent after the month's free ones.
+    var packListings: Int? = nil
 }

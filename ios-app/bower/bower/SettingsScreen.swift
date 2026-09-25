@@ -55,7 +55,10 @@ struct SettingsScreen: View {
 
             section("Seller notes") { sellerNotesCard }
 
-            section("What's left") { allowanceCard }
+            section("What's left") {
+                allowanceCard
+                plusRow
+            }
 
             section("Feedback") {
                 Button { feedback = true } label: {
@@ -232,6 +235,11 @@ struct SettingsScreen: View {
         BowerCard(padding: 16) {
             VStack(alignment: .leading, spacing: 0) {
                 meterRow("Listings", state.reads)
+                if state.packListings > 0 {
+                    Text("Plus \(state.packListings) bought listing\(state.packListings == 1 ? "" : "s"), used after these.")
+                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .padding(.top, 8)
+                }
                 Hairline().padding(.vertical, 12)
                 meterRow("Market checks", state.searches)
                 Text("A listing is written from your photos, with an estimate. A market check looks up what it's really going for. Both reset on the 1st.")
@@ -239,6 +247,30 @@ struct SettingsScreen: View {
                     .padding(.top, 12)
             }
         }
+    }
+
+    /// Opens the paywall, which shows "Manage subscription" once subscribed.
+    private var plusRow: some View {
+        Button { state.paywall = .browse } label: {
+            HStack(spacing: 12) {
+                Image(systemName: state.isPlus ? "checkmark.seal.fill" : "sparkle")
+                    .font(.system(size: 15)).foregroundStyle(theme.satin)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(state.isPlus ? "You're on bower Plus" : "bower Plus")
+                        .font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
+                    Text(state.isPlus ? "Manage your subscription." : "Unlimited listings and 10 market checks.")
+                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
+            }
+            .padding(.vertical, 12).padding(.horizontal, 16)
+            .background(theme.card)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.bowerPress)
     }
 
     private func meterRow(_ label: String, _ m: AllowanceState) -> some View {

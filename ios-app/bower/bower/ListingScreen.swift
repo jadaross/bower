@@ -295,8 +295,9 @@ private struct PriceSection: View {
                         PriceRange(low: Int(l.priceMin), high: Int(l.priceMax), size: 40, symbol: Money.symbol(state.market.currency))
                             .padding(.top, 8)
                     }
-                    BowerButton(title: state.searches.canSpend ? "Check the market" : "No market checks left",
-                                disabled: !state.searches.canSpend) { model.search() }
+                    BowerButton(title: state.searches.canSpend ? "Check the market" : "Get more market checks") {
+                        if state.searches.canSpend { model.search() } else { state.paywall = .checks }
+                    }
                         .padding(.top, 14)
                     Text(deepResearchNote)
                         .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)

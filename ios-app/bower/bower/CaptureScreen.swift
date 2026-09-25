@@ -345,13 +345,17 @@ struct CaptureScreen: View {
             if state.analysis != nil {
                 BowerButton(title: "View listing") { state.screen = .listing }
                 HStack(spacing: 9) {
-                    BowerButton(title: canSpend ? "Write it again" : "No listings left", kind: .secondary, disabled: !canSpend) { state.screen = .analysing }
+                    BowerButton(title: canSpend ? "Write it again" : "Get more listings", kind: .secondary) {
+                        if canSpend { state.screen = .analysing } else { state.paywall = .listings }
+                    }
                     clearButton
                 }
                 if let note = costNote(again: true) { costLine(note) }
             } else {
-                BowerButton(title: canSpend ? (state.hasSource ? writeTitle : "Write it") : "No listings left",
-                            disabled: !canSpend || !state.hasSource) { state.screen = .analysing }
+                BowerButton(title: canSpend ? (state.hasSource ? writeTitle : "Write it") : "Get more listings",
+                            disabled: canSpend && !state.hasSource) {
+                    if canSpend { state.screen = .analysing } else { state.paywall = .listings }
+                }
                 HStack(spacing: 9) {
                     BowerButton(title: state.photos.count < SuggestedShot.maxPhotos ? (empty ? "Add photos" : "Upload more") : "Five photos in",
                                 kind: .secondary, disabled: state.photos.count >= SuggestedShot.maxPhotos) { showLibrary = true }
@@ -369,13 +373,17 @@ struct CaptureScreen: View {
         .overlay(alignment: .top) { Hairline() }
     }
 
-    private var canSpend: Bool { state.reads.canSpend }
+    private var canSpend: Bool { state.canWrite }
 
     /// What Write it spends, in the words the market check already uses under
     /// its own button. Nothing on an account with no limit.
     private func costNote(again: Bool) -> String? {
         let reads = state.reads
         guard let left = reads.remaining else { return nil }
+        if left == 0, state.packListings > 0 {
+            let n = state.packListings
+            return "\(again ? "Writing it again uses" : "Uses") 1 of your \(n) bought listing\(n == 1 ? "" : "s")."
+        }
         if left == 0 {
             return ["All \(reads.limit ?? reads.used) listings are used this month.", reads.resetsText].compactMap { $0 }.joined(separator: " ")
         }

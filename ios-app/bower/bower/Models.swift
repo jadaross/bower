@@ -372,8 +372,19 @@ final class AppState {
     init(session: SupabaseSession, api: any BowerAPIClient) {
         self.session = session
         self.api = api
+        store = Store(report: { [api] in try await api.recordPurchase(signedTransaction: $0) })
         screen = session.hasSession ? (hasIntroduced ? (onboardingComplete ? .capture : .how) : .introduce) : .signin
+        store.onProfile = { [weak self] in self?.apply($0) }
     }
+
+    /// bower Plus and the listing pack (ADR-0010). The paywall is one sheet,
+    /// opened from wherever a meter runs out; `paywall` says why it opened.
+    let store: Store
+    var paywall: PaywallReason?
+
+    /// The signed-in user's id, signed into every purchase as its
+    /// `appAccountToken` so no other account can claim it.
+    var accountId: UUID? { session.userId }
 
     /// After sign-in: pull the profile so Enabled Platforms and the allowance
     /// are the server's truth, then route past onboarding if it is done.
@@ -432,6 +443,8 @@ final class AppState {
         if let l = p.lastName { lastName = l }
         reads = p.allowance
         if let s = p.searches { searches = s }
+        if let plan = p.plan { isPlus = plan == "plus" }
+        if let n = p.packListings { packListings = n }
     }
 
     /// Saved once, from "introduce yourself". Best effort, like the other
@@ -554,6 +567,13 @@ final class AppState {
     /// research spends from `searches`. A nil limit is no limit.
     var reads = AllowanceState(used: 0, limit: 10)
     var searches = AllowanceState(used: 0, limit: 3)
+    /// On bower Plus: listings read as unlimited, 10 market checks.
+    var isPlus = false
+    /// Bought listings left, spent only once the month's free ones are gone.
+    var packListings = 0
+
+    /// Whether Write it can spend anything: the month's listings, or the pack.
+    var canWrite: Bool { reads.canSpend || packListings > 0 }
 
     func enable(_ platform: Platform, _ on: Bool) -> Bool {
         if !on && enabled.count == 1 { return false }

@@ -53,6 +53,9 @@ protocol BowerAPIClient: Sendable {
     /// Typed feedback, with where it was written from. The item's session id
     /// is added by the client, so a note about a listing lines up with it.
     func feedbackNote(_ note: FeedbackNote) async throws
+    /// A StoreKit purchase, as Apple signed it. The server verifies it and
+    /// answers with the profile, meters already moved (ADR-0011).
+    func recordPurchase(signedTransaction: String) async throws -> ProfileResponse
 }
 
 /// A typed note from the user. `platform` and `traceId` are set when it is
@@ -253,6 +256,11 @@ struct BowerAPI: BowerAPIClient {
         _ = try await send("/api/feedback/note", method: "POST",
                            body: Body(message: note.message, screen: note.screen, sessionId: sessionBox.value,
                                       platform: note.platform, traceId: note.traceId), as: Ack.self)
+    }
+
+    func recordPurchase(signedTransaction: String) async throws -> ProfileResponse {
+        struct Body: Encodable { let transaction: String }
+        return try await send("/api/purchases", method: "POST", body: Body(transaction: signedTransaction), as: ProfileResponse.self)
     }
 
     func deleteAccount() async throws {

@@ -28,6 +28,19 @@ struct bowerApp: App {
             }
             // `-bowerMarket US` (or AU) selling there, in its currency.
             if let m = StubAPI.market { s.market = m }
+            // The paywall's prices, per market, since the stub has no App Store.
+            s.store.fixturePrices = switch s.market {
+            case .US: ("$4.99", "$0.99")
+            case .AU: ("A$7.99", "A$1.49")
+            case .IE: ("€4.99", "€0.99")
+            default:  ("£4.99", "£0.99")
+            }
+            // `-bowerPaywall` opens with the paywall up (`listings`, `checks`
+            // or `browse`, default browse). Add `-bowerPlus` for the subscribed state.
+            if let i = args.firstIndex(of: "-bowerPaywall") {
+                let next = i + 1 < args.count ? args[i + 1] : ""
+                s.paywall = next == "listings" ? .listings : next == "checks" ? .checks : .browse
+            }
             _state = State(initialValue: s)
             return
         }

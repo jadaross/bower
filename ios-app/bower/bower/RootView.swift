@@ -128,7 +128,17 @@ struct RootView: View {
         }
         .environment(\.bower, theme)
         .onChange(of: state.screen) { old, new in move(from: old, to: new) }
+        .sheet(item: Bindable(state).paywall) { reason in
+            PaywallSheet(reason: reason)
+                .environment(\.bower, theme)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
         .task {
+            // Renewals, approvals and anything a previous launch failed to
+            // report arrive here, before the profile is read.
+            state.store.listen()
             await state.loadProfileIfSignedIn()
             hideSplashSoon()
         }
