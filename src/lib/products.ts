@@ -1,0 +1,25 @@
+/**
+ * What bower sells in the App Store (ADR-0010), and the identifiers Apple
+ * checks a signed transaction against. The product ids are permanent once
+ * created in App Store Connect; the iOS app names the same two
+ * (`ios-app/bower/bower/Store.swift`).
+ */
+
+export const BUNDLE_ID = "com.jadaross.bower";
+/** The app's Apple ID in App Store Connect. Production verification needs it. */
+export const APP_APPLE_ID = 6808793078;
+
+export type ProductKind = "plus" | "pack";
+
+export const PRODUCTS: Record<string, ProductKind> = {
+  "com.jadaross.bower.plus.monthly": "plus",
+  "com.jadaross.bower.pack.10": "pack",
+};
+
+/**
+ * Apple Root CA - G3, DER, base64. Every App Store signature chains to it.
+ * From https://www.apple.com/certificateauthority/, SHA-256 fingerprint
+ * 63:34:3A:BF:B8:9A:6A:03:EB:B5:7E:9B:3F:5F:A7:BE:7C:4F:5C:75:6F:30:17:B3:A8:C4:88:C3:65:3E:91:79.
+ * Valid until 2039.
+ */
+export const APPLE_ROOT_CA_G3 = "MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2WjBnMRswGQYDVQQDDBJBcHBsZSBSb290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqGSM49AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3ZHtfTjjTuxxEtX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVztK517IDvYuVTZXpmkOlEKMaNCMEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/ayySrMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2gAMGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3meoyhpmvOwgPUnPWTxnS4at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkLF1vLUagM6BgD56KyKA==";

@@ -2,6 +2,7 @@ import { withAuth } from "@/lib/auth";
 import { serviceClient } from "@/lib/supabase";
 import {
   getProfile,
+  profileWire,
   InvalidName,
   InvalidPlatformSet,
   InvalidPreferredPlatform,
@@ -20,28 +21,6 @@ import { InvalidMarket, validateMarket } from "@/lib/markets";
 
 export const runtime = "nodejs";
 
-function body(profile: Profile) {
-  return {
-    market: profile.market,
-    enabled_platforms: profile.enabledPlatforms,
-    preferred_platform: profile.preferredPlatform,
-    seller_notes: profile.sellerNotes,
-    first_name: profile.firstName,
-    last_name: profile.lastName,
-    // `allowance` is the generations meter, kept under this name so an older
-    // app still decodes; `searches` is the deep-research meter.
-    allowance: {
-      used: profile.allowance.used,
-      limit: profile.allowance.limit,
-      resets_at: profile.allowance.resetsAt,
-    },
-    searches: {
-      used: profile.searches.used,
-      limit: profile.searches.limit,
-      resets_at: profile.searches.resetsAt,
-    },
-  };
-}
 
 /**
  * The caller's Enabled Platforms, Preferred Platform, and Allowance. Read as
@@ -49,7 +28,7 @@ function body(profile: Profile) {
  */
 export const GET = withAuth(async (_request, user) => {
   try {
-    return Response.json(body(await getProfile(user.token)));
+    return Response.json(profileWire(await getProfile(user.token)));
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
@@ -116,14 +95,14 @@ export const PATCH = withAuth(async (request, user) => {
         patch.preferred_platform === undefined &&
         patch.seller_notes === undefined
       ) {
-        return Response.json(body(profile));
+        return Response.json(profileWire(profile));
       }
     }
 
     if (patch.market !== undefined) {
       profile = await setMarket(user.token, user.id, validateMarket(patch.market));
       if (patch.enabled_platforms === undefined && patch.preferred_platform === undefined) {
-        return Response.json(body(profile));
+        return Response.json(profileWire(profile));
       }
     }
 
@@ -143,7 +122,7 @@ export const PATCH = withAuth(async (request, user) => {
       profile = await setPreferredPlatform(user.token, user.id, preferred);
     }
 
-    return Response.json(body(profile));
+    return Response.json(profileWire(profile));
   } catch (err) {
     if (
       err instanceof InvalidPlatformSet ||

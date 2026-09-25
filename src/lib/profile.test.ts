@@ -33,6 +33,8 @@ const row = {
   searches_used: 1,
   searches_limit: 3,
   allowance_period_start: "2026-08-01T00:00:00+00:00",
+  pack_listings: 0,
+  plus_expires_at: null,
 };
 
 beforeEach(() => {
@@ -54,7 +56,28 @@ describe("getProfile", () => {
       lastName: null,
       allowance: { used: 4, limit: 20, resetsAt: "2026-09-01T00:00:00.000Z" },
       searches: { used: 1, limit: 3, resetsAt: "2026-09-01T00:00:00.000Z" },
+      plan: "free",
+      plusExpiresAt: null,
+      packListings: 0,
     });
+  });
+
+  it("shows Plus as unlimited listings and 10 market checks, with the pack beside it", async () => {
+    const future = new Date(Date.now() + 864e5).toISOString();
+    single.mockResolvedValue({ data: { ...row, plus_expires_at: future, pack_listings: 7 }, error: null });
+    const p = await getProfile("token-abc");
+    expect(p).toMatchObject({ plan: "plus", plusExpiresAt: future, packListings: 7 });
+    expect(p.allowance.limit).toBeNull();
+    expect(p.searches.limit).toBe(10);
+  });
+
+  it("is back on the free numbers once Plus has lapsed", async () => {
+    const past = new Date(Date.now() - 864e5).toISOString();
+    single.mockResolvedValue({ data: { ...row, plus_expires_at: past }, error: null });
+    const p = await getProfile("token-abc");
+    expect(p).toMatchObject({ plan: "free", plusExpiresAt: past });
+    expect(p.allowance.limit).toBe(20);
+    expect(p.searches.limit).toBe(3);
   });
 
   // RLS is what stops one user reading another's row, and it only applies if

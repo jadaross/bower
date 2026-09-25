@@ -15,6 +15,7 @@ const spent = {
   allowance_used: 3,
   allowance_limit: 20,
   resets_at: "2026-09-01T00:00:00+00:00",
+  source: "monthly",
 };
 
 beforeEach(() => {
@@ -29,6 +30,7 @@ describe("spendAllowance", () => {
       used: 3,
       limit: 20,
       resetsAt: "2026-09-01T00:00:00+00:00",
+      source: "monthly",
     });
   });
 
@@ -67,7 +69,13 @@ describe("refundAllowance", () => {
   it("refunds against the user it was given", async () => {
     rpc.mockResolvedValue({ error: null });
     await refundAllowance("user-1", "search");
-    expect(rpc).toHaveBeenCalledWith("refund_allowance", { p_user_id: "user-1", p_kind: "search" });
+    expect(rpc).toHaveBeenCalledWith("refund_allowance", { p_user_id: "user-1", p_kind: "search", p_source: "monthly" });
+  });
+
+  it("sends a pack listing back to the pack", async () => {
+    rpc.mockResolvedValue({ error: null });
+    await refundAllowance("user-1", "read", "pack");
+    expect(rpc).toHaveBeenCalledWith("refund_allowance", { p_user_id: "user-1", p_kind: "read", p_source: "pack" });
   });
 
   // The caller is already returning an error to the client; a failed refund

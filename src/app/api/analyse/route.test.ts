@@ -56,7 +56,7 @@ beforeEach(() => {
   analyseListingStream.mockReturnValue(streamOf(JSON.stringify(analysisResult)));
   spendAllowance.mockReset();
   refundAllowance.mockReset();
-  spendAllowance.mockResolvedValue({ allowed: true, used: 3, limit: 40, resetsAt: "2026-10-01T00:00:00+00:00" });
+  spendAllowance.mockResolvedValue({ allowed: true, used: 3, limit: 40, resetsAt: "2026-10-01T00:00:00+00:00", source: "monthly" });
   refundAllowance.mockResolvedValue(undefined);
 });
 
@@ -97,7 +97,7 @@ describe("POST /api/analyse — a pasted link", () => {
     );
     const res = await POST(post({ link: LINK, tone: "casual" }));
     await expect(readStringStream(res)).rejects.toMatchObject({ reason: "link_unreadable" });
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "monthly");
   });
 });
 
@@ -128,7 +128,7 @@ describe("POST /api/analyse — the meter", () => {
     analyseListingStream.mockReturnValue(failingStream());
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     await expect(readStringStream(res)).rejects.toThrow();
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "monthly");
   });
 
   it("refunds a rejected read and tells the client why", async () => {
@@ -143,7 +143,15 @@ describe("POST /api/analyse — the meter", () => {
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     expect(res.status).toBe(200);
     await expect(readStringStream(res)).rejects.toThrow(StreamRejectedError);
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "monthly");
+  });
+
+  it("hands a listing spent from the pack back to the pack", async () => {
+    spendAllowance.mockResolvedValue({ allowed: true, used: 10, limit: 10, resetsAt: "2026-10-01T00:00:00+00:00", source: "pack" });
+    analyseListingStream.mockReturnValue(failingStream());
+    const res = await POST(post({ images: [PHOTO], tone: "casual" }));
+    await expect(readStringStream(res)).rejects.toThrow();
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "pack");
   });
 
   it("does not refund a read that completed", async () => {

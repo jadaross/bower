@@ -26,7 +26,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 ```
 
 ```bash
-npm test         # Vitest — 382 tests across the backend
+npm test         # Vitest — 429 tests across the backend
 ```
 
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
@@ -62,6 +62,13 @@ there are no anonymous requests, because the meter needs someone to meter
 | `DELETE /api/profile` | Deletes the caller's account. Required by App Review (5.1.1). |
 | `DELETE /api/history` | Clears the caller's history. |
 | `POST /api/feedback/note` | Typed feedback, stored in `feedback_notes` with the screen, session, platform and trace it was written from. Opened from the listing ("Tell us", beside the thumbs) and from Profile. |
+| `POST /api/purchases` | A StoreKit 2 signed transaction → verified against Apple's root certificate, recorded once in `purchases`, applied to the meter (Plus or the 10-listing pack) → the profile. ADR-0011. |
+| `POST /api/apple/notifications` | App Store Server Notifications V2: renewals, expiries, refunds. **The one route without `withAuth`**: Apple's signed payload is the authentication (ADR-0011). |
+
+`GET /api/profile` also carries `plan` (`free` | `plus`), `plus_expires_at` and
+`pack_listings`. With Plus on, the listings limit reads as null (a fair-use ceiling of
+150 sits behind it, in SQL) and market checks rise to 10; bought listings are spent
+only once the month's free ones are gone (ADR-0010, migration 0019).
 
 `PATCH /api/profile` also takes `seller_notes`: the opt-in facts about the seller a
 listing may state (`smoke_free`, `pet_free`, `posts_next_day`, `bundles`). The three
@@ -109,7 +116,7 @@ fanned out to.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 382 tests. Client: eight screens — the dark welcome
+the Valuation, account deletion, 429 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;

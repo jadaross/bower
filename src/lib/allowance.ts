@@ -22,8 +22,16 @@ export interface AllowanceState {
   resetsAt: string;
 }
 
+/**
+ * Where a spent unit came from: the month's free allowance, Plus, or (listings
+ * only) the bought pack. A refund has to go back to the same place.
+ */
+export type SpendSource = "monthly" | "plus" | "pack";
+
 export interface SpendResult extends AllowanceState {
   allowed: boolean;
+  /** Null when nothing was spent. */
+  source: SpendSource | null;
 }
 
 interface AllowanceRow {
@@ -31,6 +39,7 @@ interface AllowanceRow {
   allowance_used: number;
   allowance_limit: number | null;
   resets_at: string;
+  source: SpendSource | null;
 }
 
 /**
@@ -57,6 +66,7 @@ export async function spendAllowance(userId: string, kind: AllowanceKind): Promi
     used: row.allowance_used,
     limit: row.allowance_limit,
     resetsAt: row.resets_at,
+    source: row.source ?? null,
   };
 }
 
@@ -65,8 +75,16 @@ export async function spendAllowance(userId: string, kind: AllowanceKind): Promi
  * refund must not turn a failed valuation into a second error for the caller,
  * so it is logged rather than thrown. The worst case is one unit lost.
  */
-export async function refundAllowance(userId: string, kind: AllowanceKind): Promise<void> {
-  const { error } = await serviceClient().rpc("refund_allowance", { p_user_id: userId, p_kind: kind });
+export async function refundAllowance(
+  userId: string,
+  kind: AllowanceKind,
+  source: SpendSource | null = "monthly"
+): Promise<void> {
+  const { error } = await serviceClient().rpc("refund_allowance", {
+    p_user_id: userId,
+    p_kind: kind,
+    p_source: source ?? "monthly",
+  });
   if (error) console.error(`Failed to refund an Allowance unit for ${userId}: ${error.message}`);
 }
 

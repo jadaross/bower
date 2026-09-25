@@ -37,6 +37,8 @@ in order:
 | `0001_identity_and_metering.sql` | `profiles` — Enabled Platforms + the Allowance meter, RLS, column grants, and the trigger that gives every new auth identity a profile |
 | `0002_drop_ebay_platform_connections.sql` | Drops the dead eBay token store (ADR-0003) |
 | `0003_allowance_spend_and_refund.sql` | `spend_allowance` / `refund_allowance` — moving the meter atomically |
+| … | See the files; each opens with what it does and why |
+| `0019_plus_and_pack.sql` | bower Plus (`plus_expires_at`), the listing pack (`pack_listings`), the `purchases` ledger and `apply_transaction` (ADR-0011) |
 
 Apply them with the CLI (installed as a dev dependency):
 

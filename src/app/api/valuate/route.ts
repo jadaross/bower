@@ -83,7 +83,7 @@ export const POST = withAuth(async (request, user) => {
     });
   } catch (err) {
     // A valuation that failed must not cost the user anything (#9).
-    await refundAllowance(user.id, "search");
+    await refundAllowance(user.id, "search", spend.source);
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Valuation failed: ${message}` }, { status: 500 });
   }

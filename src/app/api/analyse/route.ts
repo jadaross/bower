@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/auth";
-import { allowanceExhausted, refundAllowance, spendAllowance } from "@/lib/allowance";
+import { allowanceExhausted, refundAllowance, spendAllowance, type SpendSource } from "@/lib/allowance";
 import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
 import { getListingContext } from "@/lib/profile";
@@ -33,7 +33,11 @@ interface RequestBody {
  * failure. The unit still goes back, but the stream ends cleanly with a
  * rejection frame naming the reason, so the client can say the right thing.
  */
-function refundOnError(input: ReadableStream<string>, userId: string): ReadableStream<string | StreamRejection> {
+function refundOnError(
+  input: ReadableStream<string>,
+  userId: string,
+  source: SpendSource | null
+): ReadableStream<string | StreamRejection> {
   const reader = input.getReader();
   return new ReadableStream<string | StreamRejection>({
     async pull(controller) {
@@ -42,7 +46,7 @@ function refundOnError(input: ReadableStream<string>, userId: string): ReadableS
         if (done) controller.close();
         else controller.enqueue(value);
       } catch (err) {
-        await refundAllowance(userId, "read");
+        await refundAllowance(userId, "read", source);
         if (err instanceof AnalyseRejected) {
           controller.enqueue({ rejected: err.subject });
           controller.close();
@@ -128,10 +132,10 @@ export const POST = withAuth(async (request, user) => {
         }),
     });
   } catch (err) {
-    await refundAllowance(user.id, "read");
+    await refundAllowance(user.id, "read", spend.source);
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: `Analysis failed: ${message}` }, { status: 500 });
   }
 
-  return toStringStreamResponse(refundOnError(stream, user.id));
+  return toStringStreamResponse(refundOnError(stream, user.id, spend.source));
 });

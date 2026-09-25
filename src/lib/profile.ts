@@ -34,6 +34,12 @@ export interface Profile {
   allowance: AllowanceState;
   /** Deep researches this month. */
   searches: AllowanceState;
+  /** `plus` while a bower Plus subscription is active (ADR-0010). */
+  plan: "free" | "plus";
+  /** When Plus lapses (or lapsed). Null if the account never had it. */
+  plusExpiresAt: string | null;
+  /** Bought listings left, spent after the month's free ones. */
+  packListings: number;
 }
 
 interface ProfileRow {
@@ -48,10 +54,33 @@ interface ProfileRow {
   searches_used: number;
   searches_limit: number | null;
   allowance_period_start: string;
+  pack_listings: number;
+  plus_expires_at: string | null;
 }
 
 const SELECT =
-  "market, enabled_platforms, preferred_platform, seller_notes, first_name, last_name, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start";
+  "market, enabled_platforms, preferred_platform, seller_notes, first_name, last_name, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start, pack_listings, plus_expires_at";
+
+/** Plus's market checks a month. Mirrors `spend_allowance` (migration 0019). */
+export const PLUS_SEARCHES = 10;
+
+/**
+ * The limits the seller sees. Mirrors `spend_allowance`, which is what
+ * enforces them: with Plus on, listings read as unlimited (a fair-use ceiling
+ * sits behind that, in SQL) and market checks rise to 10. An account that
+ * already has more, like the owner's, keeps it.
+ */
+export function shownLimits(
+  row: Pick<ProfileRow, "reads_limit" | "searches_limit" | "plus_expires_at">,
+  now = new Date()
+): { plus: boolean; reads: number | null; searches: number | null } {
+  const plus = row.plus_expires_at !== null && new Date(row.plus_expires_at) > now;
+  return {
+    plus,
+    reads: plus ? null : row.reads_limit,
+    searches: row.searches_limit === null ? null : plus ? Math.max(row.searches_limit, PLUS_SEARCHES) : row.searches_limit,
+  };
+}
 
 function toProfile(row: ProfileRow): Profile {
   const periodStart = new Date(row.allowance_period_start);
@@ -60,6 +89,7 @@ function toProfile(row: ProfileRow): Profile {
   const resets = new Date(
     Date.UTC(periodStart.getUTCFullYear(), periodStart.getUTCMonth() + 1, 1)
   );
+  const limits = shownLimits(row);
   return {
     market: isMarket(row.market) ? row.market : DEFAULT_MARKET,
     enabledPlatforms: row.enabled_platforms,
@@ -67,8 +97,38 @@ function toProfile(row: ProfileRow): Profile {
     sellerNotes: SELLER_NOTES.filter((n) => (row.seller_notes ?? []).includes(n)),
     firstName: row.first_name,
     lastName: row.last_name,
-    allowance: { used: row.reads_used, limit: row.reads_limit, resetsAt: resets.toISOString() },
-    searches: { used: row.searches_used, limit: row.searches_limit, resetsAt: resets.toISOString() },
+    allowance: { used: row.reads_used, limit: limits.reads, resetsAt: resets.toISOString() },
+    searches: { used: row.searches_used, limit: limits.searches, resetsAt: resets.toISOString() },
+    plan: limits.plus ? "plus" : "free",
+    plusExpiresAt: row.plus_expires_at,
+    packListings: row.pack_listings ?? 0,
+  };
+}
+
+/** The profile as the wire carries it, for `/api/profile` and `/api/purchases`. */
+export function profileWire(profile: Profile) {
+  return {
+    market: profile.market,
+    enabled_platforms: profile.enabledPlatforms,
+    preferred_platform: profile.preferredPlatform,
+    seller_notes: profile.sellerNotes,
+    first_name: profile.firstName,
+    last_name: profile.lastName,
+    // `allowance` is the generations meter, kept under this name so an older
+    // app still decodes; `searches` is the deep-research meter.
+    allowance: {
+      used: profile.allowance.used,
+      limit: profile.allowance.limit,
+      resets_at: profile.allowance.resetsAt,
+    },
+    searches: {
+      used: profile.searches.used,
+      limit: profile.searches.limit,
+      resets_at: profile.searches.resetsAt,
+    },
+    plan: profile.plan,
+    plus_expires_at: profile.plusExpiresAt,
+    pack_listings: profile.packListings,
   };
 }
 

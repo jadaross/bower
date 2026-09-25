@@ -42,7 +42,7 @@ const valuation = {
   query: "Carhartt Detroit jacket size M",
 };
 
-const allowance = { allowed: true, used: 3, limit: 20, resetsAt: "2026-09-01T00:00:00+00:00" };
+const allowance = { allowed: true, used: 3, limit: 20, resetsAt: "2026-09-01T00:00:00+00:00", source: "monthly" };
 
 function post(body: unknown, raw?: string) {
   return new Request("http://localhost/api/valuate", {
@@ -196,7 +196,7 @@ describe("the Allowance meter", () => {
   it("refunds the unit when the valuation fails", async () => {
     valuate.mockRejectedValue(new Error("search is down"));
     await POST(post({ item }));
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "search");
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "search", "monthly");
   });
 
   it("does not refund when the valuation succeeds", async () => {
