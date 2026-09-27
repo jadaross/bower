@@ -41,4 +41,4 @@ On Jada's phone, from TestFlight (purchases are free there):
 ## Spend and limits
 
 - [ ] A monthly spend limit is set on the Anthropic account (console → Limits)
-- [ ] The notification URL is set in App Store Connect (App Information → App Store Server Notifications, production and sandbox): `https://<api>/api/apple/notifications`
+- [x] The notification URL is set in App Store Connect, production and sandbox, V2: `https://bower-jadas-projects-b3cbda3d.vercel.app/api/apple/notifications` (27 Sep, through the API)
