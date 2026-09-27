@@ -567,7 +567,7 @@ final class AppState {
     /// research spends from `searches`. A nil limit is no limit.
     var reads = AllowanceState(used: 0, limit: 10)
     var searches = AllowanceState(used: 0, limit: 3)
-    /// On bower Plus: listings read as unlimited, 10 market checks.
+    /// On bower Plus: listings and market checks read as unlimited (fair use behind them).
     var isPlus = false
     /// Bought listings left, spent only once the month's free ones are gone.
     var packListings = 0

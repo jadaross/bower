@@ -2,7 +2,8 @@
 
 **Status:** Accepted · 12 September 2026 · amended 23 September 2026 (one free
 market check a month, not two; a pack of 10 listings for £0.99 from launch; the
-market check on Haiku 4.5 everywhere, 9p; the model rerun on that basis)
+market check on Haiku 4.5 everywhere, 9p; the model rerun on that basis) ·
+amended 27 September 2026 (Plus market checks unlimited, fair use 50)
 **Decides:** the "payment model deliberately undecided" in ADR-0007, using
 `docs/research/pricing.md` (the study) and `docs/research/valuation-cost-speed.md`
 (the spike that changed its cost basis).
@@ -68,7 +69,14 @@ below is on the 9p basis, from `scripts/pricing-model.mjs`.
 - **Unlimited listings** (fair-use ceiling of 150 a month in the terms; a
   per-minute rate limit in `withAuth`). Every competitor says "50 listings";
   "unlimited" beside that is the pitch, and a listing costs 2p.
-- **10 market checks** a month, each across every Enabled Platform. The check
+- **Unlimited market checks** (fair-use ceiling of **50 a month** in the terms,
+  enforced in `spend_allowance`). Decided 27 September: "10" read as stingy
+  beside "unlimited listings", and "unlimited" is the line the paywall sells.
+  The typical subscriber (6 checks) is unchanged at £2.52 margin; one who
+  really uses all 50 checks and 40 listings costs £5.30 against £3.46, about
+  **−£1.84** that month. Watch the checks-per-subscriber distribution on the
+  dashboard; if the cap is common, lower it or raise the price, not both.
+  Each check runs across every Enabled Platform. The check
   stays multi-platform: a Price Band per marketplace is the thing no competitor
   does (`competitors.md` §6.5), and narrowing the default to one platform to save
   pennies would throw it away.
@@ -76,8 +84,9 @@ below is on the 9p basis, from `scripts/pricing-model.mjs`.
 - **No annual plan at launch.** Add it at **£34.99** after 90 days of usage data
   (the cluster is £29.99–£34.99; annual nets £2.02 a month and loses money on a
   user at the ceiling, so it waits until the dashboard says how common that is).
-- **No market-check top-up at launch** (the listing pack above is a different
-  thing). Add **10 market checks for £3.49**, subscribers only,
+- **No market-check top-up** (the listing pack above is a different thing).
+  With checks unlimited for subscribers, the top-up below is moot unless the
+  cap ever comes down. Add **10 market checks for £3.49**, subscribers only,
   once the dashboard shows burst sellers. At 9p a check the pack nets £1.52
   (£1.18 at £2.99), so the price is no longer forced; £3.49 stays because it
   is the category's number, not because the margin needs it.

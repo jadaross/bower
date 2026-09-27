@@ -61,14 +61,10 @@ interface ProfileRow {
 const SELECT =
   "market, enabled_platforms, preferred_platform, seller_notes, first_name, last_name, reads_used, reads_limit, searches_used, searches_limit, allowance_period_start, pack_listings, plus_expires_at";
 
-/** Plus's market checks a month. Mirrors `spend_allowance` (migration 0019). */
-export const PLUS_SEARCHES = 10;
-
 /**
  * The limits the seller sees. Mirrors `spend_allowance`, which is what
- * enforces them: with Plus on, listings read as unlimited (a fair-use ceiling
- * sits behind that, in SQL) and market checks rise to 10. An account that
- * already has more, like the owner's, keeps it.
+ * enforces them: with Plus on, listings and market checks both read as
+ * unlimited (fair-use ceilings of 150 and 50 sit behind that, in SQL).
  */
 export function shownLimits(
   row: Pick<ProfileRow, "reads_limit" | "searches_limit" | "plus_expires_at">,
@@ -78,7 +74,7 @@ export function shownLimits(
   return {
     plus,
     reads: plus ? null : row.reads_limit,
-    searches: row.searches_limit === null ? null : plus ? Math.max(row.searches_limit, PLUS_SEARCHES) : row.searches_limit,
+    searches: plus ? null : row.searches_limit,
   };
 }
 

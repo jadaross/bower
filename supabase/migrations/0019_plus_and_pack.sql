@@ -1,8 +1,8 @@
 -- bower Plus and the listing pack (ADR-0010).
 --
 -- Plus is a date, not a set of limits: while `plus_expires_at` is in the
--- future the meter reads listings as unlimited (with a fair-use ceiling of
--- 150 a month) and allows 10 market checks. When it lapses nothing has to be
+-- future the meter reads listings and market checks as unlimited, behind
+-- fair-use ceilings of 150 and 50 a month. When it lapses nothing has to be
 -- written back; the free numbers in `reads_limit` / `searches_limit` were
 -- never touched. The owner's nulls stay nulls either way.
 --
@@ -70,7 +70,7 @@ declare
   v_plus boolean;
   v_used integer;
   v_limit integer;   -- what is enforced
-  v_shown integer;   -- what the client is told (Plus listings read as unlimited)
+  v_shown integer;   -- what the client is told (Plus reads as unlimited)
   v_source text;
 begin
   if p_kind not in ('read', 'search') then
@@ -114,13 +114,12 @@ begin
   else
     v_used := p.searches_used;
     if p.searches_limit is null then
-      v_limit := null;
+      v_limit := null; v_shown := null;
     elsif v_plus then
-      v_limit := greatest(p.searches_limit, 10);
+      v_limit := greatest(p.searches_limit, 50); v_shown := null;
     else
-      v_limit := p.searches_limit;
+      v_limit := p.searches_limit; v_shown := p.searches_limit;
     end if;
-    v_shown := v_limit;
 
     if v_limit is null or v_used < v_limit then
       v_source := case when v_plus then 'plus' else 'monthly' end;

@@ -62,13 +62,13 @@ describe("getProfile", () => {
     });
   });
 
-  it("shows Plus as unlimited listings and 10 market checks, with the pack beside it", async () => {
+  it("shows Plus as unlimited listings and market checks, with the pack beside it", async () => {
     const future = new Date(Date.now() + 864e5).toISOString();
     single.mockResolvedValue({ data: { ...row, plus_expires_at: future, pack_listings: 7 }, error: null });
     const p = await getProfile("token-abc");
     expect(p).toMatchObject({ plan: "plus", plusExpiresAt: future, packListings: 7 });
     expect(p.allowance.limit).toBeNull();
-    expect(p.searches.limit).toBe(10);
+    expect(p.searches.limit).toBeNull();
   });
 
   it("is back on the free numbers once Plus has lapsed", async () => {

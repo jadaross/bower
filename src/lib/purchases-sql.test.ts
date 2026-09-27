@@ -131,11 +131,18 @@ describe("spending listings: the month's free ones, then the pack", () => {
 });
 
 describe("Plus", () => {
-  it("shows listings as unlimited and allows 10 market checks", async () => {
+  it("shows listings and market checks as unlimited", async () => {
     const u = await newUser(db);
     await set(u, "plus_expires_at = $2, searches_used = 3", [inAMonth()]);
     expect(await spend(u, "read")).toMatchObject({ allowed: true, allowance_limit: null, source: "plus" });
-    expect(await spend(u, "search")).toMatchObject({ allowed: true, allowance_limit: 10 });
+    expect(await spend(u, "search")).toMatchObject({ allowed: true, allowance_limit: null, source: "plus" });
+  });
+
+  it("stops market checks at the fair-use ceiling of 50", async () => {
+    const u = await newUser(db);
+    await set(u, "plus_expires_at = $2, searches_used = 49", [inAMonth()]);
+    expect(await spend(u, "search")).toMatchObject({ allowed: true });
+    expect(await spend(u, "search")).toMatchObject({ allowed: false });
   });
 
   it("stops at the fair-use ceiling of 150 listings, then spends the pack", async () => {

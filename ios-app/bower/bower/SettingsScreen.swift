@@ -258,7 +258,7 @@ struct SettingsScreen: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(state.isPlus ? "You're on bower Plus" : "bower Plus")
                         .font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
-                    Text(state.isPlus ? "Manage your subscription." : "Unlimited listings and 10 market checks.")
+                    Text(state.isPlus ? "Manage your subscription." : "Unlimited listings and market checks.")
                         .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                 }
                 Spacer()

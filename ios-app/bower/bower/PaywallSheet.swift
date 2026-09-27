@@ -126,7 +126,7 @@ struct PaywallSheet: View {
                 }
                 VStack(alignment: .leading, spacing: 9) {
                     tick("Unlimited listings")
-                    tick("10 market checks a month")
+                    tick("Unlimited market checks")
                     tick("A price for every platform, with the listings behind it")
                 }
                 .padding(.top, 14)
@@ -187,7 +187,7 @@ struct PaywallSheet: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 9) {
                 tick("Unlimited listings")
-                tick("10 market checks a month")
+                tick("Unlimited market checks")
                 BowerButton(title: "Manage subscription", kind: .secondary) { manage = true }
                     .padding(.top, 9)
             }
