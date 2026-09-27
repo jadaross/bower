@@ -10,7 +10,7 @@ titled "App Store submission — human steps".
 
 | What | Where | How |
 |---|---|---|
-| Name, subtitle, description, keywords, promo text, copyright | `metadata.json` (one block per language) | `node scripts/asc-metadata.mjs`. English (U.K.) is on the record and serves all four stores: **"bower" is taken in English (U.S.) and English (Australia)**, so those languages cannot be added under that name (27 Sep) |
+| Name, subtitle, description, keywords, promo text, copyright | `metadata.json` (one block per language) | `node scripts/asc-metadata.mjs`. English (U.K.) is on the record and serves all four stores: **"bower" is taken in English (U.S.) and English (Australia)**; Jada chose (27 Sep) to keep the one U.K. listing everywhere rather than a longer name |
 | Support URL (`/support`) and privacy URL (`/privacy`) | `metadata.json`, `src/app/support`, `src/app/privacy` | same |
 | Categories: Shopping / Lifestyle | `metadata.json` | same |
 | Age rating: every answer "none" → 4+ | `scripts/asc-metadata.mjs` | same |
@@ -59,6 +59,7 @@ titled "App Store submission — human steps".
 ## The last mile, after the final changes
 
 ```bash
+node scripts/asc-products.mjs --apply       # Plus and the pack, four prices (once the Paid Apps agreement is active)
 node scripts/asc-availability.mjs --apply   # UK, Ireland, US, Australia on; everything else off
 scripts/upload.sh                      # archive + upload + TestFlight, as now
 node scripts/asc-metadata.mjs          # if the copy changed

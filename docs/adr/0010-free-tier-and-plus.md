@@ -66,6 +66,11 @@ below is on the 9p basis, from `scripts/pricing-model.mjs`.
 
 ### bower Plus — £4.99 a month
 
+**Prices per storefront** (decided 27 September, set explicitly rather than
+by Apple's equalisation, which lands on odd numbers): UK £4.99 and £0.99, US
+$4.99 and $0.99, Ireland €4.99 and €0.99, Australia **A$6.99** and A$1.49
+(a little under a straight conversion of £4.99, by Jada's choice).
+
 - **Unlimited listings** (fair-use ceiling of 150 a month in the terms; a
   per-minute rate limit in `withAuth`). Every competitor says "50 listings";
   "unlimited" beside that is the pitch, and a listing costs 2p.

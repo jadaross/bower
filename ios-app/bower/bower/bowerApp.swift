@@ -31,7 +31,7 @@ struct bowerApp: App {
             // The paywall's prices, per market, since the stub has no App Store.
             s.store.fixturePrices = switch s.market {
             case .US: ("$4.99", "$0.99")
-            case .AU: ("A$7.99", "A$1.49")
+            case .AU: ("A$6.99", "A$1.49")
             case .IE: ("€4.99", "€0.99")
             default:  ("£4.99", "£0.99")
             }
