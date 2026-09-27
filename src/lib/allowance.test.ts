@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const rpc = vi.fn();
 vi.mock("@/lib/supabase", () => ({ serviceClient: () => ({ rpc }) }));
 
-const { allowanceExhausted, refundAllowance, spendAllowance } = await import("./allowance");
+const { allowanceExhausted, refundAllowance, refundRejection, spendAllowance } = await import("./allowance");
 
 /** `spend_allowance` returns rows, `refund_allowance` returns none. */
 function returning(data: unknown, error: unknown = null) {
@@ -99,5 +99,25 @@ describe("allowanceExhausted", () => {
       kind: "read",
       allowance: { used: 20, limit: 20, resets_at: "2026-09-01T00:00:00+00:00" },
     });
+  });
+});
+
+describe("refundRejection", () => {
+  it("refunds through the capped SQL function and says whether it did", async () => {
+    rpc.mockResolvedValue({ data: true, error: null });
+    expect(await refundRejection("user-1", "pack")).toBe(true);
+    expect(rpc).toHaveBeenCalledWith("refund_rejection", { p_user_id: "user-1", p_source: "pack" });
+  });
+
+  it("reports no refund past the day's cap", async () => {
+    rpc.mockResolvedValue({ data: false, error: null });
+    expect(await refundRejection("user-1")).toBe(false);
+  });
+
+  it("logs rather than throws when the database fails", async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: "connection reset" } });
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await refundRejection("user-1")).toBe(false);
+    error.mockRestore();
   });
 });

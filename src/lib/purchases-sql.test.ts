@@ -249,3 +249,37 @@ describe("valuation_cache", () => {
     expect(rows[0].can).toBe(false);
   });
 });
+
+// #79: a rejected read is refunded, but only so often, so a loop of
+// non-clothing photos cannot buy unlimited model time.
+describe("refund_rejection", () => {
+  async function reject(user: string, source = "monthly"): Promise<boolean> {
+    const { rows } = await db.query<{ refund_rejection: boolean }>("select public.refund_rejection($1, $2)", [user, source]);
+    return rows[0].refund_rejection;
+  }
+
+  it("refunds the first ten rejections of a day, then stops", async () => {
+    const u = await newUser(db);
+    await set(u, "reads_limit = 20");
+    for (let i = 0; i < 11; i++) await spend(u, "read");
+    const refunded = [];
+    for (let i = 0; i < 11; i++) refunded.push(await reject(u));
+    expect(refunded.filter(Boolean)).toHaveLength(10);
+    expect(refunded[10]).toBe(false);
+    expect((await profile(u)).reads_used).toBe(1);
+  });
+
+  it("starts counting again the next day", async () => {
+    const u = await newUser(db);
+    await set(u, "rejections_refunded = 10, rejections_day = current_date - 1, reads_used = 1");
+    expect(await reject(u)).toBe(true);
+    expect((await profile(u)).reads_used).toBe(0);
+  });
+
+  it("hands a pack listing back to the pack", async () => {
+    const u = await newUser(db);
+    await set(u, "pack_listings = 2");
+    expect(await reject(u, "pack")).toBe(true);
+    expect((await profile(u)).pack_listings).toBe(3);
+  });
+});

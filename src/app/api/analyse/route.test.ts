@@ -13,10 +13,12 @@ const { AnalyseRejected } = await import("@/lib/llm/analyse");
 
 const spendAllowance = vi.fn();
 const refundAllowance = vi.fn();
+const refundRejection = vi.fn();
 vi.mock("@/lib/allowance", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/allowance")>()),
   spendAllowance,
   refundAllowance,
+  refundRejection,
 }));
 
 const { authState, resetAuthState } = await import("@/test/auth-mock");
@@ -58,6 +60,8 @@ beforeEach(() => {
   refundAllowance.mockReset();
   spendAllowance.mockResolvedValue({ allowed: true, used: 3, limit: 40, resetsAt: "2026-10-01T00:00:00+00:00", source: "monthly" });
   refundAllowance.mockResolvedValue(undefined);
+  refundRejection.mockReset();
+  refundRejection.mockResolvedValue(true);
 });
 
 describe("POST /api/analyse — a pasted link", () => {
@@ -97,7 +101,8 @@ describe("POST /api/analyse — a pasted link", () => {
     );
     const res = await POST(post({ link: LINK, tone: "casual" }));
     await expect(readStringStream(res)).rejects.toMatchObject({ reason: "link_unreadable" });
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "monthly");
+    expect(refundRejection).toHaveBeenCalledWith("test-user-id", "monthly");
+    expect(refundAllowance).not.toHaveBeenCalled();
   });
 });
 
@@ -143,7 +148,20 @@ describe("POST /api/analyse — the meter", () => {
     const res = await POST(post({ images: [PHOTO], tone: "casual" }));
     expect(res.status).toBe(200);
     await expect(readStringStream(res)).rejects.toThrow(StreamRejectedError);
-    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "read", "monthly");
+    expect(refundRejection).toHaveBeenCalledWith("test-user-id", "monthly");
+    expect(refundAllowance).not.toHaveBeenCalled();
+  });
+
+  // #79: past ten refunded rejections in a day, the unit is kept, but the
+  // seller still gets the same clean stop and the same message.
+  it("still ends a rejection cleanly once the day's refunds are used up", async () => {
+    refundRejection.mockResolvedValue(false);
+    analyseListingStream.mockReturnValue(
+      new ReadableStream<string>({ start(c) { c.error(new AnalyseRejected("not_clothing")); } })
+    );
+    const res = await POST(post({ images: [PHOTO], tone: "casual" }));
+    expect(res.status).toBe(200);
+    await expect(readStringStream(res)).rejects.toMatchObject({ reason: "not_clothing" });
   });
 
   it("hands a listing spent from the pack back to the pack", async () => {

@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/auth";
-import { allowanceExhausted, refundAllowance, spendAllowance, type SpendSource } from "@/lib/allowance";
+import { allowanceExhausted, refundAllowance, refundRejection, spendAllowance, type SpendSource } from "@/lib/allowance";
 import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
 import { getListingContext } from "@/lib/profile";
@@ -46,7 +46,9 @@ function refundOnError(
         if (done) controller.close();
         else controller.enqueue(value);
       } catch (err) {
-        await refundAllowance(userId, "read", source);
+        // A rejection is refunded ten times a day (#79); a failure always is.
+        if (err instanceof AnalyseRejected) await refundRejection(userId, source);
+        else await refundAllowance(userId, "read", source);
         if (err instanceof AnalyseRejected) {
           controller.enqueue({ rejected: err.subject });
           controller.close();

@@ -88,6 +88,24 @@ export async function refundAllowance(
   if (error) console.error(`Failed to refund an Allowance unit for ${userId}: ${error.message}`);
 }
 
+/**
+ * Hands back a read the model rejected (not clothing, explicit, refused, a
+ * link it could not read), but only the first ten a day (#79), so a loop of
+ * rejections is not free model time. Returns whether it refunded. Best-effort
+ * like `refundAllowance`: a failure here is logged, not thrown.
+ */
+export async function refundRejection(userId: string, source: SpendSource | null = "monthly"): Promise<boolean> {
+  const { data, error } = await serviceClient().rpc("refund_rejection", {
+    p_user_id: userId,
+    p_source: source ?? "monthly",
+  });
+  if (error) {
+    console.error(`Failed to refund a rejected read for ${userId}: ${error.message}`);
+    return false;
+  }
+  return data === true;
+}
+
 /** 402 with everything the client needs to explain the wall it just hit. */
 export function allowanceExhausted(state: AllowanceState, kind: AllowanceKind): Response {
   return Response.json(
