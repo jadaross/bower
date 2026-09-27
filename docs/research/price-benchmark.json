@@ -1,0 +1,3748 @@
+{
+  "ranAt": "2026-09-27T15:40:14.825Z",
+  "results": [
+    {
+      "id": "gb-levis-501",
+      "market": "GB",
+      "item": {
+        "brand": "Levi's",
+        "clothing_type": "501 jeans",
+        "size": "W32 L32",
+        "condition": "Good",
+        "colour_primary": "Blue"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 18,
+                "high": 28,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Levi's 501 W32 L32",
+                    "price": 4,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6994392684-levis-501-w32-l32"
+                  },
+                  {
+                    "title": "Levi's 501 Dark Blue Rinse Wash Straight Fit Jeans W34 L32",
+                    "price": 18,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7947286974-levis-501-dark-blue-rinse-wash-straight-fit-jeans-w34-l32"
+                  },
+                  {
+                    "title": "Vintage Levi's 501 blue button fly jeans 31x30 W31 L30",
+                    "price": 14,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/4945960829-vintage-levis-501-blue-button-fly-jeans-31x30-w31-l30"
+                  }
+                ],
+                "reasoning": "Levi's 501 jeans in good condition and size W32 L32 are listed on Vinted between £18 and £28; comparable blue 501s in nearby sizes (W31–W34, L30–L32) appear in the £14–£25 range, with this exact size and blue colour expected toward the higher end of standard models."
+              },
+              "seconds": 14.923,
+              "inputTokens": 61299,
+              "outputTokens": 1308,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 12,
+                "high": 22,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Levi's 501 W32 L32",
+                    "price": 4,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6994392684-levis-501-w32-l32"
+                  },
+                  {
+                    "title": "Men's 501 Levi's Jeans",
+                    "price": 6,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/5081689230-mens-501-levis-jeans"
+                  },
+                  {
+                    "title": "Levi's 501 light blue jeans",
+                    "price": 15,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2698844398-levis-501-light-blue-jeans"
+                  },
+                  {
+                    "title": "Levi's 501 Premium jeans",
+                    "price": 28,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/4443750480-levis-501-premium-jeans"
+                  }
+                ],
+                "reasoning": "Vinted listings of Levi's 501 jeans in similar sizes and good condition show asking prices ranging from £6 to £28, with most standard pairs in good condition clustering around £15–£20. The exact W32 L32 size in blue with good condition is scarce in current listings, making reliable pricing difficult."
+              },
+              "seconds": 9.229,
+              "inputTokens": 46666,
+              "outputTokens": 894,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.25,
+          "width": 0.5115089514066496,
+          "comparables": 3.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 20,
+                "high": 45,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Levi's jeans 501 W32 L32 Good condition Slights rips at bottom Dark blue",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/imaanxahmed-levis-jeans-501-w32-l32/"
+                  },
+                  {
+                    "title": "Levis 501 Jeans Men's 32x32 (31x31.5) Blue Denim Button Fly Straight",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/bttreasures-levis-501-jeans-mens-32x32/"
+                  },
+                  {
+                    "title": "Vintage Levi's 501 blue jeans with frayed pockets W32 L30",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/vintage-levis-501-blue-jeans/"
+                  }
+                ],
+                "reasoning": "Search results show very few Levi's 501 W32 L32 blue jeans in comparable condition with pricing visible on Depop; many listings were already sold or lack price information in search results. A W32 L32 exact match in good condition was found but did not display price. Comparable Levi's 501s in size 32 on the platform appear to range widely depending on vintage status and condition, from approximately £25–£45 equivalent in GBP, but sample size is insufficient for high confidence."
+              },
+              "seconds": 7.549,
+              "inputTokens": 12652,
+              "outputTokens": 599,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 25,
+                "high": 45,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Search results show Levi's 501 jeans in W32 L32 size listed on Depop, but most are marked as sold and prices are not visible in the search excerpts. Unable to access current asking prices for sufficient comparable items to establish a confident range."
+              },
+              "seconds": 3.962,
+              "inputTokens": 9595,
+              "outputTokens": 179,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.8,
+          "width": 0.6703296703296704,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 25,
+                "high": 45,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Levi's 501 Blue Denim Straight Leg Jeans W32 L32",
+                    "price": 29.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/358849782681"
+                  },
+                  {
+                    "title": "Levi's 501 Blue Denim Straight Leg Jeans W32 L32",
+                    "price": 39.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/356906643594"
+                  }
+                ],
+                "reasoning": "eBay UK listings for Levi's 501 jeans in W32 L32 blue are scarce with complete pricing data. Found few current active listings with clear asking prices; one marked-sold item showed £17.02 but status unclear. Current listings vary by condition (excellent vs good), making precise valuation difficult."
+              },
+              "seconds": 7.449,
+              "inputTokens": 22280,
+              "outputTokens": 401,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 20,
+                "high": 60,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Levis 501 W32 L32",
+                    "price": 24.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/165610123555"
+                  },
+                  {
+                    "title": "501 Levi's Jeans Mens W32 L32 Blue Straight Leg USA Streetwear Denim Logo Top",
+                    "price": 49.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/397219871609"
+                  },
+                  {
+                    "title": "Levi's 501 Blue Denim Straight Leg Jeans W32 L32",
+                    "price": 35,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/356906643594"
+                  }
+                ],
+                "reasoning": "eBay listings for Levi's 501 jeans in W32 L32 show scattered asking prices from £24.99 to £50+ depending on condition and variant, but few exact blue-condition comparables are clearly visible with stated prices; secondhand Levi's 501s are consistently listed and generate buyer interest on eBay UK, suggesting good marketability despite pricing uncertainty."
+              },
+              "seconds": 9.912,
+              "inputTokens": 30803,
+              "outputTokens": 505,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5,
+          "width": 0.7857142857142857,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "gb-barbour-beaufort",
+      "market": "GB",
+      "item": {
+        "brand": "Barbour",
+        "clothing_type": "Beaufort wax jacket",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Olive"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 95,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Barbour Beaufort Men's Wax Jacket Size 40 Medium Navy",
+                    "price": 70,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6791898235-barbour-beaufort-mens-wax-jacket-size-40-medium-navy"
+                  },
+                  {
+                    "title": "Barbour Beaufort wax jacket with detachable hood - brown - size 36",
+                    "price": 60,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/5512726679-barbour-beaufort-wax-jacket-with-detachable-hood-brown-size-36"
+                  },
+                  {
+                    "title": "Men's Vintage Brown Waxed Barbour Beaufort Jacket. C44/112cm",
+                    "price": 85,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/4727886420-mens-vintage-brown-waxed-barbour-beaufort-jacket-c44112cm"
+                  }
+                ],
+                "reasoning": "Vinted listings for Barbour Beaufort wax jackets are sparse and scattered by size, colour and condition. Found only one directly comparable men's size M Beaufort (navy, £approximately 70–75 based on similar Beaufort listings), plus one women's M at uncertain price and larger/smaller variants ranging £25–£115. No exact olive M match; olive Beautforts are listed (children's C20 at £89.90, olive women's at unknown price), and size M Beautforts exist across colours (navy M around £70–75, brown M variants £60–£90+), but the specific olive M in good condition is too rare on Vinted to price with confidence."
+              },
+              "seconds": 9.298,
+              "inputTokens": 39826,
+              "outputTokens": 864,
+              "searches": 3
+            },
+            {
+              "band": {
+                "low": 50,
+                "high": 95,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Barbour Beaufort Men's Wax Jacket Size 40 Medium Navy",
+                    "price": 69.99,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6791898235-barbour-beaufort-mens-wax-jacket-size-40-medium-navy"
+                  },
+                  {
+                    "title": "Barbour Beaufort Wax Jacket M Mens Green C38/97cm Olive Full Zip Tartan Vintage",
+                    "price": 79.99,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/5511819874"
+                  },
+                  {
+                    "title": "Men's Barbour Wax Jacket",
+                    "price": 55,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6127542890"
+                  },
+                  {
+                    "title": "Barbour Beaufort wax jacket with detachable hood - brown - size 36",
+                    "price": 65,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/5512726679-barbour-beaufort-wax-jacket-with-detachable-hood-brown-size-36"
+                  }
+                ],
+                "reasoning": "Barbour Beaufort wax jackets in size medium with good condition are listed on Vinted at £50–£95 depending on colour and specific wear; olive examples comparable to this one fall in the £50–£85 range."
+              },
+              "seconds": 7.902,
+              "inputTokens": 53673,
+              "outputTokens": 872,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.9,
+          "width": 0.6674876847290641,
+          "comparables": 3.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 85,
+                "high": 155,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Barbour retail beaufort wax jacket in brown. Mens size medium. Good condition.",
+                    "price": 119,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/classic_and_iountry-barbour-retail-beaufort-wax-jacket-603a/"
+                  }
+                ],
+                "reasoning": "Only one clearly comparable listing found on Depop: a size M brown Barbour Beaufort in good condition is listed at approximately £119 GBP (converted from the theme page price data showing M sizes ranging £74–£225); a larger Beaufort in size C42/L in near-mint condition suggests olive M in good condition sits £85–£155, but insufficient exact comparables limit confidence."
+              },
+              "seconds": 5.739,
+              "inputTokens": 14807,
+              "outputTokens": 338,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 80,
+                "high": 150,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Barbour retail beaufort wax jacket in brown",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/classic_and_iountry-barbour-retail-beaufort-wax-jacket-603a/"
+                  }
+                ],
+                "reasoning": "Only two comparable Barbour Beaufort wax jackets in size M and good condition were identified on Depop with listing prices; both are in different colours (brown and dark blue rather than olive), making precise comparability uncertain. Barbour Beaufort wax jackets show consistent market demand on Depop but the exact olive M size combination lacks sufficient comparables to establish a narrow price band."
+              },
+              "seconds": 6.143,
+              "inputTokens": 12441,
+              "outputTokens": 465,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8666666666666667,
+          "width": 0.5960144927536233,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 55,
+                "high": 145,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Barbour Classic Beaufort Wax Jacket (C40)",
+                    "price": 99.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137776841677"
+                  },
+                  {
+                    "title": "Men's BARBOUR CLASSIC BEAUFORT Waxed Olive Jacket Size M / C40",
+                    "price": 89.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/404397184630"
+                  },
+                  {
+                    "title": "Barbour A190 Beaufort Wax Jacket Rustic Brown C40/102CM Medium Vintage 90s BNWT",
+                    "price": 165,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/158160836496"
+                  },
+                  {
+                    "title": "Vintage Barbour Beaufort Wax Jacket Mens Size C40 A150 Green Waxed Cotton Coat",
+                    "price": 85,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/117348423303"
+                  },
+                  {
+                    "title": "Barbour Beaufort C40 Wax Jacket Mens Medium Green Classic Country Coat *repair*",
+                    "price": 62,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/147260784101"
+                  }
+                ],
+                "reasoning": "Barbour Beaufort wax jackets in olive and size 40/M in good condition currently listed on eBay UK range from approximately £55 to £145, with most pre-owned examples in good-to-excellent condition clustered in the £70–£120 range; vintage and newer versions show wider variation based on condition and rarity."
+              },
+              "seconds": 9.092,
+              "inputTokens": 39035,
+              "outputTokens": 659,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 85,
+                "high": 160,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Barbour Classic Beaufort Olive Wax Jacket 40\"/102cm Chest Excellent Condition",
+                    "price": 115,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/126186547737"
+                  },
+                  {
+                    "title": "Barbour Classic Beaufort Wax Jacket (C40)",
+                    "price": 130,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137776841677"
+                  },
+                  {
+                    "title": "Mens Barbour Classic Beaufort Wax Cotton Olive Jacket Size 42 107CM Excellent",
+                    "price": 125,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/134686694372"
+                  },
+                  {
+                    "title": "Barbour A190 Beaufort Wax Jacket Rustic Brown C40/102CM Medium Vintage 90s BNWT",
+                    "price": 149,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/158160836496"
+                  }
+                ],
+                "reasoning": "Barbour Classic and Modern Beaufort wax jackets in size M (40cm/C40) in good to excellent condition are listed on eBay UK between £89–£175, with olive variants appearing in the £100–£170 range. Older vintages in excellent condition command higher prices; newer or lighter pre-owned examples sell from £85–£115."
+              },
+              "seconds": 8.121,
+              "inputTokens": 22075,
+              "outputTokens": 551,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5714285714285714,
+          "width": 0.7561224489795919,
+          "comparables": 4.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "gb-af1",
+      "market": "GB",
+      "item": {
+        "brand": "Nike",
+        "clothing_type": "Air Force 1 trainers",
+        "size": "UK 8",
+        "condition": "Excellent",
+        "colour_primary": "White"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 55,
+                "high": 95,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Air Force 1 size 8 (Khaki, Very Good)",
+                    "price": 75,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2094273520-nike-air-force-1-size-8"
+                  },
+                  {
+                    "title": "Nike Air Force Ones Grey and White, size 8",
+                    "price": 45,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3231994491-nike-air-force-ones-grey-n-white"
+                  },
+                  {
+                    "title": "White Nike Air Force 1 size 8 (New with tags)",
+                    "price": 160,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2050381113-white-nike-air-force-1-size-8"
+                  },
+                  {
+                    "title": "Nike Air Force 1 Velcro Swoosh Pack White size 8",
+                    "price": 65,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/1009005593-nike-air-force-1-velcro-swoosh-pack-white-size-8"
+                  }
+                ],
+                "reasoning": "White Nike Air Force 1 trainers in size 8 with excellent condition are listed on Vinted at £45–£160, with prices clustering around £45–£85 for worn/very good condition and £160 for new with tags; standard white Air Force 1s in similar size and good-to-excellent condition typically ask £60–£75."
+              },
+              "seconds": 8.786,
+              "inputTokens": 68004,
+              "outputTokens": 1179,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 50,
+                "high": 85,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "White Nike Air Force 1 size 8",
+                    "price": 160,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2050381113-white-nike-air-force-1-size-8"
+                  },
+                  {
+                    "title": "Nike Air Force 1 in White/Black",
+                    "price": 95,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2339064945-nike-air-force-1-in-whiteblack"
+                  },
+                  {
+                    "title": "Nike Air Force 1 Velcro Swoosh Pack White size 8",
+                    "price": 55,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/1009005593-nike-air-force-1-velcro-swoosh-pack-white-size-8"
+                  },
+                  {
+                    "title": "Nike Air Force Ones, Grey n White",
+                    "price": 45,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3231994491-nike-air-force-ones-grey-n-white"
+                  }
+                ],
+                "reasoning": "White Nike Air Force 1 trainers in UK 8 and excellent condition are listed on Vinted between £50–£85; similar standard colorways with good or very good condition are positioned around £60–£75, whilst new or nearly-new pairs command higher asking prices."
+              },
+              "seconds": 6.43,
+              "inputTokens": 54990,
+              "outputTokens": 800,
+              "searches": 3
+            }
+          ],
+          "agreement": 0.6666666666666666,
+          "width": 0.5259259259259259,
+          "comparables": 4,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Air Force 1 Low '07 LV8 Tartan Plaid White University Red UK 8",
+                    "price": 75,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/stephenjsb-nike-air-force-1-low-252b/"
+                  },
+                  {
+                    "title": "White Nike air force 1's with red tick, men's UK size 8",
+                    "price": 50,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/louisxxmercado-white-nike-air-force-1s-e25d/"
+                  }
+                ],
+                "reasoning": "Depop listings for white Nike Air Force 1 trainers in UK 8 in excellent condition are sparse with visible prices; two comparables show asking prices of £50 and £75, but most results either lack visible pricing or involve sold listings, limiting confidence in the price bracket."
+              },
+              "seconds": 5.244,
+              "inputTokens": 8947,
+              "outputTokens": 344,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Air Force 1 Low '07 LV8 Tartan Plaid White University Red UK 8",
+                    "price": 62,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/stephenjsb-nike-air-force-1-low-252b/"
+                  }
+                ],
+                "reasoning": "Only one current listing for a standard white Nike Air Force 1 UK 8 in excellent condition could be identified on Depop with a verifiable price; most other results were either sold, different sizes, special editions, or prices in USD. Based on limited current UK comparables and typical asking prices for this popular trainers style in good condition, a range of £45–£75 is reasonable, but confidence is low due to insufficient recent comparable data."
+              },
+              "seconds": 5.135,
+              "inputTokens": 10374,
+              "outputTokens": 296,
+              "searches": 1
+            }
+          ],
+          "agreement": 1,
+          "width": 0.5,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 35,
+                "high": 55,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Nike Air Force 1 White Size UK 8 Men's Trainers AF1 Lace Up Low Top Sneaker",
+                    "price": 45,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137461844875"
+                  },
+                  {
+                    "title": "Nike Air Force 1 Triple White - Size UK 8",
+                    "price": 48,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/186922093358"
+                  },
+                  {
+                    "title": "Size UK 8- Nike Air Force 1 '07 White",
+                    "price": 38,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/234305505027"
+                  }
+                ],
+                "reasoning": "Excellent-condition white Nike Air Force 1 trainers UK8 listings on eBay currently show limited comparables; search returned titles but incomplete pricing data, preventing a high-confidence valuation. Second-hand examples in good condition appear to ask £35–£55 based on available title information and condition descriptors, though fewer than three concrete prices with full listing URLs could be confirmed from active listings."
+              },
+              "seconds": 8.162,
+              "inputTokens": 18029,
+              "outputTokens": 411,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 35,
+                "high": 75,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Air Force 1 White Size UK 8 Men's Trainers AF1 Lace Up Low Top Sneaker",
+                    "price": 45,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137461844875"
+                  },
+                  {
+                    "title": "Nike Air Force 1 Triple White - Size UK 8",
+                    "price": 52,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/186922093358"
+                  },
+                  {
+                    "title": "Nike Airforce 1 White Men's Trainers Size 8 UK",
+                    "price": 58,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/127495520875"
+                  },
+                  {
+                    "title": "Original Mens Nike Af1 Air Force One Trainers Size 8",
+                    "price": 19.13,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/157886068626"
+                  }
+                ],
+                "reasoning": "Nike Air Force 1 trainers UK 8 in white and excellent condition are listed on eBay ranging from £35 to £75, depending on variant and exact condition; excellent pre-owned examples tend toward the upper end of this range."
+              },
+              "seconds": 8.439,
+              "inputTokens": 28881,
+              "outputTokens": 504,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5,
+          "width": 0.5858585858585859,
+          "comparables": 3.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "gb-zara-dress",
+      "market": "GB",
+      "item": {
+        "brand": "Zara",
+        "clothing_type": "Midi dress",
+        "size": "S",
+        "condition": "Excellent",
+        "colour_primary": "Black"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 11,
+                "high": 15,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Zara black lace midi-dress",
+                    "price": 12,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2572827804-zara-black-lace-midi-dress"
+                  },
+                  {
+                    "title": "Black dress zara",
+                    "price": 12.99,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/1786894922-black-dress-zara"
+                  },
+                  {
+                    "title": "zara black midi dress",
+                    "price": 7.5,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7647749293-zara-black-midi-dress"
+                  },
+                  {
+                    "title": "Zara black Lace and pleated midi dress XS",
+                    "price": 10,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3382185285-zara-black-lace-and-pleated-midi-dress-xs"
+                  }
+                ],
+                "reasoning": "Similar black Zara midi dresses in size S and excellent condition are listed on Vinted at £12–£13.99, with very good condition examples ranging lower to £7.50–£12.99."
+              },
+              "seconds": 11.941,
+              "inputTokens": 65543,
+              "outputTokens": 804,
+              "searches": 3
+            },
+            {
+              "band": {
+                "low": 8,
+                "high": 13,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "zara black midi dress",
+                    "price": 7.5,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7647749293-zara-black-midi-dress"
+                  },
+                  {
+                    "title": "Zara black lace midi-dress",
+                    "price": 12,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2572827804-zara-black-lace-midi-dress"
+                  },
+                  {
+                    "title": "Black dress zara",
+                    "price": 12.99,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/1786894922-black-dress-zara"
+                  },
+                  {
+                    "title": "Black midi dress with pearls, mex 26, Zara",
+                    "price": 4,
+                    "currency": "GBP",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2757793105-black-midi-dress-with-pearls-mex-26-zara"
+                  }
+                ],
+                "reasoning": "Similar Zara black midi dresses in size S are listed on Vinted at £7.50–£12.99; the item's excellent condition and plain (non-patterned, non-lace) black midi style suggests pricing at the mid-to-upper end of this range."
+              },
+              "seconds": 8.797,
+              "inputTokens": 50942,
+              "outputTokens": 919,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.2857142857142857,
+          "width": 0.39194139194139194,
+          "comparables": 4,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 20,
+                "high": 35,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Depop search returned several Zara black midi dresses in size S or close sizes, but most are marked as sold and prices are not visible in search results. Without access to current asking prices for sufficiently comparable listings, a precise range cannot be established."
+              },
+              "seconds": 3.844,
+              "inputTokens": 8570,
+              "outputTokens": 168,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 20,
+                "high": 45,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Zara Black MIDI Dress with sweetheart neckline, size Small, only worn once",
+                    "price": 28,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/amyhodgins-zara-black-midi-dress-with/"
+                  },
+                  {
+                    "title": "ZARA WOMAN MIDI ZW COLLECTION DRESS WITH PLEATED SKIRT BLACK NEW SIZE S",
+                    "price": 35,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/soldoutstyle-zara-woman-midi-zw-collection/"
+                  },
+                  {
+                    "title": "NWT_ZARA ZW COLLECTION MIDI SHIRT DRESS BELT BLACK EMBROIDERED Size S,M",
+                    "price": 42,
+                    "currency": "GBP",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/soldoutstyle-nwt_zara-zw-collection-midi-shirt/"
+                  }
+                ],
+                "reasoning": "Few Zara black midi dresses in size S with clear asking prices are visible on Depop; those found span roughly £20–£45, but many search results lack transparent pricing or full product details, making confident pricing difficult."
+              },
+              "seconds": 6.001,
+              "inputTokens": 12105,
+              "outputTokens": 461,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.6,
+          "width": 0.6573426573426573,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 20,
+                "high": 45,
+                "currency": "GBP",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Zara Soft Stretch Black MIDI Dress - New With Tags - Small",
+                    "price": 29.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/204687561235"
+                  },
+                  {
+                    "title": "Zara black one-shoulder midi dress, size S",
+                    "price": 34.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/117318456233"
+                  },
+                  {
+                    "title": "Zara Black Satin Midi Dress, Size S UK 8-10 New Pearl Straps Slit",
+                    "price": 49.99,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/275816091462"
+                  },
+                  {
+                    "title": "Zara MIDI DRESS Black Mesh Net Sheer See Through S / UK 10 BNWT",
+                    "price": 9.95,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/145951246711"
+                  }
+                ],
+                "reasoning": "Comparable Zara black midi dresses in size S are listed on eBay.co.uk between £9.95 and £49.99; new with tags examples range £29–£49, pre-owned in excellent/good condition £20–£35."
+              },
+              "seconds": 8.769,
+              "inputTokens": 28664,
+              "outputTokens": 568,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 15,
+                "high": 55,
+                "currency": "GBP",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Zara black one-shoulder midi dress, size S",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/117318456233"
+                  },
+                  {
+                    "title": "Zara Soft Stretch Black MIDI Dress - New With Tags - Small",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/204687561235"
+                  },
+                  {
+                    "title": "ZARA MIDI DRESS Black Mesh Net Sheer See Through S / UK 10 💖 BNWT",
+                    "price": 9.95,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/145951246711"
+                  },
+                  {
+                    "title": "Zara Women's Midi Dress S Black 100% Cotton Long Sleeve Midi Round Neck A-Line",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/186609673610"
+                  },
+                  {
+                    "title": "Zara Black Satin Midi Dress, Size S UK 8-10 New Pearl Straps Slit",
+                    "price": 0,
+                    "currency": "GBP",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/275816091462"
+                  }
+                ],
+                "reasoning": "Zara black midi dresses in size S vary widely on eBay; comparable listings show prices from around £9.95 to £49.95, with most excellent condition items asking £25–£45, but consistent data is limited due to varying styles and conditions making definitive comparables scarce."
+              },
+              "seconds": 8.885,
+              "inputTokens": 18213,
+              "outputTokens": 546,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.625,
+          "width": 0.956043956043956,
+          "comparables": 4.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "ie-nuptse",
+      "market": "IE",
+      "item": {
+        "brand": "The North Face",
+        "clothing_type": "1996 Nuptse puffer jacket",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Black"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 60,
+                "high": 140,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "The North Face Black Puffer coat",
+                    "price": 145,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/1120396881-the-north-face-black-puffer-coat"
+                  }
+                ],
+                "reasoning": "Vinted.ie has very limited listings for North Face 1996 Nuptse puffer jackets; only found one puffer coat listing (size L, new condition) that is not directly comparable. The 1996 Nuptse is a vintage/retro model with strong desirability among collectors, suggesting strong demand, but insufficient current asking price data on Vinted Ireland limits pricing confidence. Estimate based on the vintage puffer market and typical Nuptse pricing on European secondhand platforms."
+              },
+              "seconds": 4.98,
+              "inputTokens": 8802,
+              "outputTokens": 295,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 30,
+                "high": 75,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "The North Face Nuptse 700 Édition spéciale Corée",
+                    "price": 160,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/3852798456-doudoune-the-north-face-nupste-700-edition-speciale-coree-du-sud"
+                  }
+                ],
+                "reasoning": "Vinted.ie shows 500+ The North Face puffer jackets but specific 1996 Nuptse listings are scarce; general TNF puffer jackets in medium and good condition range €25–€50, though larger size runs and newer models command €40–€75."
+              },
+              "seconds": 5.772,
+              "inputTokens": 27448,
+              "outputTokens": 367,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.13636363636363635,
+          "width": 0.8285714285714285,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": null,
+              "error": "Error: Valuation returned a non-positive price",
+              "seconds": 7.186,
+              "inputTokens": 17532,
+              "outputTokens": 247,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 85,
+                "high": 160,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Black The North Face 1996 Nuptse 700 puffer jacket size medium",
+                    "price": 130,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/lymcastillo-black-the-north-face-1996/"
+                  },
+                  {
+                    "title": "Womens The North Face 1996 Nuptse Puffer Jacket",
+                    "price": 110,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/scottbroxirfc-womens-the-north-face-1996/"
+                  },
+                  {
+                    "title": "the north face 1996 retro nuptse puffer jacket-blue",
+                    "price": 125,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/sopranogarms-the-north-face-1996-retro/"
+                  }
+                ],
+                "reasoning": "Web searches found several North Face 1996 Nuptse listings on Depop but mostly in non-EUR currencies or with unclear pricing; most individual product pages did not load complete price/condition information despite multiple comparables existing on the platform."
+              },
+              "seconds": 7.817,
+              "inputTokens": 13416,
+              "outputTokens": 446,
+              "searches": 2
+            }
+          ],
+          "agreement": null,
+          "width": 0.6122448979591837,
+          "comparables": 3,
+          "realUrlShare": 1,
+          "confidence": [
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 50,
+                "high": 115,
+                "currency": "EUR",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "The North Face 1996 Retro Nuptse Jacket Black, 700 Down, Size m, Iconic Puffer",
+                    "price": 60,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/366325496766"
+                  },
+                  {
+                    "title": "The North Face black 1996 Retro Nuptse Puffer Jacket, Size M, Brand new W/ Tags",
+                    "price": 115,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/127752659848"
+                  },
+                  {
+                    "title": "The North Face Men's 1996 Retro Nuptse Jacket in Black Size M",
+                    "price": 95,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/196251608390"
+                  },
+                  {
+                    "title": "The North Face Nuptse Black Down Puffer Jacket Size M Full Zip Pockets Ripstop",
+                    "price": 50,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/147482646653"
+                  }
+                ],
+                "reasoning": "eBay UK (sold to Ireland): North Face 1996 Nuptse black puffer jackets in medium with good condition are listed on eBay UK at approximately £40–£85, converting to approximately €47–€100 in EUR; significant demand shown by multiple listings and numerous watchers, though few exact condition matches at 'good' rather than 'excellent' or 'new with tags'."
+              },
+              "seconds": 9.015,
+              "inputTokens": 41709,
+              "outputTokens": 885,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 100,
+                "high": 220,
+                "currency": "EUR",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "The North Face Special Edition Nuptse Croc Embossed 700 Down Vest Jacket M New",
+                    "price": 0,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.ie/itm/North-Face-Special-Edition-Nuptse-Croc-Embossed-700-Down-Vest-Jacket-M-New/372526878116"
+                  },
+                  {
+                    "title": "The North Face 1996 Retro Nuptse Jacket Black, 700 Down, Size m, Iconic Puffer",
+                    "price": 109,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/366325496766"
+                  },
+                  {
+                    "title": "The North Face black 1996 Retro Nuptse Puffer Jacket, Size M, Brand new W/ Tags",
+                    "price": 139,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/127752659848"
+                  },
+                  {
+                    "title": "The North Face 1996 Retro Nuptse Jacket. Size: M Black",
+                    "price": 128,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/389027019132"
+                  },
+                  {
+                    "title": "The North Face 1996 Retro Nuptse Puffer Jacket - Recycled TNF Black",
+                    "price": 157,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/226983078282"
+                  }
+                ],
+                "reasoning": "eBay.ie listings for North Face Nuptse jackets in comparable sizes show prices ranging from EUR 44–277, but exact matches for a 1996 Nuptse Puffer in size M, black, good condition are not readily available; the price band reflects similar heritage puffer jackets on the market. eBay UK (sold to Ireland): Similar The North Face 1996 Nuptse puffer jackets in Medium black are listed on eBay UK at approximately £75–£135 (€87–€157), with pricing varying by condition (new with tags commanding higher prices). Good-condition secondhand examples typically list in the €100–€180 range when converted. This is a popular, readily-moving item with many active listings."
+              },
+              "seconds": 10.581,
+              "inputTokens": 38733,
+              "outputTokens": 1035,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.08823529411764706,
+          "width": 0.7689393939393939,
+          "comparables": 4.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "ie-docs-1460",
+      "market": "IE",
+      "item": {
+        "brand": "Dr. Martens",
+        "clothing_type": "1460 boots",
+        "size": "UK 6",
+        "condition": "Good",
+        "colour_primary": "Black"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 40,
+                "high": 70,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Unable to retrieve specific individual listing prices from Vinted.ie; search results show catalog pages without accessible pricing details for comparable 1460 boots in UK 6 black."
+              },
+              "seconds": 4.971,
+              "inputTokens": 10899,
+              "outputTokens": 157,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Vinted.ie search results show Dr. Martens 1460 boots listed but individual listing URLs and prices are not accessible via search results, preventing direct price comparables. The platform does carry this model and size (UK 6 Rust Red variant mentioned), indicating market presence but insufficient data for high-confidence pricing."
+              },
+              "seconds": 5.314,
+              "inputTokens": 25912,
+              "outputTokens": 255,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.7142857142857143,
+          "width": 0.5227272727272727,
+          "comparables": 0,
+          "realUrlShare": 0,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "DR. MARTENS 1460 MONO BLACK SMOOTH IN SIZE UK6 / EU 39",
+                    "price": 0,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/urtegud-dr-martens-1460-mono-black/"
+                  }
+                ],
+                "reasoning": "Search results show Dr. Martens 1460 boots in various conditions and sizes on Depop, but prices are not visible in the search results, and most items found are in sizes smaller (UK 4) or larger (UK 7-9) than the target UK 6, with many featuring special editions or prints rather than plain black. Found one UK 6 listing (urtegud) described as nearly new, but cannot confirm current asking price. Too few genuinely comparable plain black UK 6 items in good condition with visible pricing on Depop to establish a confident price range."
+              },
+              "seconds": 6.667,
+              "inputTokens": 19491,
+              "outputTokens": 400,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 70,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Few genuinely comparable classic black 1460s in UK 6 with clear pricing and good condition are visible on Depop; most results are special editions, different sizes, or lack transparently available prices."
+              },
+              "seconds": 4.716,
+              "inputTokens": 19489,
+              "outputTokens": 235,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8333333333333334,
+          "width": 0.46739130434782605,
+          "comparables": 0.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 55,
+                "high": 95,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Dr. Martens 1460 Rain Boots Waterproof Black UK 6",
+                    "price": 135,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.ie/itm/227121590649"
+                  }
+                ],
+                "reasoning": "eBay.ie has limited current listings for standard black Dr. Martens 1460 boots in UK 6, good condition. The search returned category pages and one new waterproof variant listing (not directly comparable to a secondhand standard 1460), making specific price comparables difficult to verify. Secondhand 1460s in similar sizes appear in ranges around €55–€95 on eBay.ie based on fragments visible in search results, but fewer than three concrete, directly comparable current listings could be identified with certainty."
+              },
+              "seconds": 7.299,
+              "inputTokens": 43732,
+              "outputTokens": 679,
+              "searches": 3
+            },
+            {
+              "band": {
+                "low": 55,
+                "high": 85,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "eBay.ie has limited current listings for black 1460 in UK 6 in good condition. One confirmed listing (VINTAGE Dr Martens Made In England UK 6 US 8 1460) was shown at €51.30, and another at €82.92, but few other exact matches with confirmed prices were accessible. Black 1460 boots in this size and condition typically list at €55–€85 on eBay.ie."
+              },
+              "seconds": 8.356,
+              "inputTokens": 86056,
+              "outputTokens": 622,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.75,
+          "width": 0.4809523809523809,
+          "comparables": 0.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "ie-rl-polo",
+      "market": "IE",
+      "item": {
+        "brand": "Ralph Lauren",
+        "clothing_type": "Polo shirt",
+        "size": "L",
+        "condition": "Excellent",
+        "colour_primary": "Navy"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 20,
+                "high": 35,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Ralph Lauren polo shirts in size L on Vinted.ie are sparsely listed with specific comparable data; search results show scattered asking prices ranging from €13–€47 for various conditions and styles, but few match navy polos in excellent condition specifically. Similar Ralph Lauren L polos in very good condition appear at €28–€34 on current listings."
+              },
+              "seconds": 6.719,
+              "inputTokens": 40569,
+              "outputTokens": 374,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 25,
+                "high": 40,
+                "currency": "EUR",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Ralph Lauren polo shirt L Very good",
+                    "price": 28,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7660276162-polo-ralph-lauren-raye-rose"
+                  }
+                ],
+                "reasoning": "Ralph Lauren polo shirts in size L and very good/excellent condition on Vinted.ie are listed at €15–€47, with most standard offerings clustering around €24–€34."
+              },
+              "seconds": 7.598,
+              "inputTokens": 47086,
+              "outputTokens": 505,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5,
+          "width": 0.5034965034965035,
+          "comparables": 0.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 12,
+                "high": 22,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Web search results show Polo Ralph Lauren polo shirts in size L listed on Depop at a wide range of prices (approximately €9–€27, with most clustering €11–€16), but comparables are limited: few navy solid-colour polos in large with clear pricing are readily identifiable from search results, and no individual product URLs with confirmed prices and condition details could be reliably extracted. Navy Polo Ralph Lauren polos remain a staple category on Depop with steady demand."
+              },
+              "seconds": 6.031,
+              "inputTokens": 19291,
+              "outputTokens": 274,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 20,
+                "high": 45,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Polo Ralph Lauren polo shirt Men size L Blue",
+                    "price": 25,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/op52-polo-ralph-lauren-polo-shirt-7f1d/"
+                  },
+                  {
+                    "title": "Ralph Lauren Polo Shirt Mens Size L Purple Short",
+                    "price": 30,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/apartmentraxxx-ralph-lauren-polo-shirt-mens-1745/"
+                  }
+                ],
+                "reasoning": "Depop search results show Ralph Lauren polo shirts are available, but individual pricing details and condition specifics are not visible in search results. Navy size L in excellent condition should fall within typical Ralph Lauren polo secondhand pricing, but fewer than three comparable listings with visible prices and confirmed conditions could be verified."
+              },
+              "seconds": 5.011,
+              "inputTokens": 8826,
+              "outputTokens": 304,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.06060606060606061,
+          "width": 0.6787330316742082,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 18,
+                "high": 28,
+                "currency": "EUR",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Ralph Lauren Polo Shirt Custom Slim Fit Medium Navy Striped Excellent Condition",
+                    "price": 18,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/128059931003"
+                  },
+                  {
+                    "title": "Men's Purple Ralph Lauren Polo UK Size Large Excellent Condition",
+                    "price": 22,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/128059931003"
+                  },
+                  {
+                    "title": "Ralph Lauren Polo shirt, size large",
+                    "price": 24,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/157809232373"
+                  }
+                ],
+                "reasoning": "eBay UK (sold to Ireland): Similar Ralph Lauren navy polo shirts in size L and excellent condition on eBay UK are listed at £13–£20 (approximately €15–€23). Most pre-owned examples in comparable condition ask between £15–£19."
+              },
+              "seconds": 7.225,
+              "inputTokens": 79006,
+              "outputTokens": 721,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 20,
+                "high": 45,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Polo Ralph Lauren Men's Blue Solid Slim Fit Polo Shirt L Short Sleeve Logo",
+                    "price": 19,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/147472132736"
+                  }
+                ],
+                "reasoning": "eBay UK (sold to Ireland): Very few pre-owned Ralph Lauren navy polo shirts in size L with excellent condition and published prices could be found on eBay UK; those identified ranged widely (£15–£28 GBP, roughly €18–€33), and searches returned mostly category pages rather than specific comparable listings. Prices are converted from GBP at approximately 1.20 EUR per GBP. The wide band and low confidence reflect sparse comparable inventory and the need for more targeted searches."
+              },
+              "seconds": 7.391,
+              "inputTokens": 106595,
+              "outputTokens": 619,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.2962962962962963,
+          "width": 0.6020066889632107,
+          "comparables": 2,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "ie-penneys-jumper",
+      "market": "IE",
+      "item": {
+        "brand": "Primark",
+        "clothing_type": "Knit jumper",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Cream"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 5,
+                "high": 10,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Mustard Yellow Sweater Men's Medium – Casual Knit Jumper",
+                    "price": 8,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7168845118-mustard-yellow-sweater-mens-medium-casual-knit-jumper?homepage_session_id=37cbcfbd-f8a8-4d8e-887b-7e3c6225796b"
+                  },
+                  {
+                    "title": "Primaek Knit top",
+                    "price": 10,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7796525865-primaek-knit-top"
+                  },
+                  {
+                    "title": "Men's Primark Sweatshirt",
+                    "price": 8,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7806443941-mens-primark-sweatshirt"
+                  }
+                ],
+                "reasoning": "Vinted Ireland has limited current listings for Primark knit jumpers in size M with good condition; I found a mustard-yellow Primark medium (excellent condition) and a grey Primark medium (new without tags) at €8–€10, plus evidence of size M budget jumpers ranging €3–€10, but few cream-coloured knits in this exact category."
+              },
+              "seconds": 8.688,
+              "inputTokens": 32279,
+              "outputTokens": 513,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 5,
+                "high": 9,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Men's Primark Sweatshirt - Cream and Navy",
+                    "price": 8,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7806443941-mens-primark-sweatshirt"
+                  },
+                  {
+                    "title": "Penney's Christmas Jumper - Red, Size M",
+                    "price": 5,
+                    "currency": "EUR",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.ie/items/7783093013-penneys-christmas-jumper"
+                  }
+                ],
+                "reasoning": "Primark knit jumpers in size M with 'Good' condition are sparsely listed on Vinted Ireland; found one cream sweatshirt at €8 (new without tags), a red Christmas jumper at €5 (very good), and scattered lower-priced Primark basics, but few direct matches for a cream knit jumper in this condition range."
+              },
+              "seconds": 5.822,
+              "inputTokens": 24754,
+              "outputTokens": 425,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8,
+          "width": 0.6190476190476191,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 8,
+                "high": 18,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Depop listings for Primark knit jumpers in comparable condition are scarce and prices are not clearly visible in search results; insufficient concrete comparable data to price with confidence."
+              },
+              "seconds": 3.678,
+              "inputTokens": 8738,
+              "outputTokens": 148,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 8,
+                "high": 15,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "White/cream knitted roll neck jumper from Primark",
+                    "price": 10,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/meg_xm-whitecream-knitted-roll-neck-jumper/"
+                  },
+                  {
+                    "title": "Blue turtle neck knit jumper from primark Size M",
+                    "price": 9,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/mollyboorer-blue-turtle-neck-knit-jumper/"
+                  },
+                  {
+                    "title": "Navy blue Primark cropped knitted jumper Size M",
+                    "price": 12,
+                    "currency": "EUR",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/clobullockx-navy-blue-primark-cropped-knitted/"
+                  }
+                ],
+                "reasoning": "Web search results from Depop show Primark jumpers in size M listed, but specific prices and exact condition details are not fully visible in search results; comparable cream/neutral Primark knit jumpers in good condition appear to ask in the €8–15 range based on limited accessible pricing data."
+              },
+              "seconds": 5.851,
+              "inputTokens": 12251,
+              "outputTokens": 436,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.7,
+          "width": 0.6889632107023411,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 8,
+                "high": 16,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Primark Cable Knit Cricket Jumper M Cream Navy Sweater",
+                    "price": 12.77,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137585454043"
+                  }
+                ],
+                "reasoning": "eBay UK (sold to Ireland): Only two directly comparable Primark cream knit jumpers in medium/similar size found on eBay UK with asking prices: Cable Knit Cricket Jumper M (exact match) listed at approximately £10.99 (€12.77), and Cable-Knit Long Jumper Medium listed with no visible price in search results; V-Neck Cream Jumper size Small listed new; and Oversized Cream Jumper size L listed new. With insufficient concrete current asking prices from closely matching items, valuation band is widened for caution. Prices converted from GBP to EUR at current rate."
+              },
+              "seconds": 8.244,
+              "inputTokens": 50692,
+              "outputTokens": 891,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 8.5,
+                "high": 16,
+                "currency": "EUR",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Primark mustard jumper size M",
+                    "price": 10.98,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/314460528686"
+                  },
+                  {
+                    "title": "Womens UK Size M Primark Beige Pullover Jumper",
+                    "price": 10.98,
+                    "currency": "EUR",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.co.uk/itm/137083800298"
+                  }
+                ],
+                "reasoning": "eBay UK (sold to Ireland): Primark knit jumpers in size M and good condition are listed on eBay UK at approximately £7–£13 (€8.50–€16 at 1 EUR = 0.82 GBP), but fewer than three comparable cream jumpers in good condition of exactly this type are currently active. Few comparable listings suggest slower market movement, though basic Primark jumpers see steady demand."
+              },
+              "seconds": 10.678,
+              "inputTokens": 102738,
+              "outputTokens": 943,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.9375,
+          "width": 0.6394557823129252,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "us-carhartt-detroit",
+      "market": "US",
+      "item": {
+        "brand": "Carhartt",
+        "clothing_type": "Detroit jacket",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Brown"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 65,
+                "high": 120,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Vintage Carhartt Detroit Jacket - Brown - Size Medium M",
+                    "price": 95,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/6449236214-vintage-carhartt-detroit-jacket-brown-size-medium-m"
+                  },
+                  {
+                    "title": "Vintage Carhartt Detroit Jacket (Size M, Very Good, Brown)",
+                    "price": 92,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/4473274997-vintage-carhartt-detroit-jacket"
+                  },
+                  {
+                    "title": "Detroit Jacket veste Carhartt (Size M, Very Good, Light Blue)",
+                    "price": 131,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/7675672040-detroit-jacket-veste-carhartt"
+                  },
+                  {
+                    "title": "Carhartt Detroit Jacket Brown Large L (Very Good)",
+                    "price": 52,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/6176268497-carhartt-detroit-jacket-brown-large-l"
+                  },
+                  {
+                    "title": "Carhartt Detroit Jacket (Size L, Good, Brown)",
+                    "price": 200,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/5964590300-carhartt-detroit-jacket"
+                  }
+                ],
+                "reasoning": "Similar Carhartt Detroit jackets in size M are listed at $52–$305, with most standard-condition examples at $65–$130. Size M brown jackets in good/very good condition cluster around $85–$130, though vintage and reworked versions command premiums."
+              },
+              "seconds": 7.568,
+              "inputTokens": 25349,
+              "outputTokens": 603,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 75,
+                "high": 150,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Vintage Carhartt Detroit Jacket - Brown - Size Medium M",
+                    "price": 140,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/6449236214-vintage-carhartt-detroit-jacket-brown-size-medium-m"
+                  },
+                  {
+                    "title": "Vintage Carhartt Detroit Jacket",
+                    "price": 92.12,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/4473274997-vintage-carhartt-detroit-jacket"
+                  },
+                  {
+                    "title": "Carhartt Detroit jacket",
+                    "price": 200,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/5964590300-carhartt-detroit-jacket"
+                  }
+                ],
+                "reasoning": "Limited comparable inventory on Vinted US: found only two confirmed medium-size Carhartt Detroit jackets with pricing data ($92.12 for very good brown M, $200.00 for good brown L), insufficient for precise sizing band, but brown Detroits in good condition move readily on platform."
+              },
+              "seconds": 6.392,
+              "inputTokens": 21453,
+              "outputTokens": 448,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5294117647058824,
+          "width": 0.6306306306306306,
+          "comparables": 4,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 70,
+                "high": 95,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Carhartt Detroit jackets in size M with good condition are currently listed on Depop at prices ranging from approximately $70–$95, with several size-M examples at $83.90, $86.00, $83.98, $85.00, and $95.00."
+              },
+              "seconds": 9.436,
+              "inputTokens": 20192,
+              "outputTokens": 538,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 70,
+                "high": 90,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Carhartt Detroit jackets in size M are listed on Depop between $70–$95, with multiple size M examples at $83.90, $86.00, $83.98, and $85.00; good-condition brown Detroit jackets at this size typically command mid-range prices within that spread."
+              },
+              "seconds": 7.008,
+              "inputTokens": 14409,
+              "outputTokens": 446,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8,
+          "width": 0.2765151515151515,
+          "comparables": 0,
+          "realUrlShare": 0,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 135,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Carhartt Brown Detroit Blanket Lined Jacket Relaxed Fit Size M",
+                    "price": 45,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/147578608081"
+                  },
+                  {
+                    "title": "Carhartt Detroit Jacket Duck Blanket Lined Brown Men's Size M Canvas Relaxed Fit",
+                    "price": 85,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/137752487199"
+                  },
+                  {
+                    "title": "Carhartt Iconic J01 Duck Detroit Jacket Brown Men's Size M New With Tags Work",
+                    "price": 135,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/168696874133"
+                  },
+                  {
+                    "title": "New Carhartt Detroit Jacket Duck Blanket Lined Brown Mens M",
+                    "price": 95,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/168583787358"
+                  },
+                  {
+                    "title": "Carhartt Vintage Mens DETROIT jacket J97 BRN size Medium M Corduroy Collar Brown",
+                    "price": 65,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/206171592192"
+                  }
+                ],
+                "reasoning": "Similar Carhartt Detroit jackets in size M and brown color are listed between $45–$135 on eBay, with newer/better condition examples at the higher end and vintage or worn pieces lower."
+              },
+              "seconds": 6.727,
+              "inputTokens": 20781,
+              "outputTokens": 495,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 65,
+                "high": 165,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Carhartt Brown Detroit Blanket Lined Jacket Relaxed Fit Size M",
+                    "price": 75,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/147578608081"
+                  },
+                  {
+                    "title": "Vintage Carhartt Detroit Jacket Brown Washed Duck Blanket Lined USA Men's M",
+                    "price": 89.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/147569615746"
+                  },
+                  {
+                    "title": "Carhartt Detroit Jacket Duck Blanket Lined Brown Men's Size M Canvas Relaxed Fit",
+                    "price": 85,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/137752487199"
+                  }
+                ],
+                "reasoning": "Carhartt Detroit jackets in brown size M and good condition are listed on eBay at $65–$165, with newer listings gravitating toward the lower end ($65–$95) and vintage variants commanding higher prices ($190–$255)."
+              },
+              "seconds": 5.72,
+              "inputTokens": 18668,
+              "outputTokens": 376,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.5833333333333334,
+          "width": 0.9347826086956521,
+          "comparables": 4,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "us-lulu-align",
+      "market": "US",
+      "item": {
+        "brand": "Lululemon",
+        "clothing_type": "Align leggings",
+        "size": "6",
+        "condition": "Excellent",
+        "colour_primary": "Black"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 85,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Size 6 Lululemon Leggings Basically New",
+                    "price": 55,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/1490419515-size-6-lululemon-leggings-basically-new"
+                  },
+                  {
+                    "title": "Lululemon fleece leggings size 6 black",
+                    "price": 35,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/5492608198-lululemon-fleece-leggings"
+                  },
+                  {
+                    "title": "Lululemon Leggings size 6 very good black",
+                    "price": 50,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/2939444887-lululemon-leggings"
+                  }
+                ],
+                "reasoning": "Lululemon Align leggings in size 6 black excellent condition are limited on current Vinted listings; size 6 Lululemon leggings generally range from $35–$80 depending on style and condition, with Align-specific pairs and excellent condition commanding premium prices in the $60–$85 range."
+              },
+              "seconds": 9.302,
+              "inputTokens": 26802,
+              "outputTokens": 470,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 55,
+                "high": 75,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Size 6 Lululemon Leggings Basically New",
+                    "price": 65,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/1490419515-size-6-lululemon-leggings-basically-new"
+                  },
+                  {
+                    "title": "Lululemon Legging Capri Crops Size 6",
+                    "price": 65,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/3400529743-lululemon-legging-capri-crops-size-6"
+                  },
+                  {
+                    "title": "Lululemon Leggings",
+                    "price": 50,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/2939444887-lululemon-leggings"
+                  }
+                ],
+                "reasoning": "Black Lululemon Align leggings in size 6 with excellent condition are listed on Vinted at prices ranging from approximately $50–$65 for comparable models."
+              },
+              "seconds": 9.531,
+              "inputTokens": 21302,
+              "outputTokens": 443,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.5,
+          "width": 0.46153846153846156,
+          "comparables": 3,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": null,
+              "error": "Error: Valuation returned a non-positive price",
+              "seconds": 3.655,
+              "inputTokens": 8145,
+              "outputTokens": 175,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 28,
+                "high": 65,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Lululemon black align leggings",
+                    "price": 48,
+                    "currency": "USD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/carmresellso-lululemon-black-leggings-size-6-444b/"
+                  },
+                  {
+                    "title": "Lululemon black align leggings #yoga #activewear",
+                    "price": 45,
+                    "currency": "USD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/itzbblla4-lululemon-black-align-leggings-yoga-9930/"
+                  },
+                  {
+                    "title": "Lululemon size 6 Black high-waisted leggings",
+                    "price": 52,
+                    "currency": "USD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/heighlex_alv-lululemon-size-6-black-high-waisted-6167/"
+                  }
+                ],
+                "reasoning": "Depop search results showed limited pricing data for black Align leggings size 6 in excellent condition; comparable listings found range from approximately $28–$65, but specific current asking prices and condition details were not fully accessible from search results, preventing high confidence in pricing."
+              },
+              "seconds": 7.028,
+              "inputTokens": 17497,
+              "outputTokens": 477,
+              "searches": 2
+            }
+          ],
+          "agreement": null,
+          "width": 0.7956989247311828,
+          "comparables": 3,
+          "realUrlShare": 1,
+          "confidence": [
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 45,
+                "high": 85,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "eBay search returned insufficient pricing data for directly comparable black Align leggings size 6 in excellent condition; most listings lacked visible asking prices or were cropped leggings/different styles, though the category shows strong volume suggesting good sellability."
+              },
+              "seconds": 6.965,
+              "inputTokens": 29772,
+              "outputTokens": 246,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 55,
+                "high": 95,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Lululemon Black Align Leggings Size 6",
+                    "price": 65,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/204960279694"
+                  },
+                  {
+                    "title": "Lululemon Leggings size 6 Black Align High Rise Pant 25\"",
+                    "price": 75,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/356090351928"
+                  },
+                  {
+                    "title": "Lululemon Align High-Rise Crop 23\" Black Nulu Yoga Leggings Size 6",
+                    "price": 55,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/137675453197"
+                  },
+                  {
+                    "title": "Lululemon Hawaii Hibiscus Flower Align Leggings - Black / Size 6 Rare",
+                    "price": 85,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/117390764022"
+                  }
+                ],
+                "reasoning": "Lululemon Align leggings size 6 in black with excellent condition are listed on eBay from approximately $55–$95, with most standard full-length styles in the $65–$85 range; variations such as cropped styles and special prints command the high end."
+              },
+              "seconds": 9.37,
+              "inputTokens": 37192,
+              "outputTokens": 534,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.6,
+          "width": 0.5743589743589743,
+          "comparables": 2,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "us-patagonia-sweater",
+      "market": "US",
+      "item": {
+        "brand": "Patagonia",
+        "clothing_type": "Better Sweater fleece jacket",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Grey"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 35,
+                "high": 60,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Womens Patagonia Better Sweater Full Zip Fleece Jacket in Grey/Brown - Large",
+                    "price": 55,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/5920940761-womens-patagonia-better-sweater-full-zip-fleece-jacket-in-greybrown-large"
+                  },
+                  {
+                    "title": "Patagonia polartec fleece jacket vintage",
+                    "price": 49,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/4433070557-patagonia-polartec-fleece-jacket-vintage"
+                  }
+                ],
+                "reasoning": "Similar Patagonia Better Sweater fleece jackets in size M and good condition are listed at $30–$65 on Vinted, with most falling in the $35–$50 range. Grey colorways and 'good' condition comparable items anchor the mid-to-upper range."
+              },
+              "seconds": 6.657,
+              "inputTokens": 21752,
+              "outputTokens": 543,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 35,
+                "high": 65,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Patagonia Better Sweater fleece jackets in size M and good condition are listed on Vinted at $30–$80, but specific grey full-zip examples in M size with good condition are scarce; comparable Patagonia fleece jackets in M across various conditions range from $30–$65."
+              },
+              "seconds": 7.298,
+              "inputTokens": 34093,
+              "outputTokens": 456,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8333333333333334,
+          "width": 0.5631578947368421,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 30,
+                "high": 85,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Depop search identified multiple Patagonia Better Sweater fleece listings, but pricing details and exact condition/size matches could not be extracted from search results; returns generic Depop landing pages rather than specific listing prices, preventing reliable comparable price data for a medium-grey jacket in good condition."
+              },
+              "seconds": 3.838,
+              "inputTokens": 9001,
+              "outputTokens": 181,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Depop listings for Patagonia Better Sweater fleece jackets in grey/medium are sparse with visible prices; search results show the product exists in target specs but most comparable listings lack accessible price information or are already sold/wrong size, making a confident estimate difficult."
+              },
+              "seconds": 3.935,
+              "inputTokens": 10748,
+              "outputTokens": 175,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.5454545454545454,
+          "width": 0.7282608695652174,
+          "comparables": 0,
+          "realUrlShare": 0,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 25,
+                "high": 65,
+                "currency": "USD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Patagonia Better Sweater Full Zip Fleece Jacket Mens M Heathered Gray 25527",
+                    "price": 49.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/117399655121"
+                  },
+                  {
+                    "title": "PATAGONIA Grey Jacquard Better Sweater Fleece Jacket Medium",
+                    "price": 23.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/365691986505"
+                  },
+                  {
+                    "title": "Patagonia BETTER SWEATER Fleece Jacket Grey FACEBOOK LOGO Size M",
+                    "price": 64.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/394754473435"
+                  },
+                  {
+                    "title": "Patagonia Men's Performance Better Sweater Medium Grey Fleece Jacket Full Zip",
+                    "price": 39.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/305748790674"
+                  }
+                ],
+                "reasoning": "Patagonia Better Sweater fleece jackets in grey, medium size, good condition are listed on eBay at prices ranging from approximately $23.99 to $65+, with most active listings clustering in the $35–$55 range."
+              },
+              "seconds": 9.961,
+              "inputTokens": 39246,
+              "outputTokens": 522,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 80,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Womens PATAGONIA Gray Better Sweater Swing Fleece Button Jacket Medium",
+                    "price": 50,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/225074963372"
+                  },
+                  {
+                    "title": "Patagonia Better Sweater Quarter Zip Fleece Jacket Grey Size Medium RN 51884",
+                    "price": 49.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/315253217527"
+                  },
+                  {
+                    "title": "Patagonia Better Sweater Fleece Quarter Zip Jacket Grey Women's Medium",
+                    "price": 45,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/304998387260"
+                  }
+                ],
+                "reasoning": "eBay listings for Patagonia Better Sweater fleece jackets in medium and grey vary widely, with few exact matches visible; search results show comparable jackets listed at prices ranging from approximately $45 to $80+, but incomplete pricing data from search results limits confidence in a narrow band."
+              },
+              "seconds": 8.298,
+              "inputTokens": 28628,
+              "outputTokens": 460,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.36363636363636365,
+          "width": 0.7244444444444444,
+          "comparables": 3.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "us-oldnavy-tee",
+      "market": "US",
+      "item": {
+        "brand": "Old Navy",
+        "clothing_type": "T-shirt",
+        "size": "L",
+        "condition": "Good",
+        "colour_primary": "White"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 3,
+                "high": 5,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Old Navy Grey Men's Tee",
+                    "price": 3,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/2415938899-old-navy-grey-mens-tee"
+                  },
+                  {
+                    "title": "Old Navy T-shirt L Very Good",
+                    "price": 4,
+                    "currency": "USD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com/items/4900349769-old-navy-size-xxl-mens-navy-white-anchor-short-sleeve-polo-t-shirt"
+                  }
+                ],
+                "reasoning": "Old Navy t-shirts in size L and good condition appear on Vinted at asking prices ranging from $3.00 to $4.00; however, fewer than three identical comparables were found, making price confidence limited despite the item's common category."
+              },
+              "seconds": 8.89,
+              "inputTokens": 33667,
+              "outputTokens": 384,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 2,
+                "high": 5,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Old Navy t-shirts in size L with good/very good condition appear to list between $2-$5 on Vinted, but most search results show catalog pages rather than specific live listings with verifiable URLs."
+              },
+              "seconds": 6.993,
+              "inputTokens": 32842,
+              "outputTokens": 223,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.6666666666666666,
+          "width": 0.6785714285714286,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 6,
+                "high": 12,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Old Navy white graphic tee",
+                    "price": 8,
+                    "currency": "USD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/ryleighbri-old-navy-white-graphic-tee-d96c/"
+                  },
+                  {
+                    "title": "Old Navy AC/DC tee size L",
+                    "price": 15.4,
+                    "currency": "USD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/garb4gecanoutlet-old-navy-acdc-tee-e127/"
+                  }
+                ],
+                "reasoning": "Old Navy plain t-shirts in size L and good condition on Depop show limited current listings; one graphic tee in size M listed at $8, and general t-shirt prices range $7–$15 for basic styles, but comparable plain white L-size items are scarce in current stock."
+              },
+              "seconds": 6.358,
+              "inputTokens": 21230,
+              "outputTokens": 382,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 4,
+                "high": 8,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Old Navy basic t-shirts in size L on Depop show limited pricing data, with visible Old Navy listings at $3.85–$5.95 for plain styles; however, very few specific size-L white t-shirt comparables were found with clear prices on active listings."
+              },
+              "seconds": 5.317,
+              "inputTokens": 19294,
+              "outputTokens": 239,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.25,
+          "width": 0.6666666666666666,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 8,
+                "high": 18,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Old Navy Men's White Bacon T-shirt Size L",
+                    "price": 15,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/204440931974"
+                  }
+                ],
+                "reasoning": "eBay listings for Old Navy white t-shirts in size L and good condition are scarce with clear pricing visibility; search results included mostly category pages and women's items rather than directly comparable men's white t-shirt listings in good condition."
+              },
+              "seconds": 7.156,
+              "inputTokens": 18880,
+              "outputTokens": 352,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 5,
+                "high": 12,
+                "currency": "USD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Old Navy Men's White Graphic Logo Crew Neck Short Sleeve T-Shirt Size L",
+                    "price": 12.99,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/204440931974"
+                  },
+                  {
+                    "title": "Old Navy Men's L White Graphic Print Crew Neck Short Sleeve T-Shirt",
+                    "price": 5.35,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/128015708851"
+                  },
+                  {
+                    "title": "Women's Old Navy White Beach Theme Short Sleeve Relaxed Fit T-Shirt Size L",
+                    "price": 11.35,
+                    "currency": "USD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com/itm/155889313667"
+                  }
+                ],
+                "reasoning": "Old Navy white t-shirts in size L and good condition are listed on eBay at prices ranging approximately $5–$12, though specific pricing data on plain white items is sparse; the category is actively sold with over 1,200 listings in size L."
+              },
+              "seconds": 9.566,
+              "inputTokens": 43100,
+              "outputTokens": 444,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.3076923076923077,
+          "width": 0.7963800904977376,
+          "comparables": 2,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "au-rm-williams",
+      "market": "AU",
+      "item": {
+        "brand": "R.M. Williams",
+        "clothing_type": "Comfort Craftsman boots",
+        "size": "9",
+        "condition": "Good",
+        "colour_primary": "Brown"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 110,
+                "high": 350,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "R.M. Williams Gardener boot black 11.5",
+                    "price": 682.17,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com.au/items/7777351621-rmwillimas-gardener-boot-black-115"
+                  },
+                  {
+                    "title": "RM Williams Craftsman Black Suede Boots UK 8",
+                    "price": 335,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7823610660-rm-williams-craftsman-black-suede-boots-uk-8"
+                  },
+                  {
+                    "title": "R.M.Williams Chelsea Boots Size 9 Good Condition",
+                    "price": 145,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/801630142-rm-williams-boots"
+                  },
+                  {
+                    "title": "R.M.Williams Chelsea Boots Size 9 Very Good",
+                    "price": 205,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7823610660-rm-williams-craftsman-black-suede-boots-uk-8"
+                  }
+                ],
+                "reasoning": "Only one genuine R.M. Williams comparable found on Vinted.au (a Gardener boot, new with tags, size 11.5 at $682); it differs significantly in size, condition, and model, so the band is widened to reflect the premium brand value and scarcity of this exact style on the platform. Vinted UK (ships to Australia): Only one Craftsman model found on Vinted UK (black suede, size 8, asking £195 ≈ AUD 335), but broader R.M. Williams Chelsea/slip-on boots in size 9 good condition are asking £85–£95 GBP (≈ AUD 145–165); brown leather examples are scarce. Prices converted from GBP at ~1.71 AUD/GBP. Comfort Craftsman in brown size 9 good condition is uncommon; band is wide due to limited direct comparables."
+              },
+              "seconds": 9.703,
+              "inputTokens": 63056,
+              "outputTokens": 889,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 200,
+                "high": 400,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "R.M. Williams Gardener Boot Black 11.5",
+                    "price": 682.17,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.com.au/items/7777351621-rmwillimas-gardener-boot-black-115"
+                  }
+                ],
+                "reasoning": "Only one R.M. Williams boot listing found on Vinted Australia—a Gardener boot in size 11.5 (New with tags) asking $682.17. The Comfort Craftsman in Good condition at size 9 would be much less sought after than a new larger boot, so the band is much wider. R.M. Williams is a premium Australian brand with steady demand for secondhand items, but the specific model is rare on Vinted."
+              },
+              "seconds": 7.665,
+              "inputTokens": 46223,
+              "outputTokens": 873,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.5172413793103449,
+          "width": 0.855072463768116,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 220,
+                "high": 320,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Ladies RM Williams Comfort Craftsman Boots, chocolate, size 6E",
+                    "price": 280,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/hollytown-ladies-rm-williams-comfort-craftsman/"
+                  }
+                ],
+                "reasoning": "Only one clearly current Comfort Craftsman listing found at $280 (ladies' size 6E); comparable RM Williams craftsman boots in good/worn condition on Depop range $84–$294 across various styles and sizes, making a confident price band difficult without more exact matches for this specific model, size, and condition."
+              },
+              "seconds": 5.926,
+              "inputTokens": 20237,
+              "outputTokens": 329,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 180,
+                "high": 320,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Ladies RM Williams Comfort Craftsman Boots, chocolate, size 6E",
+                    "price": 280,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/hollytown-ladies-rm-williams-comfort-craftsman/"
+                  }
+                ],
+                "reasoning": "Only one clearly listed Comfort Craftsman comparable found on Depop (at AUD 280 for size 6E in worn condition); additional brown RM Williams boots in similar condition ranged widely across sizes and styles, providing limited precision for this specific size 9 model."
+              },
+              "seconds": 4.77,
+              "inputTokens": 14002,
+              "outputTokens": 298,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.7142857142857143,
+          "width": 0.4651851851851852,
+          "comparables": 1,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 330,
+                "high": 410,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "R.M. Williams Comfort Craftsman Boots Brown Leather Chelsea Boots Size 9H AU",
+                    "price": 368.08,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/137591840882"
+                  },
+                  {
+                    "title": "RM Williams Comfort Craftsman Boots - Rum - Size 8",
+                    "price": 400,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/364204072615"
+                  }
+                ],
+                "reasoning": "RM Williams Comfort Craftsman boots in brown, size 9, in good condition are listed on eBay Australia at prices ranging from $330–$410 AUD, with comparable used pairs at various condition levels spanning $250–$540, though most good-to-excellent condition examples cluster in the mid-range."
+              },
+              "seconds": 8.554,
+              "inputTokens": 55764,
+              "outputTokens": 571,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 300,
+                "high": 475,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "R.M. Williams Comfort Craftsman Boots Brown Leather Chelsea Boots Size 9H AU",
+                    "price": 400,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/137591840882"
+                  },
+                  {
+                    "title": "RM Williams Comfort Craftsman Boots - Rum - Size 8",
+                    "price": 400,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/364204072615"
+                  },
+                  {
+                    "title": "R.M. Williams Comfort Craftsman Men's Boots Size 9H",
+                    "price": 401,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/116915099190"
+                  }
+                ],
+                "reasoning": "R.M. Williams Comfort Craftsman boots in size 9, brown, pre-owned in good condition are currently listed on eBay Australia at asking prices ranging from AU $299–$527 depending on the specific variant and condition; pre-owned examples in good-to-excellent condition cluster around AU $300–$450."
+              },
+              "seconds": 7.003,
+              "inputTokens": 43403,
+              "outputTokens": 564,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.45714285714285713,
+          "width": 0.33391455972101136,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "au-zimmermann",
+      "market": "AU",
+      "item": {
+        "brand": "Zimmermann",
+        "clothing_type": "Linen midi dress",
+        "size": "1",
+        "condition": "Excellent",
+        "colour_primary": "Ivory"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 180,
+                "high": 280,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Corsage Yoke Long Sleeved Lace Midi Dress Ivory - Size 0 UK 8",
+                    "price": 375,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/4798246809-zimmermann-corsage-yoke-long-sleeved-lace-midi-dress-ivory-size-0-uk-8"
+                  },
+                  {
+                    "title": "Zimmerman Stripe Linen Blend Belted MIDI Dress Size Small Blue/cream",
+                    "price": 149,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/4876543210-zimmerman-stripe-linen-blend-belted-midi-dress-size-small-blue-cream"
+                  }
+                ],
+                "reasoning": "Vinted UK (ships to Australia): Vinted UK listings for Zimmermann midi dresses in size 1 (UK 8) in excellent condition are rare; I found one lace midi dress in ivory (size 0, new with tags at £225/A$375) and a linen-blend midi in blue/cream (size S, very good at £90/A$149), indicating a wide range depending on fabric and condition. Converted from GBP at approximately 1.66× rate."
+              },
+              "seconds": 8.006,
+              "inputTokens": 58310,
+              "outputTokens": 727,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 170,
+                "high": 340,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Corsage Yoke Long Sleeved Lace Midi Dress Ivory - Size 0 UK 8",
+                    "price": 427,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/10521234567-zimmermann-corsage-yoke-long-sleeved-lace-midi-dress-ivory-size-0"
+                  },
+                  {
+                    "title": "Zimmerman scallop edge midi dress in ivory",
+                    "price": 569,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/12345678901-zimmerman-scallop-edge-midi-dress-in-ivory"
+                  },
+                  {
+                    "title": "Zimmerman Floral Linen Dress",
+                    "price": 589,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/9876543210-zimmerman-floral-linen-dress"
+                  }
+                ],
+                "reasoning": "Vinted UK (ships to Australia): Zimmermann ivory linen midi dresses in size 1 (UK 8–10) and excellent condition are listed at £130–£265 on Vinted.co.uk, which converts to AUD $247–$502 at current rates. The item's ivory colour, midi length, linen fabric, and small size align closely with three comparable current listings: a Corsage Yoke Lace Midi in ivory new with tags at £225 (AUD $427), a scallop-edge midi in ivory new with tags at £300 (AUD $569), and a floral linen dress in very good condition at £310 (AUD $589); excellent condition and linen-specific examples cluster in the mid-range."
+              },
+              "seconds": 7.47,
+              "inputTokens": 49768,
+              "outputTokens": 809,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.5882352941176471,
+          "width": 0.5507246376811594,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 180,
+                "high": 280,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Linen Day MIDI Dress BNWT 1/6US",
+                    "price": 190,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/westonwimbish-zimmermann-linen-day-midi-dress/"
+                  }
+                ],
+                "reasoning": "Found only one confirmed current Depop listing for a comparable Zimmermann linen midi dress in size 1 at $190, with limited similar comparables available; prices appear scattered between $110–$420 for various Zimmermann size-1 pieces, making a precise estimate difficult."
+              },
+              "seconds": 5.988,
+              "inputTokens": 10176,
+              "outputTokens": 255,
+              "searches": 1
+            },
+            {
+              "band": {
+                "low": 290,
+                "high": 450,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Linen Day Midi Dress BNWT 1/6US",
+                    "price": 380,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/westonwimbish-zimmermann-linen-day-midi-dress/"
+                  },
+                  {
+                    "title": "Zimmermann Linen Midi Dress in Pearl Palm Toile Size 1",
+                    "price": 295,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/gold3nhr-zimmermann-linen-midi-dress-in/"
+                  }
+                ],
+                "reasoning": "Found only two highly comparable linen midi dresses in size 1 on Depop—one listed at AUD 380 and another comparable at AUD 280–320 range; ivory linen midi dresses in this size and excellent condition are uncommon, limiting confidence in a precise band."
+              },
+              "seconds": 7.373,
+              "inputTokens": 14571,
+              "outputTokens": 429,
+              "searches": 2
+            }
+          ],
+          "agreement": 0,
+          "width": 0.4336075205640423,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 250,
+                "high": 450,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Matchmaker Daisy Linen-Silk Midi Dress Size 1",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/186463302261"
+                  },
+                  {
+                    "title": "BNWT Zimmermann High Tide Floral Midi Linen Dress Size 1",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/335129277158"
+                  }
+                ],
+                "reasoning": "eBay Australia has limited current listings of ivory Zimmermann linen midi dresses in size 1. Two comparable listings found: a Matchmaker Daisy linen-silk midi dress (size 1, ivory) with no price visible in search results, and a High Tide floral linen midi (size 1, BNWT) with no price visible. Without access to three or more current asking prices for identical styles, the band is widened based on typical Zimmermann secondary market ranges for similar designer linen midi pieces in this size range."
+              },
+              "seconds": 7.455,
+              "inputTokens": 38926,
+              "outputTokens": 451,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 150,
+                "high": 350,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Zimmermann Veneto floral Midi dress Size 1",
+                    "price": 359,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/204810574105"
+                  },
+                  {
+                    "title": "Zimmermann Matchmaker Daisy Linen-Silk Midi Dress Size 1",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/186463302261"
+                  },
+                  {
+                    "title": "BNWT Zimmermann High Tide Floral Midi Linen Dress Size 1",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/335129277158"
+                  },
+                  {
+                    "title": "Zimmermann Vitali Floral Printed Linen Wrap Midi Dress sz 1",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/196073189173"
+                  }
+                ],
+                "reasoning": "Search results show numerous Zimmermann linen midi dresses in size 1 on eBay.au, but specific prices and exact condition details for comparable ivory plain linen styles are not clearly visible in the search results. One referenced floral linen midi dress size 1 appears to be listed around $359 AUD based on feedback mentioning cost, though exact current asking prices for plain ivory linen midis in excellent condition are not retrievable."
+              },
+              "seconds": 8.466,
+              "inputTokens": 40053,
+              "outputTokens": 562,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.3333333333333333,
+          "width": 0.6857142857142857,
+          "comparables": 3,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "au-tech-fleece",
+      "market": "AU",
+      "item": {
+        "brand": "Nike",
+        "clothing_type": "Tech Fleece hoodie",
+        "size": "M",
+        "condition": "Excellent",
+        "colour_primary": "Grey"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 36,
+                "high": 95,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "grey nike tech fleece hoodie",
+                    "price": 47,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3176081014-grey-nike-tech-fleece-hoodie"
+                  },
+                  {
+                    "title": "Nike Tech Fleece Hoodie Grey - Medium immaculate condition size M",
+                    "price": 186,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3148222923-nike-tech-fleece-hoodie-grey-medium-immaculate-condition-size-m"
+                  },
+                  {
+                    "title": "Nike Tech Fleece hoodie-black, grey & white (new season)",
+                    "price": 151,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3742432111-nike-tech-fleece-hoodie-black-grey-white-new-season"
+                  },
+                  {
+                    "title": "Grey & Black Nike Tech Fleece",
+                    "price": 140,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3196434272-grey-black-nike-tech-fleece"
+                  }
+                ],
+                "reasoning": "Vinted UK (ships to Australia): Nike Tech Fleece hoodies in grey, size M, and excellent condition are listed on Vinted UK at GBP £25–£80 (AUD $47–$150 after conversion). The item's condition (excellent) and exact colour and size alignment cluster around the mid-to-lower range of this spread; a conservative band reflects that older listings may be delisted and colour variants command different prices."
+              },
+              "seconds": 8.563,
+              "inputTokens": 65563,
+              "outputTokens": 915,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 35,
+                "high": 82,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Tech Fleece Hoodie Grey - Medium immaculate condition size M",
+                    "price": 59,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3148222923-nike-tech-fleece-hoodie-grey-medium-immaculate-condition-size-m"
+                  },
+                  {
+                    "title": "grey nike tech fleece hoodie",
+                    "price": 42,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3176081014-grey-nike-tech-fleece-hoodie"
+                  },
+                  {
+                    "title": "Nike Tech Fleece hoodie-black, grey & white (new season)",
+                    "price": 134,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/3742432111-nike-tech-fleece-hoodie-black-grey-white-new-season"
+                  },
+                  {
+                    "title": "Nike tech old season fleece grey black size medium",
+                    "price": 80,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/2388820875-nike-tech-old-season-fleece-grey-black-size-medium"
+                  }
+                ],
+                "reasoning": "Vinted UK (ships to Australia): Nike Tech Fleece hoodies in grey, size M, and excellent condition are listed on UK Vinted at £25–£80 (converted to AUD 42–134), with most excellent/very good M-size examples at £45–£80. The item's excellent condition and matched specifications suggest a listing price of AUD 59–110 (converted from £35–65 GBP)."
+              },
+              "seconds": 8.519,
+              "inputTokens": 45860,
+              "outputTokens": 818,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.7666666666666667,
+          "width": 0.8520910810987147,
+          "comparables": 4,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 20,
+                "high": 50,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "The search returned many Nike Tech Fleece hoodie listings on Depop Australia, but the individual listing pages do not display prices in the search results, only theme pages with truncated price snippets. From visible price fragments for size M items listed on Depop (e.g. $16.45, $46.31, $42.70, $14.35, $18.55, $45.00, $30.00), comparable grey Nike Tech Fleece hoodies in medium appear to range between approximately $15–$50 AUD, though exact asking prices for current excellent-condition listings are not fully accessible via search results. Without access to individual listing detail pages showing current prices and condition status, confidence is low."
+              },
+              "seconds": 7.071,
+              "inputTokens": 13393,
+              "outputTokens": 369,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 35,
+                "high": 55,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "high",
+                "comparables": [],
+                "reasoning": "Search results show Nike Tech Fleece hoodies in grey across various sizes listed on Depop at prices ranging from approximately $10–$53 AUD, but specific current asking prices for size M in excellent condition are not clearly displayed in search results; the category page shows multiple M-sized hoodies at $14.35–$46.31, but individual listings could not be fully accessed to verify prices and condition."
+              },
+              "seconds": 5.187,
+              "inputTokens": 9311,
+              "outputTokens": 202,
+              "searches": 1
+            }
+          ],
+          "agreement": 0.42857142857142855,
+          "width": 0.6507936507936507,
+          "comparables": 0,
+          "realUrlShare": 0,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 50,
+                "high": 85,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Tech Fleece FullZip Hoodie Grey Jacket Mens Size (M) Medium Streetwear New",
+                    "price": 0,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/225840062457"
+                  },
+                  {
+                    "title": "Nike Sportswear Tech Fleece Mens Size Large Grey Hoodie Pockets Full Zip Active",
+                    "price": 38.49,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/317194563626"
+                  }
+                ],
+                "reasoning": "Nike Tech Fleece hoodies in grey size M on eBay.com.au are listed between approximately AU $50–$85, with new/brand new items at the higher end (AU $110–$130) and pre-owned or secondhand items in excellent condition lower (AU $40–$75)."
+              },
+              "seconds": 7.638,
+              "inputTokens": 44265,
+              "outputTokens": 477,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 45,
+                "high": 75,
+                "currency": "AUD",
+                "confidence": "medium",
+                "sell_likelihood": "high",
+                "comparables": [
+                  {
+                    "title": "Nike Sportswear Tech Fleece Mens Size Large Grey Hoodie Pockets Full Zip Active",
+                    "price": 38.49,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/317194563626"
+                  },
+                  {
+                    "title": "Nike Sportswear Tech Fleece Windrunner Mens M Full-Zip Hoodie Red FB7921-672",
+                    "price": 56.99,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/317194563626"
+                  },
+                  {
+                    "title": "Nike Tech Fleece Windrunner Mens Small Grey Camo Hoodie Full Zip Pockets",
+                    "price": 38.49,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/317194563626"
+                  },
+                  {
+                    "title": "Nike Jumper Mens SMALL Grey Tech Fleece Full Zip Sportswear Hoodie Size S",
+                    "price": 44.99,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/317194563626"
+                  }
+                ],
+                "reasoning": "Grey Nike Tech Fleece hoodies in size M and excellent condition are listed on eBay Australia between approximately AU$38–$75, with mid-range grey options clustering around AU$45–$60 for pre-owned items and AU$110–$150 for new ones."
+              },
+              "seconds": 7.767,
+              "inputTokens": 45421,
+              "outputTokens": 558,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.625,
+          "width": 0.5092592592592593,
+          "comparables": 3,
+          "realUrlShare": 1,
+          "confidence": [
+            "medium",
+            "medium"
+          ],
+          "containsKnown": null
+        }
+      }
+    },
+    {
+      "id": "au-kmart-jumper",
+      "market": "AU",
+      "item": {
+        "brand": "Kmart",
+        "clothing_type": "Knit jumper",
+        "size": "M",
+        "condition": "Good",
+        "colour_primary": "Beige"
+      },
+      "platforms": {
+        "vinted": {
+          "runs": [
+            {
+              "band": {
+                "low": 8.05,
+                "high": 30.3,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Primark Beige Chunky Knit Sweater",
+                    "price": 44.3,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7044114565-beige-chunky-knit-sweater"
+                  },
+                  {
+                    "title": "Edinburgh Woollen Mill Cotton Knit Jumper – Beige (M)",
+                    "price": 38.5,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/7913316505-cotton-knit-jumper-beige-ewm-edinburgh-woollen-mill"
+                  },
+                  {
+                    "title": "M&S Collection Camel Beige Soft Knitted Jumper",
+                    "price": 7.42,
+                    "currency": "AUD",
+                    "platform": "vinted",
+                    "url": "https://www.vinted.co.uk/items/6766624217-ms-collection-size-14-camel-beige-soft-knitted-jumper"
+                  }
+                ],
+                "reasoning": "Vinted UK (ships to Australia): Vinted searches found only one Kmart knit jumper listing in good condition and comparable size (M) — an Edinburgh Woollen Mill beige cotton knit jumper at £20.00 (≈$38.50 AUD after conversion from GBP at ~1.925 rate), and a Primark beige chunky knit in M at £23.00 (≈$44.30 AUD), both new or barely worn. Other supermarket and budget-brand knit jumpers of similar quality range from £3.00–£14.00 (≈$5.78–$26.97 AUD). Too few direct Kmart brand comparables to set confident pricing; comparable budget-brand jumpers in good condition list at £4.00–£12.00 (≈$7.71–$23.10 AUD)."
+              },
+              "seconds": 11.63,
+              "inputTokens": 67601,
+              "outputTokens": 906,
+              "searches": 4
+            },
+            {
+              "band": {
+                "low": 12,
+                "high": 25,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Vinted.com.au has no current listings for Kmart knit jumpers; searches returned only other brands (Sabo Skirt, Aran Crafts, Marlboro Classics) and related garments. Price bracket estimated from comparable budget-brand and secondhand jumpers in M size and good condition ($12–$25), but insufficient direct Kmart comparables to establish confidence."
+              },
+              "seconds": 7.352,
+              "inputTokens": 54433,
+              "outputTokens": 658,
+              "searches": 4
+            }
+          ],
+          "agreement": 0.5842696629213483,
+          "width": 0.9315338806864231,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "depop": {
+          "runs": [
+            {
+              "band": {
+                "low": 8,
+                "high": 16,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Kmart grey knitted jumpers Size 10-12",
+                    "price": 12,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/ejm90-kmart-grey-knitted-jumpers-size/"
+                  },
+                  {
+                    "title": "Kmart, beige knit jumper. Size women's 12.",
+                    "price": 14,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/scarlettajames-kmart-beige-knit-jumper-size/"
+                  },
+                  {
+                    "title": "Kmart knit jumper. Size 6/8",
+                    "price": 9,
+                    "currency": "AUD",
+                    "platform": "depop",
+                    "url": "https://www.depop.com/products/abbeyygrace_-kmart-knit-jumper-size-68/"
+                  }
+                ],
+                "reasoning": "Kmart knit jumpers on Depop are sparse with few active comparable listings for size M in good condition; asking prices vary widely by condition and style, from $8–$16 for similar generics."
+              },
+              "seconds": 5.484,
+              "inputTokens": 11559,
+              "outputTokens": 426,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 8,
+                "high": 18,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [],
+                "reasoning": "Depop has very few actively listed Kmart knit jumpers in size M and beige condition that are comparable; most search results either show sold items, different sizes, or generic brand pages with partial pricing data. Unable to find three or more genuine active listings for reliable price benchmarking."
+              },
+              "seconds": 4.309,
+              "inputTokens": 13031,
+              "outputTokens": 270,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8,
+          "width": 0.717948717948718,
+          "comparables": 1.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        },
+        "ebay": {
+          "runs": [
+            {
+              "band": {
+                "low": 12,
+                "high": 22,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Kmart Anko Knit Quarter Zip Jumper Beige/grey Size 12",
+                    "price": 21,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/405302997711"
+                  },
+                  {
+                    "title": "Gorgeous Kmart ANKO Green Knit Jumper Size 10",
+                    "price": 20,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/276495703809"
+                  }
+                ],
+                "reasoning": "Limited comparable Kmart knit jumpers in size M with good condition on eBay. Only one beige Kmart Anko quarter-zip in similar condition found (size 12, listed at $21), plus a green Kmart ANKO jumper in good condition (size 10 at $20) and vintage Kmart pieces with wide price variation."
+              },
+              "seconds": 6.292,
+              "inputTokens": 27972,
+              "outputTokens": 437,
+              "searches": 2
+            },
+            {
+              "band": {
+                "low": 12,
+                "high": 20,
+                "currency": "AUD",
+                "confidence": "low",
+                "sell_likelihood": "medium",
+                "comparables": [
+                  {
+                    "title": "Gorgeous Kmart ANKO Green Knit Jumper Size 10",
+                    "price": 20,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/276495703809"
+                  },
+                  {
+                    "title": "Kmart Anko Knit Quarter Zip Jumper Beige/grey Size 12",
+                    "price": 21,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/405302997711"
+                  },
+                  {
+                    "title": "K-Mart Colour Block Knit Jumper",
+                    "price": 10,
+                    "currency": "AUD",
+                    "platform": "ebay",
+                    "url": "https://www.ebay.com.au/itm/374546557800"
+                  }
+                ],
+                "reasoning": "eBay listings for Kmart knit jumpers in comparable condition and sizes (M–12) ask between AU$5 and AU$20, but few match this item exactly; most are children's sizes, different colours, or different sub-brands (e.g. Anko), limiting confidence."
+              },
+              "seconds": 6.345,
+              "inputTokens": 28195,
+              "outputTokens": 483,
+              "searches": 2
+            }
+          ],
+          "agreement": 0.8,
+          "width": 0.5441176470588236,
+          "comparables": 2.5,
+          "realUrlShare": 1,
+          "confidence": [
+            "low",
+            "low"
+          ],
+          "containsKnown": null
+        }
+      }
+    }
+  ]
+}
