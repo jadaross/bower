@@ -1,0 +1,21 @@
+{
+  "_comment": "The price benchmark's items (#78): four per market, from the dearest resale staples to a high-street basic, so the check is measured where it matters and where it is hardest. `known` is a fair asking range checked by hand on the platforms, per platform; null until someone does. Run with `npm run bench:prices`.",
+  "items": [
+    { "id": "gb-levis-501", "market": "GB", "item": { "brand": "Levi's", "clothing_type": "501 jeans", "size": "W32 L32", "condition": "Good", "colour_primary": "Blue" }, "known": null },
+    { "id": "gb-barbour-beaufort", "market": "GB", "item": { "brand": "Barbour", "clothing_type": "Beaufort wax jacket", "size": "M", "condition": "Good", "colour_primary": "Olive" }, "known": null },
+    { "id": "gb-af1", "market": "GB", "item": { "brand": "Nike", "clothing_type": "Air Force 1 trainers", "size": "UK 8", "condition": "Excellent", "colour_primary": "White" }, "known": null },
+    { "id": "gb-zara-dress", "market": "GB", "item": { "brand": "Zara", "clothing_type": "Midi dress", "size": "S", "condition": "Excellent", "colour_primary": "Black" }, "known": null },
+    { "id": "ie-nuptse", "market": "IE", "item": { "brand": "The North Face", "clothing_type": "1996 Nuptse puffer jacket", "size": "M", "condition": "Good", "colour_primary": "Black" }, "known": null },
+    { "id": "ie-docs-1460", "market": "IE", "item": { "brand": "Dr. Martens", "clothing_type": "1460 boots", "size": "UK 6", "condition": "Good", "colour_primary": "Black" }, "known": null },
+    { "id": "ie-rl-polo", "market": "IE", "item": { "brand": "Ralph Lauren", "clothing_type": "Polo shirt", "size": "L", "condition": "Excellent", "colour_primary": "Navy" }, "known": null },
+    { "id": "ie-penneys-jumper", "market": "IE", "item": { "brand": "Primark", "clothing_type": "Knit jumper", "size": "M", "condition": "Good", "colour_primary": "Cream" }, "known": null },
+    { "id": "us-carhartt-detroit", "market": "US", "item": { "brand": "Carhartt", "clothing_type": "Detroit jacket", "size": "M", "condition": "Good", "colour_primary": "Brown" }, "known": null },
+    { "id": "us-lulu-align", "market": "US", "item": { "brand": "Lululemon", "clothing_type": "Align leggings", "size": "6", "condition": "Excellent", "colour_primary": "Black" }, "known": null },
+    { "id": "us-patagonia-sweater", "market": "US", "item": { "brand": "Patagonia", "clothing_type": "Better Sweater fleece jacket", "size": "M", "condition": "Good", "colour_primary": "Grey" }, "known": null },
+    { "id": "us-oldnavy-tee", "market": "US", "item": { "brand": "Old Navy", "clothing_type": "T-shirt", "size": "L", "condition": "Good", "colour_primary": "White" }, "known": null },
+    { "id": "au-rm-williams", "market": "AU", "item": { "brand": "R.M. Williams", "clothing_type": "Comfort Craftsman boots", "size": "9", "condition": "Good", "colour_primary": "Brown" }, "known": null },
+    { "id": "au-zimmermann", "market": "AU", "item": { "brand": "Zimmermann", "clothing_type": "Linen midi dress", "size": "1", "condition": "Excellent", "colour_primary": "Ivory" }, "known": null },
+    { "id": "au-tech-fleece", "market": "AU", "item": { "brand": "Nike", "clothing_type": "Tech Fleece hoodie", "size": "M", "condition": "Excellent", "colour_primary": "Grey" }, "known": null },
+    { "id": "au-kmart-jumper", "market": "AU", "item": { "brand": "Kmart", "clothing_type": "Knit jumper", "size": "M", "condition": "Good", "colour_primary": "Beige" }, "known": null }
+  ]
+}

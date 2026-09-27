@@ -17,6 +17,9 @@ import { APP_APPLE_ID, APPLE_ROOT_CA_G3, BUNDLE_ID, PRODUCTS, type ProductKind }
 
 export class PurchaseRejected extends Error {}
 
+/** Genuine, but bought by another bower account: that account can still claim it. */
+export class PurchaseForAnotherAccount extends Error {}
+
 export interface VerifiedTransaction {
   transactionId: string;
   originalTransactionId: string;
@@ -121,7 +124,7 @@ export async function verifyNotification(signedPayload: string): Promise<Respons
  */
 export function claimFor(tx: VerifiedTransaction, userId: string): void {
   if (tx.appAccountToken && tx.appAccountToken !== userId.toLowerCase()) {
-    throw new PurchaseRejected("That purchase belongs to another bower account");
+    throw new PurchaseForAnotherAccount("That purchase was made on another bower account. Sign in to that account to use it.");
   }
 }
 

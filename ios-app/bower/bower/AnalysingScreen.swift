@@ -123,7 +123,7 @@ struct AnalysingScreen: View {
                 )
                 guard !Task.isCancelled else { return }
                 state.analysis = result
-                state.reads.used += 1
+                state.spentListing()
                 Notifications.scheduleNudge()
                 Notifications.listingIsReady(result.listing.title)
                 stage = stages.count

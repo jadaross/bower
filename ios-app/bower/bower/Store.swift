@@ -118,6 +118,10 @@ final class Store {
         } catch APIError.server(let status, let message) where status == 409 || status == 422 {
             await tx.finish()
             return .failed(message ?? "That purchase couldn't be added to this account.")
+        } catch APIError.server(403, let message) {
+            // Bought on another bower account: left unfinished, so it reaches
+            // that account the next time it is the one signed in here.
+            return .failed(message ?? "That purchase was made on another bower account.")
         } catch {
             return .failed("Bought, but bower couldn't record it yet. It will be added next time you open the app.")
         }

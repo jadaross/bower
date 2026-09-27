@@ -575,6 +575,12 @@ final class AppState {
     /// Whether Write it can spend anything: the month's listings, or the pack.
     var canWrite: Bool { reads.canSpend || packListings > 0 }
 
+    /// Mirrors `spend_allowance`: the month's listings first, then the pack.
+    /// The next profile read corrects any drift.
+    func spentListing() {
+        if reads.canSpend { reads.used += 1 } else if packListings > 0 { packListings -= 1 }
+    }
+
     func enable(_ platform: Platform, _ on: Bool) -> Bool {
         if !on && enabled.count == 1 { return false }
         if on { enabled.insert(platform) } else { enabled.remove(platform) }

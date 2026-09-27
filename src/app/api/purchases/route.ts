@@ -1,6 +1,6 @@
 import { withAuth } from "@/lib/auth";
 import { getProfile, profileWire } from "@/lib/profile";
-import { claimFor, PurchaseRejected, recordTransaction, verifyTransaction } from "@/lib/purchases";
+import { claimFor, PurchaseForAnotherAccount, PurchaseRejected, recordTransaction, verifyTransaction } from "@/lib/purchases";
 
 export const runtime = "nodejs";
 
@@ -33,6 +33,11 @@ export const POST = withAuth(async (request, user) => {
     }
     return Response.json(profileWire(await getProfile(user.token)));
   } catch (err) {
+    // Kept apart from a rejection: the app finishes a rejected transaction,
+    // and this one still belongs to someone.
+    if (err instanceof PurchaseForAnotherAccount) {
+      return Response.json({ error: err.message, code: "purchase_other_account" }, { status: 403 });
+    }
     if (err instanceof PurchaseRejected) {
       return Response.json({ error: err.message, code: "purchase_rejected" }, { status: 422 });
     }

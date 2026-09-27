@@ -87,9 +87,14 @@ describe("POST /api/purchases", () => {
     expect(recordTransaction).not.toHaveBeenCalled();
   });
 
-  it("refuses a purchase made from another bower account", async () => {
+  // Not 422: the app finishes a transaction the server refuses for good, and
+  // this one is still good for the account that bought it. 403 tells the app
+  // to leave it for that account to report.
+  it("refuses a purchase made from another bower account, as one to keep", async () => {
     verifyTransaction.mockResolvedValue({ ...tx, appAccountToken: "someone-else" });
-    expect((await POST(post({ transaction: "jws" }))).status).toBe(422);
+    const res = await POST(post({ transaction: "jws" }));
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe("purchase_other_account");
     expect(recordTransaction).not.toHaveBeenCalled();
   });
 

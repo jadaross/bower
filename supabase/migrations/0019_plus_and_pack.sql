@@ -135,7 +135,9 @@ begin
          allowance_period_start = p.allowance_period_start
    where id = p_user_id;
 
-  return query select v_source is not null, v_used, v_shown,
+  -- A refusal names the ceiling that was hit, so the app stops offering it.
+  return query select v_source is not null, v_used,
+                      case when v_source is null then v_limit else v_shown end,
                       p.allowance_period_start + interval '1 month', v_source;
 end;
 $$;
@@ -202,6 +204,7 @@ declare
   v_user uuid;
   v_existing public.purchases%rowtype;
   v_seen boolean;
+  v_rows integer;
 begin
   if p_kind not in ('plus', 'pack') then
     raise exception 'unknown product kind: %', p_kind;
@@ -228,6 +231,30 @@ begin
     end if;
   end if;
 
+  if not v_seen then
+    -- The app and Apple's notification can report the same new purchase at
+    -- once. Whichever inserts second finds the row there and goes on as if it
+    -- had seen it, instead of failing the unique constraint.
+    insert into public.purchases
+      (user_id, transaction_id, original_transaction_id, product_id, kind, environment,
+       purchased_at, expires_at, revoked_at, signed_transaction)
+    values
+      (v_user, p_transaction_id, p_original_transaction_id, p_product_id, p_kind, p_environment,
+       p_purchased_at, p_expires_at, p_revoked_at, p_signed)
+    on conflict (transaction_id) do nothing;
+    get diagnostics v_rows = row_count;
+
+    if v_rows = 1 then
+      if p_kind = 'pack' and p_revoked_at is null then
+        update public.profiles set pack_listings = pack_listings + 10 where id = v_user;
+      end if;
+    else
+      select * into v_existing from public.purchases where transaction_id = p_transaction_id for update;
+      v_seen := true;
+      v_user := v_existing.user_id;
+    end if;
+  end if;
+
   if v_seen then
     update public.purchases
        set expires_at = p_expires_at,
@@ -239,17 +266,6 @@ begin
     -- A pack refunded after it was counted takes its listings back.
     if p_kind = 'pack' and v_existing.revoked_at is null and p_revoked_at is not null then
       update public.profiles set pack_listings = greatest(pack_listings - 10, 0) where id = v_user;
-    end if;
-  else
-    insert into public.purchases
-      (user_id, transaction_id, original_transaction_id, product_id, kind, environment,
-       purchased_at, expires_at, revoked_at, signed_transaction)
-    values
-      (v_user, p_transaction_id, p_original_transaction_id, p_product_id, p_kind, p_environment,
-       p_purchased_at, p_expires_at, p_revoked_at, p_signed);
-
-    if p_kind = 'pack' and p_revoked_at is null then
-      update public.profiles set pack_listings = pack_listings + 10 where id = v_user;
     end if;
   end if;
 

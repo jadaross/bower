@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const rpc = vi.fn();
 vi.mock("@/lib/supabase", () => ({ serviceClient: () => ({ rpc }) }));
 
-const { claimFor, PurchaseRejected, recordTransaction, toVerified, verifyTransaction } = await import("./purchases");
+const { claimFor, PurchaseForAnotherAccount, PurchaseRejected, recordTransaction, toVerified, verifyTransaction } = await import("./purchases");
 
 /** An unsigned JWS carrying `payload`, for the checks that run before the signature's. */
 function unsigned(payload: object): string {
@@ -83,7 +83,7 @@ describe("claimFor", () => {
   });
 
   it("refuses a transaction bought from another bower account", () => {
-    expect(() => claimFor(tx, "someone-else")).toThrow(PurchaseRejected);
+    expect(() => claimFor(tx, "someone-else")).toThrow(PurchaseForAnotherAccount);
   });
 
   // A purchase made outside the app (an offer code, say) carries no token.
