@@ -114,6 +114,32 @@ describe("valuate — failure", () => {
   });
 });
 
+// ADR-0005: a Price Band exists only with Comparables. The benchmark (#78)
+// found 22% of bands resting on none; those are "no listings found", not a range.
+describe("valuate — no listings", () => {
+  it("reports a platform whose band has no comparables as no listings, not a band", async () => {
+    band.mockImplementation((_item: ValuationItem, platform: Platform) =>
+      Promise.resolve(platform === "depop" ? { ...bandFor(platform), comparables: [] } : bandFor(platform))
+    );
+    const result = await valuate(item, ["vinted", "depop"], "GB", provider);
+    expect(Object.keys(result.perPlatform)).toEqual(["vinted"]);
+    expect(result.noListings).toEqual(["depop"]);
+  });
+
+  it("says so for every platform when none found any", async () => {
+    band.mockImplementation((_item: ValuationItem, platform: Platform) =>
+      Promise.resolve({ ...bandFor(platform), comparables: [] })
+    );
+    const result = await valuate(item, ["vinted", "depop"], "GB", provider);
+    expect(result.perPlatform).toEqual({});
+    expect(result.noListings).toEqual(["vinted", "depop"]);
+  });
+
+  it("lists nothing when every platform found listings", async () => {
+    expect((await valuate(item, ["vinted", "depop"], "GB", provider)).noListings).toEqual([]);
+  });
+});
+
 describe("valuate — market", () => {
   it("passes the market to the provider", async () => {
     await valuate(item, ["depop"], "AU", provider);

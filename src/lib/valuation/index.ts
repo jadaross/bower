@@ -43,16 +43,21 @@ export async function valuate(
     })
   );
 
+  // ADR-0005: a Price Band exists only with Comparables. A band the search
+  // could not back with a single listing is an estimate in a band's clothes,
+  // so the platform is reported as having no listings instead (#80).
   const perPlatform: Partial<Record<Platform, PriceBand>> = {};
+  const noListings: Platform[] = [];
   for (const result of results) {
     if (result.status === "fulfilled") {
       const [platform, band] = result.value;
-      perPlatform[platform] = band;
+      if (band.comparables.length > 0) perPlatform[platform] = band;
+      else noListings.push(platform);
     }
   }
 
   // A partial answer is useful; no answer at all is a failure worth surfacing.
-  if (Object.keys(perPlatform).length === 0) {
+  if (Object.keys(perPlatform).length === 0 && noListings.length === 0) {
     const reason = results.find((r) => r.status === "rejected");
     throw new Error(
       `Valuation failed on every platform: ${
@@ -61,6 +66,6 @@ export async function valuate(
     );
   }
 
-  return { perPlatform, query: describeItem(item) };
+  return { perPlatform, noListings, query: describeItem(item) };
   });
 }

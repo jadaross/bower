@@ -31,7 +31,7 @@ function unevidenced(low: number, high: number): PriceBand {
 }
 
 function valuation(perPlatform: Partial<Record<Platform, PriceBand>>): Valuation {
-  return { perPlatform, query: "test item" };
+  return { perPlatform, noListings: [], query: "test item" };
 }
 
 describe("midpoint / score", () => {

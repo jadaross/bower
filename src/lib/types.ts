@@ -158,7 +158,10 @@ export interface PriceBand {
 
 /** The answer to "what is this item worth?" — one band per Enabled Platform. */
 export interface Valuation {
+  /** Only platforms whose band rests on Comparables (ADR-0005). */
   perPlatform: Partial<Record<Platform, PriceBand>>;
+  /** Platforms that were searched and found no comparable listings. Not a band. */
+  noListings: Platform[];
   /** The search phrasing used, exposed so a user can sanity-check the result. */
   query: string;
 }

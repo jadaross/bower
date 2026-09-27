@@ -190,8 +190,15 @@ private struct HistoryDetail: View {
                                     Circle().fill(pair.0.tint).frame(width: 9, height: 9)
                                     Text(pair.0.name).font(BowerFont.ui(14)).foregroundStyle(theme.text)
                                     Spacer()
-                                    Text("\(Money.symbol(pair.1.currency))\(trim(pair.1.low))–\(Money.symbol(pair.1.currency))\(trim(pair.1.high))")
-                                        .font(BowerFont.mono(13)).foregroundStyle(theme.text)
+                                    // Older checks stored a band with no listings behind
+                                    // it; that was never a price (ADR-0005, #80).
+                                    if pair.1.comparables.isEmpty {
+                                        Text("Nothing comparable")
+                                            .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                                    } else {
+                                        Text("\(Money.symbol(pair.1.currency))\(trim(pair.1.low))–\(Money.symbol(pair.1.currency))\(trim(pair.1.high))")
+                                            .font(BowerFont.mono(13)).foregroundStyle(theme.text)
+                                    }
                                 }
                                 .padding(.vertical, 12).padding(.horizontal, 16)
                             }
@@ -307,13 +314,19 @@ enum HistoryFormat {
     /// What the card's price is: the ask and where, the searched range, or the estimate.
     static func priceLabel(_ item: HistoryItem) -> String {
         if let rec = item.valuation?.recommendation { return "ASK ON \(rec.platform.name.uppercased())" }
-        if item.valuation?.perPlatform.values.first != nil { return "LISTED AT" }
+        if evidenced(item) != nil { return "LISTED AT" }
         return "ESTIMATE"
+    }
+
+    /// The first searched band with listings behind it. A band without any was
+    /// never a price (ADR-0005), so the card falls back to the estimate.
+    private static func evidenced(_ item: HistoryItem) -> PriceBand? {
+        item.valuation?.perPlatform.values.first { !$0.comparables.isEmpty }
     }
 
     static func price(_ item: HistoryItem) -> String {
         if let rec = item.valuation?.recommendation { return Money.format(Int(rec.listAt.rounded()), rec.currency) }
-        if let band = item.valuation?.perPlatform.values.first {
+        if let band = evidenced(item) {
             let s = Money.symbol(band.currency)
             return "\(s)\(Int(band.low.rounded()))–\(s)\(Int(band.high.rounded()))"
         }

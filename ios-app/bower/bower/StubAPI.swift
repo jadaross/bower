@@ -234,6 +234,25 @@ struct StubAPI: BowerAPIClient {
                 reasoning: "Similar jackets are listed at \(sym)\(Int(lo))–\(sym)\(Int(hi)) on \(p.name) today."
             )
         }
+        // `-bowerNoListings`: Depop found nothing comparable. `-bowerNoListings all`: nowhere did.
+        let args = CommandLine.arguments
+        if let i = args.firstIndex(of: "-bowerNoListings") {
+            let all = i + 1 < args.count && args[i + 1] == "all"
+            return ValuationResponse(
+                perPlatform: all ? [:] : [
+                    Platform.vinted.rawValue: band(34, 46, 18, .vinted),
+                    Platform.ebay.rawValue: band(38, 52, 26, .ebay),
+                ],
+                query: "Carhartt Detroit jacket M brown",
+                recommendation: all ? nil : Recommendation(
+                    platform: .ebay, listAt: 45, net: 39, currency: cur,
+                    reasoning: "Higher asking prices than Vinted for this jacket.",
+                    runnersUp: [RunnerUp(platform: .vinted, listAt: 40, net: 40)]
+                ),
+                searches: AllowanceState(used: all ? 1 : 2, limit: 3, resetsAt: "2026-10-01T00:00:00Z"),
+                noListings: all ? ["vinted", "depop", "ebay"] : ["depop"]
+            )
+        }
         return ValuationResponse(
             perPlatform: [
                 Platform.vinted.rawValue: band(34, 46, 18, .vinted),

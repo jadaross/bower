@@ -46,6 +46,8 @@ final class ListingModel {
     var listing: NeutralListing?
     var priceState: PriceState = .estimated
     var bands: [Platform: PriceBand] = [:]
+    /// Searched, and nothing comparable was listed there. Shown as such, never as a range.
+    var noListings: Set<Platform> = []
     var recommendation: Recommendation?
     var searchError: String?
     var elapsed = 0
@@ -141,6 +143,7 @@ final class ListingModel {
                 var out: [Platform: PriceBand] = [:]
                 for (k, b) in v.perPlatform { if let p = Platform(rawValue: k) { out[p] = b } }
                 bands = out
+                noListings = Set(v.noListings.compactMap(Platform.init(rawValue:)))
                 recommendation = v.recommendation
                 if let s = v.searches { state.searches = s }
                 priceState = .searched
@@ -367,10 +370,16 @@ private struct PriceSection: View {
                 Kicker("Listed at right now")
                 VStack(spacing: 10) {
                     ForEach(Array(model.enabled.enumerated()), id: \.element) { i, p in
-                        if let band = model.bands[p] { bandRow(p, band).staggerIn(i + 1) }
+                        if let band = model.bands[p] {
+                            bandRow(p, band).staggerIn(i + 1)
+                        } else if model.noListings.contains(p) {
+                            nothingRow(p).staggerIn(i + 1)
+                        }
                     }
                 }
-                Text("Asking prices today. Nothing here has necessarily sold.")
+                Text(model.bands.isEmpty
+                     ? "Nothing comparable is listed right now, so this check didn't count."
+                     : "Asking prices today. Nothing here has necessarily sold.")
                     .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
                     .padding(.top, 4)
             }
@@ -410,6 +419,22 @@ private struct PriceSection: View {
             .padding(.vertical, 16).padding(.horizontal, 18)
         }
         .animation(Motion.quick, value: model.platform)
+    }
+
+    /// A platform searched with nothing comparable listed: said plainly, no range.
+    private func nothingRow(_ p: Platform) -> some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 3).fill(theme.line).frame(width: 6, height: 34)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
+                Text("Nothing comparable today").font(BowerFont.serifUpright(22)).foregroundStyle(theme.muted)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 13).padding(.horizontal, 14)
+        .background(theme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(theme.line, lineWidth: 0.5))
     }
 
     private func bandRow(_ p: Platform, _ band: PriceBand) -> some View {

@@ -175,6 +175,8 @@ struct ValuationResponse: Codable, Sendable {
     let recommendation: Recommendation?
     /// The deep-research meter after this spend.
     var searches: AllowanceState? = nil
+    /// Platforms searched that found no comparable listings: no band, by design (ADR-0005).
+    var noListings: [String] = []
 }
 
 /// Deliberately narrower than the Neutral Listing — a valuation needs less

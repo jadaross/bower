@@ -199,6 +199,24 @@ describe("the Allowance meter", () => {
     expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "search", "monthly");
   });
 
+  it("passes on which platforms found no listings", async () => {
+    valuate.mockResolvedValue({ ...valuation, noListings: ["depop"] });
+    const body = await (await POST(post({ item }))).json();
+    expect(body.no_listings).toEqual(["depop"]);
+    expect(refundAllowance).not.toHaveBeenCalled();
+  });
+
+  // Nothing found anywhere delivers nothing, so it costs nothing, like a failure.
+  it("refunds, and reports the meter after the refund, when no platform found any listings", async () => {
+    valuate.mockResolvedValue({ perPlatform: {}, noListings: ["vinted", "depop"], query: "q" });
+    const res = await POST(post({ item }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.no_listings).toEqual(["vinted", "depop"]);
+    expect(refundAllowance).toHaveBeenCalledWith("test-user-id", "search", "monthly");
+    expect(body.searches.used).toBe(2);
+  });
+
   it("does not refund when the valuation succeeds", async () => {
     await POST(post({ item }));
     expect(refundAllowance).not.toHaveBeenCalled();

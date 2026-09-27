@@ -73,13 +73,19 @@ export const POST = withAuth(async (request, user) => {
       query: valuation.query,
       recommendation,
     });
+    // Found nothing on any platform: nothing was delivered, so, like a
+    // failure, it costs nothing (#80).
+    const foundNothing = Object.keys(valuation.perPlatform).length === 0;
+    if (foundNothing) await refundAllowance(user.id, "search", spend.source);
+    const { noListings, ...rest } = valuation;
     // Null recommendation with a single Enabled Platform — there is nothing to
     // choose between, and no comparison work runs. See ADR-0004.
     return Response.json({
-      ...valuation,
+      ...rest,
+      no_listings: noListings ?? [],
       recommendation,
-      // The deep-research meter after this spend.
-      searches: { used: spend.used, limit: spend.limit, resets_at: spend.resetsAt },
+      // The market-check meter after this spend (and any refund).
+      searches: { used: foundNothing ? Math.max(0, spend.used - 1) : spend.used, limit: spend.limit, resets_at: spend.resetsAt },
     });
   } catch (err) {
     // A valuation that failed must not cost the user anything (#9).
