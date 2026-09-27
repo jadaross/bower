@@ -8,6 +8,8 @@
 #   ./scripts/upload.sh                  # bump build, archive, upload, distribute to every group
 #   ./scripts/upload.sh --internal-only  # the same, but the build stops at the internal
 #                                        # testers (Jada); Friends are not sent it
+#   ./scripts/upload.sh --no-push        # commit the build number but leave main unpushed,
+#                                        # for when a push would deploy a backend not ready yet
 #
 # With "Enable automatic distribution" on the TestFlight group, the build
 # reaches testers the moment it finishes processing — usually minutes.
@@ -26,9 +28,11 @@
 set -euo pipefail
 
 INTERNAL_ONLY=0
+NO_PUSH=0
 for arg in "$@"; do
   case "$arg" in
     --internal-only) INTERNAL_ONLY=1 ;;
+    --no-push) NO_PUSH=1 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -78,8 +82,13 @@ echo "uploaded build $NEXT — App Store Connect is processing it"
 
 cd ../..
 git add ios-app/bower/bower.xcodeproj/project.pbxproj
-git commit -q -m "chore: build $NEXT" && git push -q origin main
-echo "committed and pushed"
+git commit -q -m "chore: build $NEXT"
+if [[ "$NO_PUSH" == 1 ]]; then
+  echo "committed, not pushed (--no-push)"
+else
+  git push -q origin main
+  echo "committed and pushed"
+fi
 
 # Every build goes to every TestFlight group: internal testers get it the
 # moment it processes; external groups (Friends) need it added and submitted,
