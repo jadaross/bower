@@ -25,7 +25,7 @@ app: about 100 seconds a platform, 46p for three, and the client honestly says
 3. ✅ **Forbid placeholder URLs in the prompt.** About one Haiku call in fifteen
    returned `itm/unknown`; `coerceBand` drops them, but the model's confidence
    label lies when it happens.
-4. **Move the comparables cache into Supabase.** `src/lib/valuation/cache.ts` is
+4. ✅ **Move the comparables cache into Supabase** (27 September, #80, migration 0020). `src/lib/valuation/cache.ts` is
    per process, so on Vercel it is nearly always empty and every repeat of
    "Levi's 501, 32, Good" pays full price. Same key, a table, a 7-day TTL.
 5. **Keep `max_uses: 2`.** 1 loses comparables (§6); 3 and 5 on Haiku buy little

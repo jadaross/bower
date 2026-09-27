@@ -240,3 +240,12 @@ describe("apply_transaction", () => {
     expect(rows).toHaveLength(0);
   });
 });
+
+describe("valuation_cache", () => {
+  it("exists, and is closed to signed-in users", async () => {
+    const { rows } = await db.query<{ can: boolean }>(
+      "select has_table_privilege('authenticated', 'public.valuation_cache', 'select') as can"
+    );
+    expect(rows[0].can).toBe(false);
+  });
+});

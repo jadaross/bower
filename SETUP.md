@@ -39,6 +39,7 @@ in order:
 | `0003_allowance_spend_and_refund.sql` | `spend_allowance` / `refund_allowance` — moving the meter atomically |
 | … | See the files; each opens with what it does and why |
 | `0019_plus_and_pack.sql` | bower Plus (`plus_expires_at`), the listing pack (`pack_listings`), the `purchases` ledger and `apply_transaction` (ADR-0011) |
+| `0020_valuation_cache.sql` | `valuation_cache`: Price Bands by item key for seven days, shared by every instance (#80) |
 
 Apply them with the CLI (installed as a dev dependency):
 

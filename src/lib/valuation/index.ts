@@ -6,7 +6,7 @@ import { readCache, writeCache } from "./cache";
 import type { ValuationProvider } from "./provider";
 
 export type { ValuationProvider } from "./provider";
-export { clearCache } from "./cache";
+export { clearCache, useSharedCache } from "./cache";
 export { askingPriceProvider } from "./asking-price";
 export { recommend, midpoint, score } from "./recommend";
 
@@ -35,10 +35,10 @@ export async function valuate(
   return observeParent("valuate", { item, platforms: unique, market }, async () => {
   const results = await Promise.allSettled(
     unique.map(async (platform): Promise<[Platform, PriceBand]> => {
-      const cached = readCache(item, platform, market);
+      const cached = await readCache(item, platform, market);
       if (cached) return [platform, cached];
       const band = await provider.band(item, platform, market);
-      writeCache(item, platform, market, band);
+      await writeCache(item, platform, market, band);
       return [platform, band];
     })
   );

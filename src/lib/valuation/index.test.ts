@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Platform, PriceBand, ValuationItem } from "@/lib/types";
-import { clearCache, valuate, type ValuationProvider } from "./index";
+import { clearCache, useSharedCache, valuate, type ValuationProvider } from "./index";
 
 const item: ValuationItem = {
   brand: "Carhartt",
@@ -26,6 +26,7 @@ const provider: ValuationProvider = { band };
 
 beforeEach(() => {
   clearCache();
+  useSharedCache(null);
   band.mockReset();
   band.mockImplementation((_item: ValuationItem, platform: Platform) =>
     Promise.resolve(bandFor(platform))
