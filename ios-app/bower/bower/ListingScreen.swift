@@ -23,7 +23,14 @@ struct ListingScreen: View {
         }
         .padding(.top, 6)
         .padding(.bottom, 34)
-        .task { await model.start(state: state) }
+        .task {
+            await model.start(state: state)
+            #if DEBUG
+            // `-bowerSearch` runs the market check as soon as the listing is
+            // up, so the priced state can be screenshotted without a tap.
+            if CommandLine.arguments.contains("-bowerSearch"), model.priceState == .estimated { model.search() }
+            #endif
+        }
         .sheet(item: $model.compsFor) { platform in
             CompsSheet(platform: platform, band: model.bands[platform])
         }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Push docs/app-store/metadata.json into App Store Connect: the version's
-// listing copy, the app-level name/subtitle/privacy URL, categories, the
+// listing copy in every language under `localizations` (creating any the
+// record lacks), the app-level name/subtitle/privacy URL, categories, the
 // content-rights answer, the age rating (everything "none" → 4+) and the App
 // Review details. Idempotent — run it again after editing the file.
 //
@@ -37,10 +38,33 @@ function patch(type, id, attributes, relationships) {
 const limit = (name, value, max) => {
   if (value && value.length > max) throw new Error(`${name} is ${value.length} chars; limit ${max}`);
 };
-limit("subtitle", meta.subtitle, 30);
-limit("keywords", meta.keywords, 100);
-limit("promotionalText", meta.promotionalText, 170);
-limit("description", meta.description, 4000);
+for (const [locale, l] of Object.entries(meta.localizations)) {
+  limit(`${locale} subtitle`, l.subtitle, 30);
+  limit(`${locale} keywords`, l.keywords, 100);
+  limit(`${locale} promotionalText`, l.promotionalText, 170);
+  limit(`${locale} description`, l.description, 4000);
+  for (const [k, v] of Object.entries(l)) {
+    if (typeof v === "string" && v.includes("\u2014")) throw new Error(`${locale} ${k} has an em dash`);
+  }
+}
+
+/** The localization for `locale` under `parent`, created when missing. */
+function localization(type, parentType, parentId, existing, locale, attributes) {
+  const found = existing.find((l) => l.attributes.locale === locale);
+  if (found) return patch(type, found.id, attributes);
+  if (dry) return console.log("POST", type, locale, JSON.stringify(attributes, null, 1).slice(0, 300));
+  try {
+    asc("POST", `/v1/${type}`, {
+      data: { type, attributes: { locale, ...attributes }, relationships: { [parentType]: { data: { type: `${parentType}s`, id: parentId } } } },
+    });
+    console.log("created", type, locale);
+  } catch (err) {
+    // App names are unique per language across the whole store. Where
+    // "bower" is taken, that storefront shows the primary language instead.
+    if (!/DUPLICATE_NAME|→ 409/.test(String(err.message))) throw err;
+    console.log(`skipped ${type} ${locale}: the name "${meta.name}" is taken in that language; the store falls back to ${meta.primaryLocale}`);
+  }
+}
 
 // The version in preparation and its localization.
 const versions = asc("GET", `/v1/apps/${APP_ID}/appStoreVersions?filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED,WAITING_FOR_REVIEW`).data;
@@ -48,24 +72,31 @@ const version = versions[0];
 if (!version) throw new Error("no App Store version in preparation");
 console.log(`version ${version.attributes.versionString} (${version.attributes.appStoreState})`);
 
-const loc = asc("GET", `/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations`).data.find((l) => l.attributes.locale === meta.locale);
-if (!loc) throw new Error(`no ${meta.locale} localization on the version`);
+const versionLocs = asc("GET", `/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations`).data;
 // "What's New" only exists once there is a live version to be new against.
 const hasLive = asc("GET", `/v1/apps/${APP_ID}/appStoreVersions?filter[appStoreState]=READY_FOR_SALE`).data.length > 0;
-patch("appStoreVersionLocalizations", loc.id, {
-  description: meta.description,
-  keywords: meta.keywords,
-  promotionalText: meta.promotionalText,
-  supportUrl: meta.supportUrl,
-  marketingUrl: meta.marketingUrl,
-  ...(hasLive ? { whatsNew: meta.whatsNew } : {}),
-});
+for (const [locale, l] of Object.entries(meta.localizations)) {
+  localization("appStoreVersionLocalizations", "appStoreVersion", version.id, versionLocs, locale, {
+    description: l.description,
+    keywords: l.keywords,
+    promotionalText: l.promotionalText,
+    supportUrl: meta.supportUrl,
+    marketingUrl: meta.marketingUrl,
+    ...(hasLive ? { whatsNew: l.whatsNew } : {}),
+  });
+}
 patch("appStoreVersions", version.id, { copyright: meta.copyright });
 
 // App-level info: name, subtitle, privacy URL, categories, age rating.
 const info = asc("GET", `/v1/apps/${APP_ID}/appInfos`).data.find((i) => i.attributes.appStoreState !== "READY_FOR_SALE") ?? asc("GET", `/v1/apps/${APP_ID}/appInfos`).data[0];
-const infoLoc = asc("GET", `/v1/appInfos/${info.id}/appInfoLocalizations`).data.find((l) => l.attributes.locale === meta.locale);
-patch("appInfoLocalizations", infoLoc.id, { name: meta.name, subtitle: meta.subtitle, privacyPolicyUrl: meta.privacyPolicyUrl });
+const infoLocs = asc("GET", `/v1/appInfos/${info.id}/appInfoLocalizations`).data;
+for (const [locale, l] of Object.entries(meta.localizations)) {
+  localization("appInfoLocalizations", "appInfo", info.id, infoLocs, locale, {
+    name: meta.name,
+    subtitle: l.subtitle,
+    privacyPolicyUrl: meta.privacyPolicyUrl,
+  });
+}
 patch("appInfos", info.id, {}, {
   primaryCategory: { data: { type: "appCategories", id: meta.primaryCategory } },
   ...(meta.secondaryCategory ? { secondaryCategory: { data: { type: "appCategories", id: meta.secondaryCategory } } } : {}),

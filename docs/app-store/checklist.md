@@ -10,12 +10,12 @@ titled "App Store submission — human steps".
 
 | What | Where | How |
 |---|---|---|
-| Name, subtitle, description, keywords, promo text, copyright | `metadata.json` | `node scripts/asc-metadata.mjs` |
+| Name, subtitle, description, keywords, promo text, copyright | `metadata.json` (one block per language) | `node scripts/asc-metadata.mjs`. English (U.K.) is on the record and serves all four stores: **"bower" is taken in English (U.S.) and English (Australia)**, so those languages cannot be added under that name (27 Sep) |
 | Support URL (`/support`) and privacy URL (`/privacy`) | `metadata.json`, `src/app/support`, `src/app/privacy` | same |
 | Categories: Shopping / Lifestyle | `metadata.json` | same |
 | Age rating: every answer "none" → 4+ | `scripts/asc-metadata.mjs` | same |
 | Content rights: no third-party content | same | same |
-| Six placeholder 6.9" screenshots from the stub | `screenshots/` | `node scripts/asc-screenshots.mjs` — **to be replaced by the designed set** |
+| Six placeholder 6.9" screenshots from the stub | `screenshots/` | `node scripts/asc-screenshots.mjs`. **To be replaced by the designed set.** Raw captures per market (£, €, $, A$) are in `screenshots/GB`, `IE`, `US`, `AU` |
 | Availability: United Kingdom only, new territories off | ASC → Pricing and Availability | `appAvailabilities` v2 takes all 175 territories in one request. **Australia works from build 35 (ADR-0009) — switch AU on before submitting that build.** Ireland is #56 |
 | App Privacy label: Email, Photos, User ID, Other User Content, Product Interaction, Performance Data — all linked, none tracking | ASC → App Privacy (browser only, done 11 Sep) | matches `PrivacyInfo.xcprivacy` from build 35 |
 
@@ -59,6 +59,7 @@ titled "App Store submission — human steps".
 ## The last mile, after the final changes
 
 ```bash
+node scripts/asc-availability.mjs --apply   # UK, Ireland, US, Australia on; everything else off
 scripts/upload.sh                      # archive + upload + TestFlight, as now
 node scripts/asc-metadata.mjs          # if the copy changed
 node scripts/asc-screenshots.mjs       # if the screenshots folder changed
