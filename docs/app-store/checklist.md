@@ -59,6 +59,7 @@ titled "App Store submission — human steps".
 ## The last mile, after the final changes
 
 ```bash
+# docs/app-store/launch-day-free-tier.sql → the next migration, applied (#76): free tier to 5 and 1
 node scripts/asc-products.mjs --apply       # Plus and the pack, four prices (once the Paid Apps agreement is active)
 node scripts/asc-availability.mjs --apply   # UK, Ireland, US, Australia on; everything else off
 scripts/upload.sh                      # archive + upload + TestFlight, as now

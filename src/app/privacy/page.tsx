@@ -101,7 +101,7 @@ export default function Privacy() {
 
       <h2>Contact</h2>
       <p>
-        Questions about any of this: <a href="mailto:jada-ross@hotmail.com" style={{ color: "#2B3AA8" }}>jada-ross@hotmail.com</a>.
+        Questions about any of this: <a href="mailto:moko.jada.ross@gmail.com" style={{ color: "#2B3AA8" }}>moko.jada.ross@gmail.com</a>.
       </p>
     </main>
   );

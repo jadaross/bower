@@ -298,3 +298,20 @@ describe("refund_rejection", () => {
     expect((await profile(u)).pack_listings).toBe(3);
   });
 });
+
+// #76: prepared now, applied on launch day. Proven here so the day holds no surprises.
+describe("the launch-day free tier", () => {
+  it("moves free accounts and new ones to 5 and 1, and leaves the owner unlimited", async () => {
+    const { readFileSync } = await import("node:fs");
+    const free = await newUser(db);
+    const owner = await newUser(db);
+    await set(owner, "reads_limit = null, searches_limit = null");
+    await db.exec(readFileSync("docs/app-store/launch-day-free-tier.sql", "utf8"));
+    const limits = async (id: string) =>
+      (await db.query<{ reads_limit: number | null; searches_limit: number | null }>(
+        "select reads_limit, searches_limit from public.profiles where id = $1", [id])).rows[0];
+    expect(await limits(free)).toEqual({ reads_limit: 5, searches_limit: 1 });
+    expect(await limits(owner)).toEqual({ reads_limit: null, searches_limit: null });
+    expect(await limits(await newUser(db))).toEqual({ reads_limit: 5, searches_limit: 1 });
+  });
+});

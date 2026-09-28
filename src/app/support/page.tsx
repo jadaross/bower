@@ -2,7 +2,7 @@ export const metadata = { title: "bower · support" };
 
 // The public support contact App Store Connect requires. One address, and it
 // is the same one given as the App Review contact.
-const SUPPORT_EMAIL = "SUPPORT_EMAIL_TO_SET";
+const SUPPORT_EMAIL = "moko.jada.ross@gmail.com";
 
 export default function Support() {
   return (
