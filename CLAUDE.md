@@ -129,6 +129,9 @@ quiet week. Real camera,
 real Supabase session, every screen exercised in the simulator. Fonts, icon, usage strings,
 privacy manifest and export compliance are all in.
 
+**Releasing:** every build to the App Store follows `docs/release-checklist.md`; the first
+submission's full pass is `docs/app-store/launch-test.md`.
+
 **Waiting on:** the human steps in #54 (support email, screenshots, review contact).
 What comes next, in order, is `docs/roadmap.md`; the free tier, the price of Plus,
 running costs and break-even are ADR-0010.
