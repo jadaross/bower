@@ -77,27 +77,10 @@ struct BowerTheme {
 /// as two static faces; Geist and Geist Mono are variable fonts, addressed by
 /// family name so the weight axis responds to `.weight()`.
 enum BowerFont {
-    static func serif(_ size: CGFloat) -> Font {
-        .custom("InstrumentSerif-Italic", size: size)
-    }
-
-    static func serifUpright(_ size: CGFloat) -> Font {
-        .custom("InstrumentSerif-Regular", size: size)
-    }
-
-    static func ui(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom("Geist", size: size).weight(weight)
-    }
-
-    static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        .custom("Geist Mono", size: size).weight(weight)
-    }
-    // MARK: The scale
-    //
     // Every size the app sets comes from these steps, so the same kind of
-    // text is the same size on every screen and nothing is under 11pt. The
-    // free sizes above go once every screen has moved over (#89). Each step
-    // still scales with Dynamic Type, relative to body.
+    // text is the same size on every screen and nothing is under 11pt. There
+    // is deliberately no way to pass a number: a size outside the scale does
+    // not compile. Each step scales with Dynamic Type, relative to body.
 
     /// Geist, the UI face.
     enum Step: CGFloat {
@@ -114,29 +97,34 @@ enum BowerFont {
         case label = 11
     }
 
-    /// Instrument Serif, italic or upright: headlines and the wordmark.
-    /// Price figures inside `PriceRange` keep their own sizes.
+    /// Instrument Serif, italic or upright: headlines, the wordmark, prices.
     enum Display: CGFloat {
-        case small = 22        // a sheet's headline
+        case small = 22        // a sheet's headline, a card's title
         case medium = 30       // a screen's headline
         case large = 38        // onboarding headlines
-        case hero = 60         // the sign-in wordmark and splash
+        case hero = 60         // the sign-in wordmark, the splash, the Ask
     }
 
     static func ui(_ step: Step, weight: Font.Weight = .regular) -> Font {
-        ui(step.rawValue, weight: weight)
+        .custom("Geist", size: step.rawValue).weight(weight)
     }
 
     static func mono(_ step: MonoStep, weight: Font.Weight = .regular) -> Font {
-        mono(step.rawValue, weight: weight)
+        .custom("Geist Mono", size: step.rawValue).weight(weight)
     }
 
     static func serif(_ step: Display) -> Font {
-        serif(step.rawValue)
+        .custom("InstrumentSerif-Italic", size: step.rawValue)
     }
 
     static func serifUpright(_ step: Display) -> Font {
-        serifUpright(step.rawValue)
+        .custom("InstrumentSerif-Regular", size: step.rawValue)
+    }
+
+    /// The one exception to the scale: a Price Band's figures, which
+    /// `PriceRange` sizes to fit wherever the band is shown. Use nowhere else.
+    static func priceFigure(_ size: CGFloat) -> Font {
+        .custom("InstrumentSerif-Regular", size: size)
     }
 }
 

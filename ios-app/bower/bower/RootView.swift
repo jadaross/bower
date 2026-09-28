@@ -25,6 +25,11 @@ struct BowerNav<Leading: View, Trailing: View>: View {
                 trailing().frame(minWidth: 60, alignment: .trailing)
             }
             .frame(height: 44)
+            // A 44pt bar holds a back button, a title and an action, so like
+            // UIKit's navigation bar it stops growing past a step above the
+            // default; long-pressing an item shows it large instead.
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
+            .accessibilityShowsLargeContentViewer()
 
             if large {
                 HStack(spacing: 9) {

@@ -223,12 +223,12 @@ struct PriceRange: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
-            Text("\(symbol)\(low)").font(BowerFont.serifUpright(size))
+            Text("\(symbol)\(low)").font(BowerFont.priceFigure(size))
             Text("–")
-                .font(BowerFont.serifUpright(size * 0.6))
+                .font(BowerFont.priceFigure(size * 0.6))
                 .opacity(0.5)
                 .padding(.horizontal, 3)
-            Text("\(symbol)\(high)").font(BowerFont.serifUpright(size))
+            Text("\(symbol)\(high)").font(BowerFont.priceFigure(size))
         }
         .foregroundStyle(color ?? theme.text)
         .monospacedDigit()

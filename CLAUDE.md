@@ -218,8 +218,9 @@ Sizes come from the scale in `BowerFont`, never a number:
 | Geist Mono (`mono`) | label 11 (kickers, counters) |
 | Instrument Serif (`serif`, `serifUpright`) | small 22 · medium 30 · large 38 · hero 60 |
 
-Nothing is under 11pt. Price figures inside `PriceRange` keep their own sizes. The free
-`size:` overloads remain only until every screen has moved over (#87, #88), then go (#89).
+Nothing is under 11pt, and there is no way to pass a number: a size off the scale does
+not compile. The one exception is `BowerFont.priceFigure`, which only `PriceRange` uses to
+size a Price Band's figures to where it is shown.
 
 The mark is **the arch** — a bower, filled solid, with a hole punched through the
 crown so it reads as a swing tag, and the pollen dot beneath. One `Arch` view draws
