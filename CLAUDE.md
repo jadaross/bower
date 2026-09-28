@@ -37,7 +37,11 @@ only, the flag does not exist in Release. Add `-bowerScreen signin` (or `how`,
 for an account with no limits, `-bowerSpent` for both meters at zero, `-bowerLink <url>` for a
 product page already pasted on Home, `-bowerMarket US` (or `AU`) to sell there in its
 currency, `-bowerRegion CA` to stand in for the device's region (with `-onboardingComplete NO`
-on `platforms`, the uncovered-region state).
+on `platforms`, the uncovered-region state). The simulator can't be tapped from outside on
+Xcode 27, so every other state has a flag too (`DebugLaunch.swift`): `-bowerSheet tips|help|about|feedback|comps|detail|email`,
+`-bowerHelpStep 0…4`, `-bowerScroll 0…1` (any page, scrolled that far), `-bowerPhotos 1…5`.
+`./scripts/screens.sh` shoots every page in light and dark with them; `docs/review-checklist.md`
+is the same pass by hand on a phone.
 
 ## Environment
 

@@ -15,6 +15,9 @@ Backend-only changes (a push to `main`, no new build) need only parts 1 and 5.
 - [ ] The iOS app builds with no warnings, and the stub (`-bowerStub`) opens every screen touched by the release.
 - [ ] New user-facing copy follows `docs/copy.md` and CLAUDE.md: no em dashes, and no "unlimited" on anything with a hard stop.
 - [ ] If `Arch` changed, the launch image and icon were re-rendered (`BOWER_RENDER_LAUNCH=1`).
+- [ ] The iOS tests pass, including `PaletteContrastTests` (every text colour at 4.5:1 in both themes).
+- [ ] `./scripts/screens.sh` shoots every page in light and dark, and each one is looked at: nothing cut off, overlapping or wrapping badly, nothing hard to read. If the release touched layout, the listing and Home again at the largest text size (`xcrun simctl ui booted content_size extra-extra-extra-large`). A new screen or sheet gets a line in the script, and a `-bower…` launch argument if nothing reaches it.
+- [ ] New text uses a `BowerFont` step and a theme text token (`accentText`, `errorText`, `confirmText`), never a number or a fill colour.
 
 ## 2. The build
 
@@ -35,6 +38,7 @@ Use a normal account, not the owner's, so the meters are real.
 8. [ ] The paywall opens from Profile with real prices, and **Restore purchases** brings back anything bought before.
 9. [ ] A photo that isn't clothing: **Only clothes, shoes and bags**.
 10. [ ] Everything the release changed, tried the way a new user would.
+11. [ ] If the release changed anything you can see, the page review (`docs/review-checklist.md`) in light and dark.
 
 If the release touched purchases (`Store.swift`, `PaywallSheet.swift`, `/api/purchases`, `/api/apple/notifications`, the allowance SQL), also run part 2 of `docs/app-store/launch-test.md` in full.
 
