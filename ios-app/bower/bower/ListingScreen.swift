@@ -260,7 +260,7 @@ private struct ItemSummary: View {
 
     var body: some View {
         Text("\(listing.brand) \(listing.clothingType)")
-            .font(BowerFont.serif(32))
+            .font(BowerFont.serif(.medium))
             .foregroundStyle(theme.text)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 22)
@@ -296,7 +296,7 @@ private struct PriceSection: View {
             BowerCard(padding: 16, dashed: true, fill: theme.subtle) {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("ESTIMATE")
-                        .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
+                        .font(BowerFont.mono(.label, weight: .bold)).tracking(0.8)
                         .foregroundStyle(theme.text)
                         .padding(.vertical, 3).padding(.horizontal, 7)
                         .background(theme.pollen.opacity(0.28))
@@ -310,14 +310,14 @@ private struct PriceSection: View {
                     }
                         .padding(.top, 14)
                     Text(deepResearchNote)
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 9)
                 }
             }
 
             if let e = model.searchError {
-                Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
+                Text(e).font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText)
             }
         }
     }
@@ -338,16 +338,16 @@ private struct PriceSection: View {
                     Kicker("Checking the market", color: theme.accentText)
                     Spacer()
                     Text(String(format: "%02d:%02d", model.elapsed / 60, model.elapsed % 60))
-                        .font(BowerFont.mono(11)).foregroundStyle(theme.muted).monospacedDigit()
+                        .font(BowerFont.mono(.label)).foregroundStyle(theme.muted).monospacedDigit()
                 }
                 VStack(spacing: 0) {
                     ForEach(Array(model.enabled.enumerated()), id: \.element) { i, p in
                         HStack(spacing: 10) {
                             PulsingDot(color: p.tint, delay: Double(i) * 0.2)
                                 .frame(width: 16)
-                            Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
+                            Text(p.name).font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
                             Spacer()
-                            Text("searching").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                            Text("searching").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                         }
                         .padding(.vertical, 9)
                         .overlay(alignment: .bottom) { if i < model.enabled.count - 1 { Hairline() } }
@@ -380,7 +380,7 @@ private struct PriceSection: View {
                 Text(model.bands.isEmpty
                      ? "Nothing comparable is listed right now, so this check didn't count."
                      : "Asking prices today. Nothing here has necessarily sold.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                     .padding(.top, 4)
             }
         }
@@ -392,13 +392,13 @@ private struct PriceSection: View {
                 Kicker("Ask")
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     RollingPrice(amount: ask.listAt, currency: state.market.currency)
-                        .font(BowerFont.serifUpright(56)).foregroundStyle(theme.text).monospacedDigit()
+                        .font(BowerFont.serifUpright(.hero)).foregroundStyle(theme.text).monospacedDigit()
                     HStack(spacing: 6) {
                         Text("on")
                         Circle().fill(ask.platform.tint).frame(width: 7, height: 7)
                         Text(ask.platform.name)
                     }
-                    .font(BowerFont.ui(16)).foregroundStyle(theme.text)
+                    .font(BowerFont.ui(.callout)).foregroundStyle(theme.text)
                 }
                 .padding(.top, 4)
                 if model.platform != ask.platform {
@@ -407,7 +407,7 @@ private struct PriceSection: View {
                             Circle().fill(ask.platform.tint).frame(width: 6, height: 6)
                             Text("Rewrite it for \(ask.platform.name)")
                         }
-                        .font(BowerFont.ui(12.5, weight: .semibold))
+                        .font(BowerFont.ui(.footnote, weight: .semibold))
                         .foregroundStyle(ask.platform.tint)
                         .padding(.vertical, 7).padding(.horizontal, 12)
                         .overlay(RoundedRectangle(cornerRadius: 9).stroke(ask.platform.tint, lineWidth: 1))
@@ -426,8 +426,8 @@ private struct PriceSection: View {
         HStack(spacing: 12) {
             RoundedRectangle(cornerRadius: 3).fill(theme.line).frame(width: 6, height: 34)
             VStack(alignment: .leading, spacing: 1) {
-                Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
-                Text("Nothing comparable today").font(BowerFont.serifUpright(22)).foregroundStyle(theme.muted)
+                Text(p.name).font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
+                Text("Nothing comparable today").font(BowerFont.serifUpright(.small)).foregroundStyle(theme.muted)
             }
             Spacer(minLength: 0)
         }
@@ -444,9 +444,9 @@ private struct PriceSection: View {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 3).fill(empty ? theme.line : p.tint).frame(width: 6, height: 34)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(p.name).font(BowerFont.ui(13.5, weight: .semibold)).foregroundStyle(theme.text)
+                    Text(p.name).font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
                     if empty {
-                        Text("Nothing comparable today").font(BowerFont.serifUpright(22)).foregroundStyle(theme.muted)
+                        Text("Nothing comparable today").font(BowerFont.serifUpright(.small)).foregroundStyle(theme.muted)
                     } else {
                         PriceRange(low: Int(band.low), high: Int(band.high), size: 22, symbol: Money.symbol(band.currency))
                     }
@@ -457,7 +457,7 @@ private struct PriceSection: View {
                         Text("\(band.comparables.count) listing\(band.comparables.count == 1 ? "" : "s")")
                         Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold))
                     }
-                    .font(BowerFont.ui(11.5, weight: .semibold)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.caption, weight: .semibold)).foregroundStyle(theme.muted)
                 }
             }
             .padding(.vertical, 13).padding(.horizontal, 14)
@@ -471,7 +471,7 @@ private struct PriceSection: View {
         .overlay(alignment: .topLeading) {
             if winner {
                 Text("POST HERE FIRST")
-                    .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.7).foregroundStyle(.white)
+                    .font(BowerFont.mono(.label, weight: .bold)).tracking(0.7).foregroundStyle(.white)
                     .padding(.vertical, 3).padding(.horizontal, 8)
                     .background(p.tint).clipShape(RoundedRectangle(cornerRadius: 5))
                     .offset(x: 14, y: -8)
@@ -528,7 +528,7 @@ private struct ListingSection: View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 5) {
                 Text("The listing")
-                    .font(BowerFont.serif(27)).foregroundStyle(theme.text)
+                    .font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
             }
 
             if model.enabled.count > 1 {
@@ -550,7 +550,7 @@ private struct ListingSection: View {
                     Spacer(minLength: 0)
                     if !model.chips.isEmpty || !model.extraKeywords.isEmpty {
                         Button("Reset") { model.resetChips() }
-                            .buttonStyle(.bowerPressText).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
+                            .buttonStyle(.bowerPressText).font(BowerFont.ui(.footnote, weight: .medium)).foregroundStyle(theme.muted)
                     }
                 }
                 FlowLayout(spacing: 7) {
@@ -561,7 +561,7 @@ private struct ListingSection: View {
                                 if on { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
                                 Text(chip.label)
                             }
-                            .font(BowerFont.ui(12.5, weight: .medium))
+                            .font(BowerFont.ui(.footnote, weight: .medium))
                             .foregroundStyle(on ? .white : theme.text)
                             .padding(.vertical, 8).padding(.horizontal, 13)
                             .background(on ? theme.satin : theme.card)
@@ -575,7 +575,7 @@ private struct ListingSection: View {
                             if !model.extraKeywords.isEmpty { Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)) }
                             Text(model.extraKeywords.isEmpty ? "+ Keywords" : "Keywords")
                         }
-                        .font(BowerFont.ui(12.5, weight: .medium))
+                        .font(BowerFont.ui(.footnote, weight: .medium))
                         .foregroundStyle(model.extraKeywords.isEmpty ? theme.text : .white)
                         .padding(.vertical, 8).padding(.horizontal, 13)
                         .background(model.extraKeywords.isEmpty ? theme.card : theme.satin)
@@ -604,7 +604,7 @@ private struct ListingSection: View {
                     Text("Open \(model.platform.name)")
                     Image(systemName: "arrow.up.right").font(.system(size: 11, weight: .bold))
                 }
-                .font(BowerFont.ui(15, weight: .semibold))
+                .font(BowerFont.ui(.body, weight: .semibold))
                 .foregroundStyle(theme.text)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
@@ -617,7 +617,7 @@ private struct ListingSection: View {
 
             if model.current != nil {
                 HStack(spacing: 12) {
-                    Text("How's the listing?").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    Text("How's the listing?").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                     Spacer(minLength: 0)
                     Button { model.thumb(up: true) } label: {
                         Image(systemName: model.thumbed[model.platform] == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
@@ -635,7 +635,7 @@ private struct ListingSection: View {
                     .buttonStyle(.bowerPress).accessibilityLabel("Bad listing")
                     Button("Tell us") { feedback = true }
                         .buttonStyle(.bowerPressText)
-                        .font(BowerFont.ui(12, weight: .semibold))
+                        .font(BowerFont.ui(.footnote, weight: .semibold))
                         .foregroundStyle(theme.accentText)
                         .padding(.leading, 4)
                 }
@@ -672,7 +672,7 @@ private struct ListingSection: View {
                             }
                             FlowLayout(spacing: 6) {
                                 ForEach(c.displayHashtags, id: \.self) { t in
-                                    Text(t).font(BowerFont.mono(11.5)).foregroundStyle(theme.text)
+                                    Text(t).font(BowerFont.mono(.label)).foregroundStyle(theme.text)
                                         .padding(.vertical, 4).padding(.horizontal, 8)
                                         .background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 6))
                                 }
@@ -687,9 +687,9 @@ private struct ListingSection: View {
                             // form takes them one dropdown at a time.
                             ForEach(fields) { f in
                                 HStack(alignment: .top, spacing: 10) {
-                                    Text(f.label).font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                                    Text(f.label).font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                                     Spacer()
-                                    Text(f.value).font(BowerFont.ui(12.5, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.trailing)
+                                    Text(f.value).font(BowerFont.ui(.footnote, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.trailing)
                                     CopyButton(text: f.value, onCopy: { model.recordFeedback("copied") })
                                 }
                                 .padding(.vertical, 6)
@@ -700,8 +700,8 @@ private struct ListingSection: View {
 
                 } else if model.formatError {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Couldn't write the listing.").font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.text)
-                        Text("Check your connection and try again.").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                        Text("Couldn't write the listing.").font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
+                        Text("Check your connection and try again.").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                         BowerButton(title: "Try again", kind: .secondary, small: true) { model.resetChips() }
                     }
                 } else {
@@ -719,7 +719,7 @@ private struct ListingSection: View {
             if model.rewriting {
                 HStack(spacing: 8) {
                     ProgressView().tint(theme.accentText)
-                    Text("Rewriting…").font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
+                    Text("Rewriting…").font(BowerFont.ui(.footnote)).foregroundStyle(theme.text)
                 }
                 .padding(.vertical, 8).padding(.horizontal, 14)
                 .background(theme.card).clipShape(Capsule())
@@ -738,7 +738,7 @@ private struct ListingSection: View {
                 if editing != key {
                     Button { withAnimation(Motion.quick) { editing = key } } label: {
                         HStack(spacing: 4) { Image(systemName: "pencil").font(.system(size: 9)); Text("Edit") }
-                            .font(BowerFont.ui(11, weight: .semibold)).foregroundStyle(theme.muted)
+                            .font(BowerFont.ui(.caption, weight: .semibold)).foregroundStyle(theme.muted)
                     }
                     .buttonStyle(.bowerPress)
                 }
@@ -751,7 +751,7 @@ private struct ListingSection: View {
                 .transition(Motion.soften)
             } else {
                 Text(text)
-                    .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
+                    .font(bold ? BowerFont.ui(.callout, weight: .semibold) : BowerFont.ui(.body))
                     .foregroundStyle(theme.text)
                     .lineSpacing(bold ? 2 : 4)
                     .onTapGesture { withAnimation(Motion.quick) { editing = key } }
@@ -788,7 +788,7 @@ private struct EditBox: View {
                 if multiline { TextEditor(text: $draft).frame(minHeight: 140) }
                 else { TextField(placeholder, text: $draft) }
             }
-            .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
+            .font(bold ? BowerFont.ui(.callout, weight: .semibold) : BowerFont.ui(.body))
             .foregroundStyle(theme.text)
             .scrollContentBackground(.hidden)
             .padding(.vertical, 8).padding(.horizontal, 10)
@@ -798,10 +798,10 @@ private struct EditBox: View {
 
             HStack(spacing: 8) {
                 Button("Cancel", action: onCancel).buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text)
+                    .font(BowerFont.ui(.footnote, weight: .medium)).foregroundStyle(theme.text)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 8))
                 Button("Save") { onSave(draft) }.buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(.white)
+                    .font(BowerFont.ui(.footnote, weight: .semibold)).foregroundStyle(.white)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.satin).clipShape(RoundedRectangle(cornerRadius: 8))
             }
         }
@@ -829,7 +829,7 @@ struct CopyButton: View {
                 face("doc.on.doc", "Copy").opacity(copied ? 0 : 1)
                 face("checkmark", "Copied").opacity(copied ? 1 : 0)
             }
-            .font(BowerFont.ui(big ? 12 : 11, weight: .semibold))
+            .font(BowerFont.ui(big ? .footnote : .caption, weight: .semibold))
             .foregroundStyle(copied ? theme.confirmText : theme.muted)
             .padding(.vertical, big ? 7 : 4).padding(.horizontal, big ? 12 : 6)
             .background(big ? theme.subtle : .clear)
@@ -862,8 +862,8 @@ private struct CompsSheet: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Asking on \(platform.name)").font(BowerFont.serif(24)).foregroundStyle(theme.text)
-                    Text("\(comps.count) live listing\(comps.count == 1 ? "" : "s")").font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    Text("Asking on \(platform.name)").font(BowerFont.serif(.small)).foregroundStyle(theme.text)
+                    Text("\(comps.count) live listing\(comps.count == 1 ? "" : "s")").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 }
                 Spacer()
                 Button { dismiss() } label: {
@@ -889,7 +889,7 @@ private struct CompsSheet: View {
                         }
                     }
                     Text("Asking prices from listings live today. None of these have necessarily sold.")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.top, 6)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted).padding(.top, 6)
                 }
                 .padding(20)
             }
@@ -903,15 +903,15 @@ private struct CompsSheet: View {
     private func compRow(_ c: ComparableListing, openable: Bool) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(c.title).font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.leading)
-                Text(c.platform.capitalized).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+                Text(c.title).font(BowerFont.ui(.footnote, weight: .medium)).foregroundStyle(theme.text).multilineTextAlignment(.leading)
+                Text(c.platform.capitalized).font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Text(Money.format(Int(c.price), c.currency)).font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
+                Text(Money.format(Int(c.price), c.currency)).font(BowerFont.ui(.callout, weight: .semibold)).foregroundStyle(theme.text)
                 if openable {
                     HStack(spacing: 3) { Text("Open"); Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .bold)) }
-                        .font(BowerFont.ui(10.5)).foregroundStyle(theme.accentText)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.accentText)
                 }
             }
         }

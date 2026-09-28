@@ -26,15 +26,15 @@ struct FeedbackSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("Tell bower").font(BowerFont.serif(28)).foregroundStyle(theme.text)
+                Text("Tell bower").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(14, weight: .semibold))
+                    .font(BowerFont.ui(.body, weight: .semibold))
                     .foregroundStyle(theme.accentText)
             }
             Text(about.map { "About \($0)." } ?? "Anything at all. Wrong price, odd wording, something that broke.")
-                .font(BowerFont.ui(13))
+                .font(BowerFont.ui(.footnote))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)
                 .padding(.top, 6)
@@ -42,18 +42,18 @@ struct FeedbackSheet: View {
             if sent {
                 HStack(spacing: 9) {
                     Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.confirmText)
-                    Text("Sent. Thank you.").font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
+                    Text("Sent. Thank you.").font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
                 }
                 .padding(.top, 24)
             } else {
                 ZStack(alignment: .topLeading) {
                     if message.isEmpty {
                         Text("What happened?")
-                            .font(BowerFont.ui(14.5)).foregroundStyle(theme.muted)
+                            .font(BowerFont.ui(.body)).foregroundStyle(theme.muted)
                             .padding(.top, 8).padding(.leading, 5)
                     }
                     TextEditor(text: $message)
-                        .font(BowerFont.ui(14.5))
+                        .font(BowerFont.ui(.body))
                         .foregroundStyle(theme.text)
                         .scrollContentBackground(.hidden)
                         .focused($focused)
@@ -67,7 +67,7 @@ struct FeedbackSheet: View {
 
                 if failed {
                     Text("Couldn't send that. Check your connection and try again.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText).padding(.top, 8)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText).padding(.top, 8)
                         .transition(Motion.rise)
                 }
 

@@ -188,10 +188,12 @@ struct MarketPicker: View {
     var unchosen = false
     /// Called when a market is picked, including the one already held.
     var onPick: () -> Void = {}
+    /// Off on Profile, where the section's own label already says it.
+    var labelled = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Kicker("Selling in")
+            if labelled { Kicker("Selling in") }
             Segmented(
                 options: Market.allCases.map { SegmentedOption(id: $0.rawValue, label: $0.shortName) },
                 selection: Binding(

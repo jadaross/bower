@@ -32,7 +32,7 @@ struct PaywallSheet: View {
                     Spacer()
                     Button("Done") { dismiss() }
                         .buttonStyle(.bowerPressText)
-                        .font(BowerFont.ui(14, weight: .semibold))
+                        .font(BowerFont.ui(.body, weight: .semibold))
                         .foregroundStyle(theme.accentText)
                 }
 
@@ -43,7 +43,7 @@ struct PaywallSheet: View {
                         Text(headline).id(headline)
                     }
                 }
-                .font(BowerFont.serif(30))
+                .font(BowerFont.serif(.medium))
                 .foregroundStyle(theme.text)
                 .fixedSize(horizontal: false, vertical: true)
                 .transition(Motion.sharpen)
@@ -51,7 +51,7 @@ struct PaywallSheet: View {
 
                 if let sub = subline {
                     Text(sub)
-                        .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                         .padding(.top, 6)
                 }
 
@@ -68,19 +68,19 @@ struct PaywallSheet: View {
 
                 if store.loadFailed && store.fixturePrices == nil {
                     Text("Couldn't reach the App Store. Check your connection and try again.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText)
                         .padding(.top, 12)
                 }
 
                 if let message {
                     Text(message)
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText)
                         .padding(.top, 12)
                         .transition(Motion.rise)
                 }
 
                 Text("Chips and switching platforms are always free.")
-                    .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 18)
 
@@ -125,7 +125,7 @@ struct PaywallSheet: View {
         BowerCard(padding: 18, borderColor: theme.accentText.opacity(0.45)) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text("Plus").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                    Text("Plus").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                     Spacer()
                     price(store.plusPrice, per: "a month")
                 }
@@ -143,7 +143,7 @@ struct PaywallSheet: View {
                 .padding(.top, 18)
 
                 Text(renewalTerms)
-                    .font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 10)
             }
@@ -163,12 +163,12 @@ struct PaywallSheet: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text("10 listings").font(BowerFont.serif(22)).foregroundStyle(theme.text)
+                    Text("10 listings").font(BowerFont.serif(.small)).foregroundStyle(theme.text)
                     Spacer()
                     price(store.packPrice, per: "once")
                 }
                 Text("Listings only. They never expire and are used after your free ones. Plus adds unlimited listings and 50 market checks.")
-                    .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 6)
                 BowerButton(title: store.buying == StoreProduct.pack ? "Opening the App Store…" : "Buy 10 listings",
@@ -178,7 +178,7 @@ struct PaywallSheet: View {
                 .padding(.top, 14)
                 if state.packListings > 0 {
                     Text("\(state.packListings) bought listing\(state.packListings == 1 ? "" : "s") left.")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 9)
                 }
@@ -204,9 +204,9 @@ struct PaywallSheet: View {
     private func price(_ amount: String?, per: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 5) {
             Text(amount ?? "…")
-                .font(BowerFont.serifUpright(24)).foregroundStyle(theme.text).monospacedDigit()
+                .font(BowerFont.serifUpright(.small)).foregroundStyle(theme.text).monospacedDigit()
                 .contentTransition(.opacity)
-            Text(per).font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+            Text(per).font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
         }
         .animation(Motion.quick, value: amount)
     }
@@ -214,7 +214,7 @@ struct PaywallSheet: View {
     private func tick(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 9) {
             Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.confirmText)
-            Text(text).font(BowerFont.ui(14)).foregroundStyle(theme.text)
+            Text(text).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -227,7 +227,7 @@ struct PaywallSheet: View {
             Link("Privacy", destination: APIConfig.baseURL.appending(path: "privacy"))
         }
         .buttonStyle(.bowerPress)
-        .font(BowerFont.ui(12, weight: .medium))
+        .font(BowerFont.ui(.footnote, weight: .medium))
         .foregroundStyle(theme.muted)
         .frame(maxWidth: .infinity)
     }

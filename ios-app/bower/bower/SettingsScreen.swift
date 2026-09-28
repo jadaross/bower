@@ -16,7 +16,7 @@ struct SettingsScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             section("Where you sell") {
-                MarketPicker(savesOnChange: true)
+                MarketPicker(savesOnChange: true, labelled: false)
                 BowerGroup {
                     ForEach(Array(state.market.platforms.enumerated()), id: \.element) { i, p in
                         if i > 0 { Hairline() }
@@ -25,7 +25,7 @@ struct SettingsScreen: View {
                 }
                 if blocked != nil {
                     Text("Keep at least one. Nothing to price against otherwise.")
-                        .font(BowerFont.ui(12)).foregroundStyle(theme.errorText).padding(.leading, 4)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText).padding(.leading, 4)
                         .transition(Motion.rise)
                 }
             }
@@ -37,7 +37,7 @@ struct SettingsScreen: View {
                         Button { Task { await state.savePreferred(p) } } label: {
                             HStack(spacing: 12) {
                                 Circle().fill(p.tint).frame(width: 10, height: 10)
-                                Text(p.name).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
+                                Text(p.name).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                                 Spacer()
                                 if state.preferred == p {
                                     Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(theme.accentText)
@@ -51,7 +51,7 @@ struct SettingsScreen: View {
                     }
                 }
                 Text("Listings are written for this one first. Switch any time.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).padding(.leading, 4)
+                    .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted).padding(.leading, 4)
             }
 
             section("Seller notes") { sellerNotesCard }
@@ -66,8 +66,8 @@ struct SettingsScreen: View {
                     HStack(spacing: 12) {
                         Image(systemName: "bubble.left").font(.system(size: 15)).foregroundStyle(theme.accentText)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text("Tell bower what's wrong").font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
-                            Text("A price, some wording, anything.").font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                            Text("Tell bower what's wrong").font(BowerFont.ui(.body, weight: .medium)).foregroundStyle(theme.text)
+                            Text("A price, some wording, anything.").font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         }
                         Spacer()
                         Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
@@ -95,13 +95,13 @@ struct SettingsScreen: View {
             }
 
             Text("Photos are read and discarded. Bower keeps no images. It does keep a text history of your items and their prices, cleared when you delete your account.")
-                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
 
             Button { confirmDelete = true } label: {
                 Text(deleting ? "Deleting…" : "Delete account")
-                    .font(BowerFont.ui(12.5, weight: .medium))
+                    .font(BowerFont.ui(.footnote, weight: .medium))
                     .foregroundStyle(theme.muted)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -110,7 +110,7 @@ struct SettingsScreen: View {
             .disabled(deleting)
             if deleteFailed {
                 Text("Couldn't delete the account. Check your connection and try again.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.errorText)
+                    .font(BowerFont.ui(.caption)).foregroundStyle(theme.errorText)
                     .multilineTextAlignment(.center).frame(maxWidth: .infinity)
                     .transition(Motion.rise)
             }
@@ -156,13 +156,13 @@ struct SettingsScreen: View {
         let on = state.enabled.contains(p)
         return HStack(spacing: 12) {
             Text(String(p.name.prefix(1)))
-                .font(BowerFont.ui(14, weight: .bold)).foregroundStyle(.white)
+                .font(BowerFont.ui(.body, weight: .bold)).foregroundStyle(.white)
                 .frame(width: 30, height: 30).background(p.tint)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .opacity(on ? 1 : 0.35)
             VStack(alignment: .leading, spacing: 1) {
-                Text(p.name).font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
-                Text(p.note(in: state.market)).font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+                Text(p.name).font(BowerFont.ui(.body, weight: .medium)).foregroundStyle(theme.text)
+                Text(p.note(in: state.market)).font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
             }
             Spacer()
             BowerToggle(
@@ -193,7 +193,7 @@ struct SettingsScreen: View {
                 ForEach(Array(SellerNote.allCases.enumerated()), id: \.element) { i, note in
                     if i > 0 { Hairline() }
                     HStack {
-                        Text(note.label(in: state.market)).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
+                        Text(note.label(in: state.market)).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                         Spacer()
                         BowerToggle(isOn: Binding(
                             get: { state.sellerNotes.contains(note) },
@@ -214,12 +214,12 @@ struct SettingsScreen: View {
             Kicker("The last line of every listing")
             VStack(alignment: .leading, spacing: 3) {
                 Text("Good condition, light wear at the cuffs.")
-                    .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 if line.isEmpty {
                     Text("Nothing about you. Only what the photos show.")
-                        .font(BowerFont.ui(13)).foregroundStyle(theme.muted).italic()
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted).italic()
                 } else {
-                    Text(line).font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(theme.text)
+                    Text(line).font(BowerFont.ui(.footnote, weight: .semibold)).foregroundStyle(theme.text)
                 }
             }
             .padding(.vertical, 12).padding(.horizontal, 14)
@@ -239,13 +239,13 @@ struct SettingsScreen: View {
                 meterRow("Listings", state.reads)
                 if state.packListings > 0 {
                     Text("Plus \(state.packListings) bought listing\(state.packListings == 1 ? "" : "s"), used after these.")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         .padding(.top, 8)
                 }
                 Hairline().padding(.vertical, 12)
                 meterRow("Market checks", state.searches)
                 Text("A listing is written from your photos, with an estimate. A market check looks up what it's really going for. Both reset on the 1st.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                     .padding(.top, 12)
             }
         }
@@ -259,9 +259,9 @@ struct SettingsScreen: View {
                     .font(.system(size: 15)).foregroundStyle(theme.accentText)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(state.isPlus ? "You're on bower Plus" : "bower Plus")
-                        .font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
+                        .font(BowerFont.ui(.body, weight: .medium)).foregroundStyle(theme.text)
                     Text(state.isPlus ? "Manage your subscription." : "Unlimited listings and 50 market checks a month.")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                 }
                 Spacer()
                 Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)).foregroundStyle(theme.muted)
@@ -283,15 +283,15 @@ struct SettingsScreen: View {
                 Spacer()
                 if let limit = m.limit, let remaining = m.remaining {
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
-                        Text("\(remaining)").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                        Text("\(remaining)").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                             .contentTransition(.numericText(value: Double(remaining)))
                             .animation(Motion.quick, value: remaining)
-                        Text("of \(limit) left").font(BowerFont.serif(15)).foregroundStyle(theme.muted)
+                        Text("of \(limit) left").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                     }
                 } else {
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
-                        Text("No limit").font(BowerFont.serif(26)).foregroundStyle(theme.text)
-                        Text("\(m.used) used").font(BowerFont.serif(15)).foregroundStyle(theme.muted)
+                        Text("No limit").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
+                        Text("\(m.used) used").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                     }
                 }
             }
@@ -311,9 +311,9 @@ struct SettingsScreen: View {
 
     private func row(_ label: String, value: String) -> some View {
         HStack {
-            Text(label).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
+            Text(label).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
             Spacer()
-            Text(value).font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+            Text(value).font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
         }
         .padding(.vertical, 12).padding(.horizontal, 16)
     }

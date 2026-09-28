@@ -46,9 +46,9 @@ struct HistoryScreen: View {
 
     private var empty: some View {
         VStack(spacing: 10) {
-            Text("Nothing yet").font(BowerFont.serif(24)).foregroundStyle(theme.text)
+            Text("Nothing yet").font(BowerFont.serif(.small)).foregroundStyle(theme.text)
             Text("Items you write show up here, with the prices you were given.")
-                .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity).padding(.top, 80)
@@ -66,10 +66,10 @@ struct HistoryScreen: View {
             }
             VStack(spacing: 14) {
                 Text("Text only. Bower keeps no photos.")
-                    .font(BowerFont.ui(12)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 Button(clearing ? "Clearing…" : "Clear history") { confirmClear = true }
                     .buttonStyle(.bowerPress)
-                    .font(BowerFont.ui(13, weight: .medium))
+                    .font(BowerFont.ui(.footnote, weight: .medium))
                     .foregroundStyle(theme.errorText)
                     .disabled(clearing)
             }
@@ -97,25 +97,25 @@ struct HistoryScreen: View {
                 }
                 Spacer()
                 Text(HistoryFormat.relative(item.createdAt))
-                    .font(BowerFont.mono(10.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
             }
 
             Text(item.title)
-                .font(BowerFont.serif(22))
+                .font(BowerFont.serif(.small))
                 .foregroundStyle(theme.text)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
 
             Text([item.brand, item.size, item.condition].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
-                .font(BowerFont.ui(13)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 .padding(.top, 3)
 
             HStack(alignment: .lastTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(HistoryFormat.price(item))
-                        .font(BowerFont.serifUpright(26)).foregroundStyle(theme.text).monospacedDigit()
+                        .font(BowerFont.serifUpright(.medium)).foregroundStyle(theme.text).monospacedDigit()
                     Text(HistoryFormat.priceLabel(item))
-                        .font(BowerFont.mono(9.5)).tracking(0.8).foregroundStyle(theme.muted)
+                        .font(BowerFont.mono(.label)).tracking(0.8).foregroundStyle(theme.muted)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -143,7 +143,7 @@ struct HistoryScreen: View {
     }
 
     private func message(_ text: String) -> some View {
-        Text(text).font(BowerFont.ui(13)).foregroundStyle(theme.errorText)
+        Text(text).font(BowerFont.ui(.footnote)).foregroundStyle(theme.errorText)
             .multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 60)
     }
 }
@@ -160,25 +160,25 @@ private struct HistoryDetail: View {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     Text(HistoryFormat.relative(item.createdAt))
-                        .font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+                        .font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
                     Spacer()
                     Button("Done") { dismiss() }
                         .buttonStyle(.bowerPressText)
-                        .font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.accentText)
+                        .font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.accentText)
                 }
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
+                    Text(item.title).font(BowerFont.serif(.small)).foregroundStyle(theme.text)
                     if let p = item.preferredPlatform {
                         HStack(spacing: 6) {
                             Circle().fill(p.tint).frame(width: 7, height: 7)
-                            Text("Written for \(p.name)").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                            Text("Written for \(p.name)").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                         }
                     }
                     if let raw = item.sourceUrl, let url = URL(string: raw), let host = url.host {
                         Link(destination: url) {
                             HStack(spacing: 6) {
                                 Image(systemName: "link").font(.system(size: 11, weight: .medium))
-                                Text("From \(host.replacingOccurrences(of: "www.", with: ""))").font(BowerFont.ui(12.5))
+                                Text("From \(host.replacingOccurrences(of: "www.", with: ""))").font(BowerFont.ui(.footnote))
                             }
                             .foregroundStyle(theme.accentText)
                         }
@@ -200,16 +200,16 @@ private struct HistoryDetail: View {
                                 if i > 0 { Hairline() }
                                 HStack {
                                     Circle().fill(pair.0.tint).frame(width: 9, height: 9)
-                                    Text(pair.0.name).font(BowerFont.ui(14)).foregroundStyle(theme.text)
+                                    Text(pair.0.name).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                                     Spacer()
                                     // Older checks stored a band with no listings behind
                                     // it; that was never a price (ADR-0005, #80).
                                     if pair.1.comparables.isEmpty {
                                         Text("Nothing comparable")
-                                            .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                                            .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                                     } else {
                                         Text("\(Money.symbol(pair.1.currency))\(trim(pair.1.low))–\(Money.symbol(pair.1.currency))\(trim(pair.1.high))")
-                                            .font(BowerFont.mono(13)).foregroundStyle(theme.text)
+                                            .font(BowerFont.mono(.label)).foregroundStyle(theme.text)
                                     }
                                 }
                                 .padding(.vertical, 12).padding(.horizontal, 16)
@@ -232,30 +232,30 @@ private struct HistoryDetail: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Kicker("Ask")
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("\(Money.symbol(rec.currency))\(trim(rec.listAt))").font(BowerFont.serifUpright(40)).foregroundStyle(theme.text).monospacedDigit()
+                        Text("\(Money.symbol(rec.currency))\(trim(rec.listAt))").font(BowerFont.serifUpright(.large)).foregroundStyle(theme.text).monospacedDigit()
                         HStack(spacing: 6) {
                             Text("on")
                             Circle().fill(rec.platform.tint).frame(width: 7, height: 7)
                             Text(rec.platform.name)
                         }
-                        .font(BowerFont.ui(15)).foregroundStyle(theme.text)
+                        .font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                     }
                 }
                 if let lo = item.priceMin, let hi = item.priceMax {
                     Text("Estimate was \(Money.symbol(item.currency))\(trim(lo)) to \(Money.symbol(item.currency))\(trim(hi)).")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 }
             } else if let lo = item.priceMin, let hi = item.priceMax {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("ESTIMATE")
-                        .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
+                        .font(BowerFont.mono(.label, weight: .bold)).tracking(0.8)
                         .foregroundStyle(theme.text)
                         .padding(.vertical, 3).padding(.horizontal, 7)
                         .background(theme.pollen.opacity(0.28))
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                     PriceRange(low: Int(lo.rounded()), high: Int(hi.rounded()), size: 32, symbol: Money.symbol(item.currency))
                     Text("The market wasn't checked.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 }
             }
         }
@@ -278,7 +278,7 @@ private struct HistoryDetail: View {
                             CopyButton(text: pl.displayHashtags.joined(separator: " "))
                         }
                         Text(pl.displayHashtags.joined(separator: "  "))
-                            .font(BowerFont.mono(11.5)).foregroundStyle(theme.muted)
+                            .font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     if let fields = pl.fields, !fields.isEmpty {
@@ -287,8 +287,8 @@ private struct HistoryDetail: View {
                         ForEach(fields) { f in
                             HStack(alignment: .top, spacing: 8) {
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(f.label).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-                                    Text(f.value).font(BowerFont.ui(13.5)).foregroundStyle(theme.text)
+                                    Text(f.label).font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
+                                    Text(f.value).font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                                 }
                                 Spacer()
                                 CopyButton(text: f.value)
@@ -304,7 +304,7 @@ private struct HistoryDetail: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack { Kicker(label); Spacer(); CopyButton(text: text) }
             Text(text)
-                .font(bold ? BowerFont.ui(15.5, weight: .semibold) : BowerFont.ui(14))
+                .font(bold ? BowerFont.ui(.callout, weight: .semibold) : BowerFont.ui(.body))
                 .foregroundStyle(theme.text)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
