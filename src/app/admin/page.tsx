@@ -1,4 +1,4 @@
-import { daily, recentEvents, summary, costStats, feedbackStats, itemStats, linkStats } from "@/lib/dashboard/metrics";
+import { countryStats, daily, recentEvents, summary, costStats, feedbackStats, itemStats, linkStats } from "@/lib/dashboard/metrics";
 import { Card, Columns, Stat } from "./_components/charts";
 import { money, num, pct, when } from "./_components/format";
 import { pageData } from "./_components/load";
@@ -19,6 +19,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
   const fb = feedbackStats(data);
   const it = itemStats(data);
   const ln = linkStats(data);
+  const countries = countryStats(data);
   // Listings with a trace: the denominator of anything read from Langfuse scores.
   const traced = fb.funnel[0].count;
   const events = recentEvents(data, 14);
@@ -27,7 +28,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
   return (
     <Shell tab="overview" q={q} data={data} badges={badges}>
       <h1>How it&rsquo;s going</h1>
-      <p>{data.range.label}, {data.includeOwner ? "including your own account" : "your account left out"}. Spend is what Langfuse priced the model calls at, in US dollars.</p>
+      <p>{data.range.label}, {data.includeOwner ? "including your own account" : "your account left out"}{data.market ? <>, <strong>{countries.find((c) => c.market === data.market)?.name}</strong> only</> : null}. Spend is what Langfuse priced the model calls at, in US dollars.</p>
 
       <div className="kpis">
         <Stat label="People with an account" value={num(s.accounts)} hint={s.newAccounts ? `+${s.newAccounts} in this range` : "none new in this range"} />
@@ -38,6 +39,30 @@ export default async function Overview({ searchParams }: { searchParams: Promise
         <Stat label="Spend" value={money(s.spend)} hint={cost.perListingAllIn !== null ? `${money(cost.perListingAllIn)} per listing, all in` : undefined} />
         <Stat label="Thumbs up" value={thumbsTotal ? pct(s.thumbsUp, thumbsTotal) : "—"} hint={thumbsTotal ? `${s.thumbsUp} up · ${s.thumbsDown} down` : "no thumbs yet"} tone={s.thumbsDown > s.thumbsUp ? "bad" : s.thumbsUp ? "good" : undefined} />
         <Stat label="Copied" value={traced ? pct(fb.copiedListings, traced) : "—"} hint={traced < s.listings ? `listings where something was copied, of the ${num(traced)} with a trace` : "listings where something was copied"} />
+      </div>
+
+      <div className="grid">
+        <Card title="Where they sell" sub="By the country on each person's profile now. Pick one in the top bar to see only its people." span="c12">
+          <div className="tablewrap">
+            <table className="t">
+              <thead>
+                <tr><th>Country</th><th className="num">People</th><th className="num">Used it in this range</th><th className="num">Listings</th><th className="num">Market checks</th><th className="num">Share of listings</th></tr>
+              </thead>
+              <tbody>
+                {countries.map((c) => (
+                  <tr key={c.market} className={c.accounts || c.listings ? "" : "dim"}>
+                    <td><a href={`/admin${qs(q, { market: c.market })}`}>{c.name}</a></td>
+                    <td className="num">{num(c.accounts)}</td>
+                    <td className="num">{num(c.active)}</td>
+                    <td className="num">{num(c.listings)}</td>
+                    <td className="num">{num(c.checks)}</td>
+                    <td className="num">{pct(c.listings, countries.reduce((s, r) => s + r.listings, 0))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
 
       <div className="grid">

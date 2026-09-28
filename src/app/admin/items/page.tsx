@@ -1,6 +1,6 @@
 import { itemStats, labelFor, linkStats, marketStats, photoStats } from "@/lib/dashboard/metrics";
 import { Bars, Card, Stat } from "../_components/charts";
-import { gbp, num, pct, when } from "../_components/format";
+import { num, pct, price, when } from "../_components/format";
 import { pageData } from "../_components/load";
 import { Shell, type Query } from "../_components/Shell";
 
@@ -26,7 +26,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
         <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint={gap ? `of a possible 5, listings with photos · over the ${traced}` : "of a possible 5, listings with photos"} />
         <Stat label="Tag read" value={ph.tagKnown ? pct(ph.withTag, ph.tagKnown) : "—"} hint={gap ? `a brand, size or fabric read off a label · ${traced}` : "a brand, size or fabric read off a label"} tone={ph.tagKnown && ph.withTag / ph.tagKnown < 0.3 ? "warn" : undefined} />
         <Stat label="Rejected" value={num(rejected)} hint={rejected ? ph.rejections.map((r) => `${r.count} ${r.label}`).join(" · ") : gap ? `none among the ${traced}` : "nothing that was not clothing"} tone={rejected ? "warn" : undefined} />
-        <Stat label="Typical estimate" value={gbp(it.medianEstimate)} hint="median of the photo-only price band midpoint" />
+        <Stat label="Typical estimate" value={price(it.medianEstimate, it.estimateCurrency)} hint={it.estimateLeftOut ? `median photo-only estimate, ${it.estimateCurrency} items only; ${num(it.estimateLeftOut)} in other currencies left out` : "median of the photo-only price band midpoint"} />
       </div>
 
       <div className="grid">
@@ -76,7 +76,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
       <div className="grid">
         <Card title="Category" span="c4"><Bars items={it.categories} of={it.rows.length} /></Card>
         <Card title="Colour" span="c4"><Bars items={it.colours} of={it.rows.length} /></Card>
-        <Card title="Photo-only estimate" sub="Midpoint of the band bower guessed before any search" span="c4"><Bars items={it.priceBands} of={it.rows.length} /></Card>
+        <Card title="Photo-only estimate" sub={it.estimateLeftOut ? `Midpoint of the band bower guessed before any search, ${it.estimateCurrency} items only` : "Midpoint of the band bower guessed before any search"} span="c4"><Bars items={it.priceBands} of={it.rows.length - it.estimateLeftOut} /></Card>
       </div>
 
       <h1 style={{ fontSize: 26, marginTop: 24 }}>Market checks</h1>
@@ -124,8 +124,8 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
                         <td className="dim">{r.clothingType}</td>
                         <td className="dim">{r.condition}</td>
                         <td className="dim">{r.size ?? "—"}</td>
-                        <td className="num">{r.priceMin !== null && r.priceMax !== null ? `${gbp(r.priceMin)}–${gbp(r.priceMax)}` : "—"}</td>
-                        <td className="num">{band ? `${gbp(band.low)}–${gbp(band.high)}` : <span className="dim">not checked</span>}</td>
+                        <td className="num">{r.priceMin !== null && r.priceMax !== null ? `${price(r.priceMin, r.currency)}–${price(r.priceMax, r.currency)}` : "—"}</td>
+                        <td className="num">{band ? `${price(band.low, band.currency)}–${price(band.high, band.currency)}` : <span className="dim">not checked</span>}</td>
                         <td className="dim">{rec ? `${rec}${band ? ` · ${band.confidence} confidence` : ""}` : "—"}</td>
                       </tr>
                     );

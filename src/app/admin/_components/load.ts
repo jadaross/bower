@@ -7,7 +7,7 @@ import type { Query, TabId } from "./Shell";
 export async function pageData(searchParams: Promise<Query>): Promise<{ q: Query; data: DashboardData; badges: Partial<Record<TabId, { n: number; alert?: boolean }>> }> {
   await requireAdmin();
   const q = await searchParams;
-  const data = await loadDashboard({ range: q.range, includeOwner: q.me === "1", fresh: q.fresh === "1" });
+  const data = await loadDashboard({ range: q.range, includeOwner: q.me === "1", fresh: q.fresh === "1", market: q.market });
   const s = summary(data);
   return {
     q,

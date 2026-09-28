@@ -48,6 +48,8 @@ export interface HistoryRow {
   mainCategory: string | null;
   gender: string | null;
   valuation: StoredValuation | null;
+  /** The item's currency, from the seller's Market at the time. Null on rows from before Markets: GBP. */
+  currency: string | null;
 }
 
 export interface Note {
@@ -101,7 +103,7 @@ export async function fetchHistory(): Promise<HistoryRow[]> {
   const { data, error } = await serviceClient()
     .from("item_history")
     .select(
-      "id,user_id,created_at,session_id,brand,clothing_type,title,colour_primary,size,condition,price_min,price_max,preferred_platform,valuation,main_category:listing->>main_category,gender:listing->>gender"
+      "id,user_id,created_at,session_id,brand,clothing_type,title,colour_primary,size,condition,price_min,price_max,preferred_platform,valuation,currency,main_category:listing->>main_category,gender:listing->>gender"
     )
     .order("created_at", { ascending: false })
     .limit(5000);
@@ -123,6 +125,7 @@ export async function fetchHistory(): Promise<HistoryRow[]> {
     mainCategory: r.main_category ?? null,
     gender: r.gender ?? null,
     valuation: r.valuation,
+    currency: r.currency ?? null,
   }));
 }
 

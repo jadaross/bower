@@ -1,6 +1,6 @@
 import { fetchGenerations, fetchScores, langfuseConfigured, type Generation } from "./langfuse";
 import { fetchAccounts, fetchHistory, fetchNotes } from "./supabase";
-import { isAccountId, rangeFor, type DashboardData } from "./metrics";
+import { forMarket, isAccountId, rangeFor, type DashboardData } from "./metrics";
 
 /**
  * One load for a dashboard page: everything from Supabase and Langfuse for
@@ -20,9 +20,15 @@ export interface LoadOptions {
   range?: string;
   includeOwner?: boolean;
   fresh?: boolean;
+  /** One country (a Market id), or all when absent. Applied after the cache. */
+  market?: string;
 }
 
-export function loadDashboard(opts: LoadOptions = {}): Promise<DashboardData> {
+export async function loadDashboard(opts: LoadOptions = {}): Promise<DashboardData> {
+  return forMarket(await loadAll(opts), opts.market);
+}
+
+function loadAll(opts: LoadOptions): Promise<DashboardData> {
   const key = `${opts.range ?? "30d"}:${opts.includeOwner ? "me" : "friends"}`;
   const hit = cache.get(key);
   if (hit && !opts.fresh && Date.now() - hit.at < TTL_MS) return hit.data;

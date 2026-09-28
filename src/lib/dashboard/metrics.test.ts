@@ -10,6 +10,8 @@ import {
   isListing,
   itemStats,
   labelFor,
+  countryStats,
+  forMarket,
   linkStats,
   marketChecks,
   people,
@@ -171,6 +173,7 @@ const HISTORY_ROW: HistoryRow = {
   mainCategory: null,
   gender: null,
   valuation: null,
+  currency: null,
 };
 
 describe("summary and people", () => {
@@ -311,9 +314,53 @@ describe("linkStats", () => {
   });
 });
 
+describe("countries", () => {
+  const AU_ID = "00000000-0000-0000-0000-000000000004";
+  const hrow = (over: Partial<HistoryRow>): HistoryRow => ({ id: Math.random().toString(36), userId: FRIEND, createdAt: "2026-09-11T10:00:00.000Z", sessionId: null, brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null, currency: null, ...over });
+  const world = () =>
+    data({
+      accounts: [account({}), account({ id: AU_ID, email: "kim@example.com", market: "AU" })],
+      history: [hrow({}), hrow({ userId: AU_ID, currency: "AUD" }), hrow({ userId: AU_ID, currency: "AUD" })],
+      generations: [gen({ userId: FRIEND }), gen({ name: "valuate:vinted", userId: AU_ID, traceId: "V1" })],
+      notes: [{ id: "n", userId: AU_ID, createdAt: "2026-09-11T10:00:00.000Z" } as Note],
+    });
+
+  it("splits people, listings and checks by the country they sell in, in a fixed order", () => {
+    const c = countryStats(world());
+    expect(c.map((r) => r.market)).toEqual(["GB", "IE", "US", "AU"]);
+    expect(c.find((r) => r.market === "GB")).toMatchObject({ accounts: 1, active: 1, listings: 1, checks: 0 });
+    expect(c.find((r) => r.market === "AU")).toMatchObject({ accounts: 1, active: 1, listings: 2, checks: 1 });
+    expect(c.find((r) => r.market === "US")).toMatchObject({ accounts: 0, active: 0, listings: 0, checks: 0 });
+  });
+
+  it("filters everything to the people selling in one country", () => {
+    const au = forMarket(world(), "AU");
+    expect(au.market).toBe("AU");
+    expect(au.accounts.map((a) => a.id)).toEqual([AU_ID]);
+    expect(au.history).toHaveLength(2);
+    expect(au.generations.map((g) => g.userId)).toEqual([AU_ID]);
+    expect(au.notes).toHaveLength(1);
+  });
+
+  it("leaves everything in place for all countries", () => {
+    const all = forMarket(world(), undefined);
+    expect(all.market).toBeNull();
+    expect(all.history).toHaveLength(3);
+  });
+
+  // An A$ estimate is not a £ estimate: the price figures use the most common
+  // currency in view and say how many items they leave out.
+  it("prices the estimate in the most common currency, leaving the rest out", () => {
+    const it = itemStats(data({ history: [hrow({ currency: "AUD", priceMin: 30, priceMax: 50 }), hrow({ currency: "AUD", priceMin: 10, priceMax: 30 }), hrow({ currency: null })] }));
+    expect(it.estimateCurrency).toBe("AUD");
+    expect(it.medianEstimate).toBe(40);
+    expect(it.estimateLeftOut).toBe(1);
+  });
+});
+
 describe("itemStats", () => {
   it("counts platforms and market checks from the history, so untraced listings count", () => {
-    const row = (over: Partial<HistoryRow>): HistoryRow => ({ id: Math.random().toString(36), userId: FRIEND, createdAt: "t", sessionId: null, brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null, ...over });
+    const row = (over: Partial<HistoryRow>): HistoryRow => ({ id: Math.random().toString(36), userId: FRIEND, createdAt: "t", sessionId: null, brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null, currency: null, ...over });
     const it = itemStats(
       data({
         generations: [],
@@ -342,7 +389,7 @@ describe("feedbackStats", () => {
         { id: "2", name: "copied", value: 1, dataType: "NUMERIC", timestamp: "t", comment: null, traceId: "A", environment: "production" },
         { id: "3", name: "thumbs", value: false, dataType: "BOOLEAN", timestamp: "t", comment: "too long", traceId: "B", environment: "production" },
       ],
-      history: [{ id: "h", userId: FRIEND, createdAt: "t", sessionId: "S2", brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null } satisfies HistoryRow],
+      history: [{ id: "h", userId: FRIEND, createdAt: "t", sessionId: "S2", brand: "Nike", clothingType: "Hoodie", title: "Nike hoodie", colourPrimary: null, size: null, condition: "Good", priceMin: 10, priceMax: 20, preferredPlatform: "vinted", mainCategory: null, gender: null, valuation: null, currency: null } satisfies HistoryRow],
     });
     const f = feedbackStats(d);
     expect(f.copied).toBe(2);

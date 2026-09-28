@@ -7,6 +7,8 @@ export interface Query {
   range?: string;
   me?: string;
   fresh?: string;
+  /** One country (GB, IE, US, AU), or all when absent. */
+  market?: string;
 }
 
 export const TABS = [
@@ -21,9 +23,9 @@ export const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-/** Keep the range and owner toggle across tabs. */
+/** Keep the range, owner toggle and country across tabs. */
 export function qs(q: Query, over: Partial<Query> = {}): string {
-  const merged = { range: q.range, me: q.me, ...over };
+  const merged = { range: q.range, me: q.me, market: q.market, ...over };
   const parts = Object.entries(merged).filter(([, v]) => v).map(([k, v]) => `${k}=${encodeURIComponent(v!)}`);
   return parts.length ? `?${parts.join("&")}` : "";
 }
@@ -36,6 +38,13 @@ export function Shell({ tab, q, data, badges = {}, children }: { tab: TabId; q: 
     ["all", "all"],
   ] as const;
   const me = q.me === "1";
+  const countries = [
+    [undefined, "all"],
+    ["GB", "UK"],
+    ["IE", "IE"],
+    ["US", "US"],
+    ["AU", "AU"],
+  ] as const;
   return (
     <>
       <div className="topbar">
@@ -44,6 +53,11 @@ export function Shell({ tab, q, data, badges = {}, children }: { tab: TabId; q: 
         <nav className="seg" aria-label="Range">
           {ranges.map(([k, label]) => (
             <a key={k} className={data.range.key === k ? "on" : ""} href={`${TABS.find((t) => t.id === tab)!.href}${qs(q, { range: k })}`}>{label}</a>
+          ))}
+        </nav>
+        <nav className="seg" aria-label="Country">
+          {countries.map(([m, label]) => (
+            <a key={label} className={(data.market ?? undefined) === m ? "on" : ""} href={`${TABS.find((t) => t.id === tab)!.href}${qs(q, { market: m })}`}>{label}</a>
           ))}
         </nav>
         <nav className="seg" aria-label="Whose activity">

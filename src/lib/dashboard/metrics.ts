@@ -2,6 +2,7 @@ import { CHIPS } from "@/lib/chip-vocab";
 import type { Platform } from "@/lib/types";
 import type { Generation, Route, Score } from "./langfuse";
 import type { Account, HistoryRow, Note } from "./supabase";
+import { isMarket, MARKET_IDS, MARKETS, type Market } from "@/lib/markets";
 
 /**
  * Pure aggregation over what the dashboard fetched. Nothing in here touches
@@ -37,6 +38,8 @@ export function rangeFor(key: string | undefined, now = new Date()): Range {
 export interface DashboardData {
   range: Range;
   includeOwner: boolean;
+  /** One country, or null for all of them. See `forMarket`. */
+  market?: Market | null;
   fetchedAt: string;
   projectId: string | null;
   generations: Generation[];
@@ -547,6 +550,55 @@ export function linkStats(data: DashboardData): LinkStats {
   };
 }
 
+// ── Countries ──────────────────────────────────────────────────────────────
+
+/**
+ * Only the people selling in one country, by the Market on their profile now:
+ * their account, traces, history and notes. Someone who moved country takes
+ * their whole history with them. Undefined leaves everything in place.
+ */
+export function forMarket(data: DashboardData, market: string | undefined): DashboardData {
+  if (!market || !isMarket(market)) return { ...data, market: null };
+  const here = new Set(data.accounts.filter((a) => a.market === market).map((a) => a.id));
+  const keep = (userId: string | null) => !!userId && here.has(userId);
+  return {
+    ...data,
+    market,
+    accounts: data.accounts.filter((a) => here.has(a.id)),
+    generations: data.generations.filter((g) => keep(g.userId)),
+    history: data.history.filter((h) => keep(h.userId)),
+    notes: data.notes.filter((n) => keep(n.userId)),
+  };
+}
+
+export interface CountryRow {
+  market: Market;
+  name: string;
+  accounts: number;
+  /** Used it in this range. */
+  active: number;
+  listings: number;
+  checks: number;
+}
+
+/** People, listings and market checks per country, always all four, in a fixed order. */
+export function countryStats(data: DashboardData): CountryRow[] {
+  const accounts = data.accounts.filter((a) => data.includeOwner || !a.isOwner);
+  const marketOf = new Map(data.accounts.map((a) => [a.id, a.market]));
+  const checks = marketChecks(data.generations);
+  return MARKET_IDS.map((m) => {
+    const mine = (userId: string | null) => !!userId && marketOf.get(userId) === m;
+    return {
+      market: m,
+      name: MARKETS[m].name,
+      accounts: accounts.filter((a) => a.market === m).length,
+      active: new Set([...data.generations.map((g) => g.userId), ...data.history.map((h) => h.userId)].filter(mine)).size,
+      listings: data.history.filter((h) => mine(h.userId)).length,
+      checks: checks.filter((c) => mine(c.userId)).length,
+    };
+  });
+}
+
 /** From the history table, so every listing counts — traced or not. */
 export interface ItemStats {
   /** The Preferred Platform each listing was written for. */
@@ -561,21 +613,32 @@ export interface ItemStats {
   colours: Count[];
   priceBands: Count[];
   medianEstimate: number | null;
+  /** The estimate figures are in this currency, the most common one in view. */
+  estimateCurrency: string;
+  /** Items in other currencies, left out of the estimate figures rather than mixed in. */
+  estimateLeftOut: number;
   rows: HistoryRow[];
 }
 
+/** Rows from before Markets carry no currency; they were all in pounds. */
+export const currencyOf = (r: HistoryRow): string => r.currency ?? "GBP";
+
 export function itemStats(data: DashboardData): ItemStats {
   const rows = data.history;
+  const byCurrency = countBy(rows, currencyOf, 99);
+  const estimateCurrency = byCurrency[0]?.label ?? "GBP";
   const mids = rows
+    .filter((r) => currencyOf(r) === estimateCurrency)
     .filter((r) => r.priceMin !== null && r.priceMax !== null)
     .map((r) => ((r.priceMin as number) + (r.priceMax as number)) / 2)
     .sort((a, b) => a - b);
+  const sym = Object.values(MARKETS).find((m) => m.currency === estimateCurrency)?.symbol ?? "";
   const bands = [
-    ["under £10", 0, 10],
-    ["£10–20", 10, 20],
-    ["£20–40", 20, 40],
-    ["£40–80", 40, 80],
-    ["£80+", 80, Infinity],
+    [`under ${sym}10`, 0, 10],
+    [`${sym}10–20`, 10, 20],
+    [`${sym}20–40`, 20, 40],
+    [`${sym}40–80`, 40, 80],
+    [`${sym}80+`, 80, Infinity],
   ] as const;
   return {
     platforms: countBy(rows, (r) => r.preferredPlatform),
@@ -588,6 +651,8 @@ export function itemStats(data: DashboardData): ItemStats {
     colours: countBy(rows, (r) => r.colourPrimary),
     priceBands: bands.map(([label, lo, hi]) => ({ label, count: mids.filter((m) => m >= lo && m < hi).length })),
     medianEstimate: mids.length ? mids[Math.floor(mids.length / 2)] : null,
+    estimateCurrency,
+    estimateLeftOut: rows.filter((r) => currencyOf(r) !== estimateCurrency).length,
     rows,
   };
 }

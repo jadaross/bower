@@ -10,9 +10,12 @@ export function money(v: number | null | undefined): string {
   return `$${v.toFixed(4)}`;
 }
 
-export function gbp(v: number | null | undefined): string {
+const SYMBOL: Record<string, string> = { GBP: "£", EUR: "€", USD: "$", AUD: "A$" };
+
+/** A price in its own currency. Null currency is a row from before Markets: pounds. */
+export function price(v: number | null | undefined, currency: string | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return "—";
-  return `£${Number.isInteger(v) ? v : v.toFixed(0)}`;
+  return `${SYMBOL[currency ?? "GBP"] ?? ""}${Number.isInteger(v) ? v : v.toFixed(0)}`;
 }
 
 export function num(v: number | null | undefined, digits = 0): string {
