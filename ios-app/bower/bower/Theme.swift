@@ -25,12 +25,19 @@ struct BowerTheme {
     let muted: Color
     let chrome: Color
 
+    // Text tokens — the accents as text and icons. A fill and a text colour
+    // are different tokens: satin fills pass in both themes, but satin text
+    // on a dark ground does not, so text and icons use these instead.
+    let accentText: Color    // links, icon buttons, selection: satin, sheen in dark
+    let errorText: Color     // error lines: coral, deepened or lifted to read
+    let confirmText: Color   // "Copied", ticks, thumbs: moss, lifted in dark
+
     // Accents — shared by both appearances. See CLAUDE.md.
     let satin  = Color(hex: 0x2B3AA8)   // primary: buttons, links, selection
     let sheen  = Color(hex: 0x7BA9E8)   // progress and fills on dark
     let shell  = Color(hex: 0xDCE3F0)   // pale blue ground
     let coral  = Color(hex: 0xE1563C)   // the wordmark's stop, errors, "guess"
-    let pollen = Color(hex: 0xE8B547)   // the mark's dot, warnings
+    let pollen = Color(hex: 0xE8B547)   // the mark's dot, warnings: a fill, never text
     let moss   = Color(hex: 0x3F6B4A)   // confirmed, copied, evidence
     let ink    = Color(hex: 0x1B1A20)
     let avenue = Color(hex: 0x171A2E)   // full-bleed dark screens
@@ -41,8 +48,11 @@ struct BowerTheme {
         subtle: Color(hex: 0xF1EADC),
         line:   Color(hex: 0xE5DECE),
         text:   Color(hex: 0x1B1A20),
-        muted:  Color(hex: 0x86807A),
-        chrome: Color(hex: 0xFBF7EF, opacity: 0.86)
+        muted:  Color(hex: 0x6E6862),
+        chrome: Color(hex: 0xFBF7EF, opacity: 0.86),
+        accentText:  Color(hex: 0x2B3AA8),
+        errorText:   Color(hex: 0xB83C26),
+        confirmText: Color(hex: 0x3F6B4A)
     )
 
     static let dark = BowerTheme(
@@ -52,7 +62,10 @@ struct BowerTheme {
         line:   Color(hex: 0x2E3348),
         text:   Color(hex: 0xF2EEE6),
         muted:  Color(hex: 0x8D93A8),
-        chrome: Color(hex: 0x131521, opacity: 0.86)
+        chrome: Color(hex: 0x131521, opacity: 0.86),
+        accentText:  Color(hex: 0x7BA9E8),
+        errorText:   Color(hex: 0xEB6F56),
+        confirmText: Color(hex: 0x7FB08A)
     )
 
     static func of(_ scheme: ColorScheme) -> BowerTheme {
