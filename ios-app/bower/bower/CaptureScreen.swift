@@ -128,7 +128,7 @@ struct CaptureScreen: View {
                         Text("Tips")
                     }
                     .font(BowerFont.ui(13, weight: .semibold))
-                    .foregroundStyle(theme.satin)
+                    .foregroundStyle(theme.accentText)
                     .padding(.horizontal, 14)
                     .frame(height: 34)
                     .background(theme.card)
@@ -141,7 +141,7 @@ struct CaptureScreen: View {
                 Button { showHelp = true } label: {
                     Text("?")
                         .font(BowerFont.ui(15, weight: .semibold))
-                        .foregroundStyle(theme.satin)
+                        .foregroundStyle(theme.accentText)
                         .frame(width: 34, height: 34)
                         .background(theme.card)
                         .clipShape(Circle())
@@ -199,7 +199,7 @@ struct CaptureScreen: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(theme.satin.opacity(0.27), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
+                    .strokeBorder(theme.accentText.opacity(0.27), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
             )
             .contentShape(RoundedRectangle(cornerRadius: 20))
         }
@@ -234,7 +234,7 @@ struct CaptureScreen: View {
             Button("Tips") { showTips = true }
                 .buttonStyle(.bowerPressText)
                 .font(BowerFont.ui(12.5, weight: .semibold))
-                .foregroundStyle(theme.satin)
+                .foregroundStyle(theme.accentText)
         }
         .padding(.horizontal, 2)
     }
@@ -252,7 +252,7 @@ struct CaptureScreen: View {
             HStack(spacing: 10) {
                 Image(systemName: "link")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(state.linkIsUsable ? theme.satin : theme.muted)
+                    .foregroundStyle(state.linkIsUsable ? theme.accentText : theme.muted)
                 TextField("Or paste the shop's link to it", text: $state.link)
                     .font(BowerFont.ui(14))
                     .foregroundStyle(theme.text)
@@ -451,7 +451,7 @@ struct CaptureScreen: View {
 
     private var preparing: some View {
         HStack(spacing: 8) {
-            ProgressView().tint(theme.satin)
+            ProgressView().tint(theme.accentText)
             Text("Preparing photos…").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
         }
         .frame(maxWidth: .infinity)
@@ -471,7 +471,7 @@ struct CaptureScreen: View {
                     .aspectRatio(3 / 4, contentMode: .fit)
                     .overlay {
                         VStack(spacing: 6) {
-                            Image(systemName: "plus").font(.system(size: 18, weight: .medium)).foregroundStyle(theme.satin)
+                            Image(systemName: "plus").font(.system(size: 18, weight: .medium)).foregroundStyle(theme.accentText)
                             Text("Add").font(BowerFont.ui(11)).foregroundStyle(theme.muted)
                         }
                     }
@@ -491,7 +491,7 @@ struct CaptureScreen: View {
                 .background(theme.subtle)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
                 .overlay(alignment: .topTrailing) {
-                    Image(systemName: "slash.circle.fill").foregroundStyle(theme.coral).offset(x: 4, y: -4)
+                    Image(systemName: "slash.circle.fill").foregroundStyle(theme.errorText).offset(x: 4, y: -4)
                 }
             VStack(spacing: 6) {
                 Text("No camera access").font(BowerFont.serif(26)).foregroundStyle(theme.text)

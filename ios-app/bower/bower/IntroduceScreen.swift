@@ -75,7 +75,7 @@ struct IntroduceScreen: View {
                 .frame(maxWidth: 280)
 
             Rectangle()
-                .fill(focused == field ? theme.satin : theme.line)
+                .fill(focused == field ? theme.accentText : theme.line)
                 .frame(width: 200, height: focused == field ? 1.5 : 0.5)
                 .animation(Motion.quick, value: focused)
         }

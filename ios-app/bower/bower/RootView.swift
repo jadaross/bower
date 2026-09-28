@@ -66,7 +66,7 @@ struct BackButton: View {
                 if let label { Text(label) }
             }
             .font(BowerFont.ui(16, weight: .medium))
-            .foregroundStyle(theme.satin)
+            .foregroundStyle(theme.accentText)
         }
         .buttonStyle(.bowerPress)
     }
@@ -304,7 +304,7 @@ struct BowerTabBar: View {
                 Image(systemName: icon).font(.system(size: 19))
                 Text(soon ? "Soon" : label).font(BowerFont.ui(10, weight: .medium))
             }
-            .foregroundStyle(soon ? theme.muted.opacity(0.4) : (on ? theme.satin : theme.muted))
+            .foregroundStyle(soon ? theme.muted.opacity(0.4) : (on ? theme.accentText : theme.muted))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 2)
             .contentShape(Rectangle())

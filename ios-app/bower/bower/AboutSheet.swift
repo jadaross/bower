@@ -12,7 +12,7 @@ struct AboutSheet: View {
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
-                    .foregroundStyle(theme.satin)
+                    .foregroundStyle(theme.accentText)
             }
 
             VStack(spacing: 12) {

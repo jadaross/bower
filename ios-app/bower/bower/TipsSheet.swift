@@ -23,7 +23,7 @@ struct TipsSheet: View {
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
-                    .foregroundStyle(theme.satin)
+                    .foregroundStyle(theme.accentText)
             }
             Text("Four angles, none required. The fifth photo is for a flaw, if there is one.")
                 .font(BowerFont.ui(13))
@@ -37,7 +37,7 @@ struct TipsSheet: View {
                         HStack(alignment: .top, spacing: 13) {
                             Image(systemName: tip.0.symbol)
                                 .font(.system(size: 14))
-                                .foregroundStyle(theme.satin)
+                                .foregroundStyle(theme.accentText)
                                 .frame(width: 34, height: 34)
                                 .background(theme.subtle)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))

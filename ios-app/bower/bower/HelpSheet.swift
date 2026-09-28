@@ -58,13 +58,13 @@ struct HelpSheet: View {
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
-                    .foregroundStyle(theme.satin)
+                    .foregroundStyle(theme.accentText)
             }
 
             HStack(spacing: 5) {
                 ForEach(0..<steps.count, id: \.self) { n in
                     Capsule()
-                        .fill(n <= step ? theme.satin : theme.line)
+                        .fill(n <= step ? theme.accentText : theme.line)
                         .frame(height: 3)
                         .contentShape(Rectangle().inset(by: -8))
                         .onTapGesture { go(to: n) }
@@ -137,9 +137,9 @@ struct HelpSheet: View {
     private func tag(_ text: String) -> some View {
         Text(text.uppercased())
             .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
-            .foregroundStyle(theme.satin)
+            .foregroundStyle(theme.accentText)
             .padding(.vertical, 4).padding(.horizontal, 8)
-            .background(theme.satin.opacity(0.1))
+            .background(theme.accentText.opacity(0.1))
             .clipShape(Capsule())
     }
 
@@ -158,7 +158,7 @@ struct HelpSheet: View {
                     VStack(spacing: 6) {
                         Image(systemName: shot.symbol)
                             .font(.system(size: 15))
-                            .foregroundStyle(theme.satin)
+                            .foregroundStyle(theme.accentText)
                             .frame(width: 44, height: 44)
                             .background(theme.subtle)
                             .clipShape(RoundedRectangle(cornerRadius: 12))

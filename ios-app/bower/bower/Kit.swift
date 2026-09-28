@@ -276,8 +276,8 @@ struct BowerButton: View {
         switch kind {
         case .primary:   disabled ? theme.muted : .white
         case .secondary: theme.text
-        case .quiet:     theme.satin
-        case .danger:    theme.coral
+        case .quiet:     theme.accentText
+        case .danger:    theme.errorText
         }
     }
 
@@ -307,7 +307,7 @@ struct BowerToggle: View {
     @Environment(\.bower) private var theme
 
     var body: some View {
-        let c = tint ?? theme.satin
+        let c = tint ?? theme.accentText
         Button { isOn.toggle() } label: {
             ZStack(alignment: isOn ? .trailing : .leading) {
                 Capsule().fill(isOn ? c : theme.subtle)
