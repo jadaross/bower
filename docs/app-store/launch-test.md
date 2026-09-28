@@ -22,6 +22,7 @@ Not verifiable in the simulator: a real StoreKit purchase. That is part 2.
 
 - [ ] Submission-day step 1 is done: the free tier is at **5 listings and 1 market check** (#76), and this build is the one attached to the version in App Store Connect.
 - [ ] TestFlight shows the build number you are about to tick with.
+- [ ] On a fresh account, the notifications sheet at the end of setup says "Your listings are back / 5 listings and 1 market check." (singular, #76).
 - [ ] Your own account is the owner's, with no limits. For parts 2 and 3, use the second bower account (or a fresh one) so the meters are real.
 
 ## 1. The free product, start to finish
