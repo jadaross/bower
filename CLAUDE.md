@@ -177,7 +177,7 @@ Format **only the platform being shown** — never fan out across all three. See
 
 Carried over from the Claude Design prototype (`Bower iOS Prototype.html`).
 
-**Light** — bg `#FBF7EF`, card `#FFFDF8`, subtle `#F1EADC`, line `#E5DECE`, text `#1B1A20`, muted `#86807A`.
+**Light** — bg `#FBF7EF`, card `#FFFDF8`, subtle `#F1EADC`, line `#E5DECE`, text `#1B1A20`, muted `#6E6862`.
 **Dark** — bg `#131521`, card `#1C1F30`, subtle `#232739`, line `#2E3348`, text `#F2EEE6`, muted `#8D93A8`.
 
 The accent palette is shared by both themes:
@@ -192,8 +192,33 @@ The accent palette is shared by both themes:
 | moss | `#3F6B4A` | Confirmed, copied, evidence ticks |
 | avenue | `#171A2E` | Full-bleed dark screens — analysing, failure |
 
+**A fill colour and a text colour are different tokens.** The accents above are fills.
+Satin text on a dark ground is 1.97:1, so text and icons use the text tokens, which change
+per theme:
+
+| Token | Light | Dark | For |
+|---|---|---|---|
+| `accentText` | satin | sheen `#7BA9E8` | Links, icon buttons, the selected tab, ticks |
+| `errorText` | `#B83C26` | `#EB6F56` | Error lines |
+| `confirmText` | moss | `#7FB08A` | "Copied", confirmations, thumbs |
+
+Pollen is a fill only (1.86:1 on a light card), never text. `PaletteContrastTests` holds every
+text token, `text` and `muted` to 4.5:1 on bg, card and subtle in both themes; a palette
+change that fails it is not done.
+
 Fonts: **Instrument Serif**, *italic*, for the wordmark and expressive headlines;
 **Geist** for UI; **Geist Mono** for kickers, counters and numerics.
+
+Sizes come from the scale in `BowerFont`, never a number:
+
+| Face | Steps |
+|---|---|
+| Geist (`ui`) | caption 11 · footnote 12.5 · body 14.5 · callout 16 · title 19 · largeTitle 24 |
+| Geist Mono (`mono`) | label 11 (kickers, counters) |
+| Instrument Serif (`serif`, `serifUpright`) | small 22 · medium 30 · large 38 · hero 60 |
+
+Nothing is under 11pt. Price figures inside `PriceRange` keep their own sizes. The free
+`size:` overloads remain only until every screen has moved over (#87, #88), then go (#89).
 
 The mark is **the arch** — a bower, filled solid, with a hole punched through the
 crown so it reads as a swing tag, and the pollen dot beneath. One `Arch` view draws

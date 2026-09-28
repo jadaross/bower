@@ -92,6 +92,52 @@ enum BowerFont {
     static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .custom("Geist Mono", size: size).weight(weight)
     }
+    // MARK: The scale
+    //
+    // Every size the app sets comes from these steps, so the same kind of
+    // text is the same size on every screen and nothing is under 11pt. The
+    // free sizes above go once every screen has moved over (#89). Each step
+    // still scales with Dynamic Type, relative to body.
+
+    /// Geist, the UI face.
+    enum Step: CGFloat {
+        case caption = 11      // fine print under a block, tab labels
+        case footnote = 12.5   // helper lines, row details, metadata
+        case body = 14.5       // rows, paragraphs, field values
+        case callout = 16      // buttons, emphasised rows
+        case title = 19        // card and sheet headings
+        case largeTitle = 24   // the biggest Geist on a screen
+    }
+
+    /// Geist Mono: section labels (`Kicker`) and counters.
+    enum MonoStep: CGFloat {
+        case label = 11
+    }
+
+    /// Instrument Serif, italic or upright: headlines and the wordmark.
+    /// Price figures inside `PriceRange` keep their own sizes.
+    enum Display: CGFloat {
+        case small = 22        // a sheet's headline
+        case medium = 30       // a screen's headline
+        case large = 38        // onboarding headlines
+        case hero = 60         // the sign-in wordmark and splash
+    }
+
+    static func ui(_ step: Step, weight: Font.Weight = .regular) -> Font {
+        ui(step.rawValue, weight: weight)
+    }
+
+    static func mono(_ step: MonoStep, weight: Font.Weight = .regular) -> Font {
+        mono(step.rawValue, weight: weight)
+    }
+
+    static func serif(_ step: Display) -> Font {
+        serif(step.rawValue)
+    }
+
+    static func serifUpright(_ step: Display) -> Font {
+        serifUpright(step.rawValue)
+    }
 }
 
 private struct BowerThemeKey: EnvironmentKey {
