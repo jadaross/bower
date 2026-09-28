@@ -45,11 +45,11 @@ struct SignInScreen: View {
                             Text("bower").foregroundStyle(Self.paper)
                             Text(".").foregroundStyle(theme.coral)
                         }
-                        .font(BowerFont.serif(64))
+                        .font(BowerFont.serif(.hero))
                         .wordmarkAccessibility()
 
                         Text("Love selling your clothes.\nHate writing the listings.")
-                            .font(BowerFont.ui(16))
+                            .font(BowerFont.ui(.callout))
                             .foregroundStyle(Self.paper.opacity(0.74))
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
@@ -93,11 +93,13 @@ struct SignInScreen: View {
                             focusedField = "Email"
                         } label: {
                             Text("Continue with email")
-                                .font(BowerFont.ui(15, weight: .semibold))
+                                .font(BowerFont.ui(.body, weight: .semibold))
                                 .foregroundStyle(Self.paper)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                // The same height and corners as Sign in with Apple above it.
+                                .frame(height: 50)
                                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Self.paper.opacity(0.35), lineWidth: 1))
+                                .contentShape(RoundedRectangle(cornerRadius: 12))
                         }
                         .buttonStyle(.bowerPress)
                     }
@@ -105,7 +107,7 @@ struct SignInScreen: View {
                     }
 
                     Text("Photos are read and thrown away. Bower keeps no images.")
-                        .font(BowerFont.ui(11.5))
+                        .font(BowerFont.ui(.caption))
                         .foregroundStyle(Self.paper.opacity(0.45))
                         .multilineTextAlignment(.center)
                         .padding(.top, 2)
@@ -125,13 +127,13 @@ struct SignInScreen: View {
     private func rejection(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text("!")
-                .font(BowerFont.ui(11, weight: .bold))
+                .font(BowerFont.ui(.caption, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
                 .background(theme.coral)
                 .clipShape(Circle())
             Text(message)
-                .font(BowerFont.ui(12.5))
+                .font(BowerFont.ui(.footnote))
                 .foregroundStyle(Self.paper)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -144,13 +146,13 @@ struct SignInScreen: View {
     private func noticeBanner(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text("✓")
-                .font(BowerFont.ui(11, weight: .bold))
+                .font(BowerFont.ui(.caption, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
                 .background(theme.moss)
                 .clipShape(Circle())
             Text(message)
-                .font(BowerFont.ui(12.5))
+                .font(BowerFont.ui(.footnote))
                 .foregroundStyle(Self.paper)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -167,7 +169,7 @@ struct SignInScreen: View {
                     Image(systemName: "chevron.left").font(.system(size: 11, weight: .semibold))
                     Text("Back")
                 }
-                .font(BowerFont.ui(13, weight: .medium))
+                .font(BowerFont.ui(.footnote, weight: .medium))
                 .foregroundStyle(Self.paper.opacity(0.6))
             }
             .buttonStyle(.bowerPress)
@@ -198,7 +200,7 @@ struct SignInScreen: View {
 
             Button { Task { await submitEmail() } } label: {
                 Text(signingUp ? "Create account" : "Log in")
-                    .font(BowerFont.ui(15, weight: .semibold))
+                    .font(BowerFont.ui(.body, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .foregroundStyle(canSubmitEmail ? theme.avenue : Self.paper.opacity(0.4))
@@ -219,7 +221,7 @@ struct SignInScreen: View {
     private func emailModeTab(_ label: String, active: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(BowerFont.ui(13, weight: active ? .semibold : .medium))
+                .font(BowerFont.ui(.footnote, weight: active ? .semibold : .medium))
                 .foregroundStyle(active ? theme.avenue : Self.paper.opacity(0.6))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
@@ -248,7 +250,7 @@ struct SignInScreen: View {
                 if secure { SecureField("", text: text, prompt: Text(placeholder).foregroundColor(Self.paper.opacity(0.4))) }
                 else { TextField("", text: text, prompt: Text(placeholder).foregroundColor(Self.paper.opacity(0.4))) }
             }
-            .font(BowerFont.ui(14.5))
+            .font(BowerFont.ui(.body))
             .foregroundStyle(Self.paper)
             .tint(theme.sheen)
             .keyboardType(keyboard)

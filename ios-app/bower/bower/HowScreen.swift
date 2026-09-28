@@ -17,10 +17,10 @@ struct HowScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("What bower does")
-                .font(BowerFont.serif(38))
+                .font(BowerFont.serif(.large))
                 .foregroundStyle(theme.text)
             Text("The selling is the easy part. This is the admin.")
-                .font(BowerFont.ui(14))
+                .font(BowerFont.ui(.body))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)
                 .frame(maxWidth: 300, alignment: .leading)
@@ -32,7 +32,7 @@ struct HowScreen: View {
                     HStack(alignment: .top, spacing: 16) {
                         VStack(spacing: 0) {
                             Text("\(i + 1)")
-                                .font(BowerFont.mono(12))
+                                .font(BowerFont.mono(.label))
                                 .foregroundStyle(.white)
                                 .frame(width: 30, height: 30)
                                 .background(theme.satin)
@@ -44,11 +44,11 @@ struct HowScreen: View {
                         }
                         VStack(alignment: .leading, spacing: 4) {
                             Text(beat.0)
-                                .font(BowerFont.ui(19, weight: .semibold))
+                                .font(BowerFont.ui(.title, weight: .semibold))
                                 .foregroundStyle(theme.text)
                                 .padding(.top, 4)
                             Text(beat.1)
-                                .font(BowerFont.ui(14))
+                                .font(BowerFont.ui(.body))
                                 .foregroundStyle(theme.muted)
                                 .lineSpacing(3)
                         }

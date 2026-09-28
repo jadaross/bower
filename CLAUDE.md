@@ -108,7 +108,7 @@ fanned out to.
 | `src/lib/markets.ts` | The Market vocabulary: currency, search country and the platforms on offer, per market (ADR-0009) |
 | `src/lib/seller-notes.ts` | The seller-note vocabulary and its one phrasing per platform |
 | `supabase/migrations/*` | The schema, and the source of truth for it — never edit in the dashboard |
-| `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple only), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
+| `ios-app/bower/` | **The app.** Eight screens, Supabase Auth (Apple, or email and password), the API client. Filesystem-synchronised, so a new `.swift` file joins the target on save. |
 | `ios-app/bower/bower/BowerAPI.swift` | The client, behind `BowerAPIClient`. `StubAPI` is the fixture implementation |
 | `ios-app/bower/bower/Wire.swift` | Codable mirrors of `types.ts` — keep in step. The wire's `Comparable` is `ComparableListing` here |
 | `ios-app/bower/bower/Store.swift` | StoreKit 2: loads Plus and the pack, buys with the user id as `appAccountToken`, hands every signed transaction to `/api/purchases` and finishes it only once the server has it. `PaywallSheet` is the one paywall; set `state.paywall` to open it. `-bowerPaywall [listings\|checks]`, `-bowerPlus`, `-bowerPack` in the stub |
@@ -137,8 +137,9 @@ What comes next, in order, is `docs/roadmap.md`; the free tier, the price of Plu
 running costs and break-even are ADR-0010.
 
 Two decisions that shape the client and are easy to undo by accident: sign-in is
-**Apple only** (a second method without account linking creates two accounts —
-#30), and `/api/analyse` streams a JSON *document* in text fragments, not events,
+**Apple or email, never linked** (#58): each is a plain, independent Supabase identity,
+because Supabase's automatic linking fails on Apple's Hide My Email addresses, so one
+person using both gets two accounts (#30); and `/api/analyse` streams a JSON *document* in text fragments, not events,
 so the client assembles then decodes. Three things are surfaced mid-stream, each a
 real wire event (`AnalyseProgress`): the stream opening, the title (pattern-matched
 out of the buffer the moment its closing quote arrives), and the `tag_data` key,

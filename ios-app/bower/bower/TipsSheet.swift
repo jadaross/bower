@@ -18,15 +18,15 @@ struct TipsSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("What photographs well").font(BowerFont.serif(28)).foregroundStyle(theme.text)
+                Text("What photographs well").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(14, weight: .semibold))
+                    .font(BowerFont.ui(.body, weight: .semibold))
                     .foregroundStyle(theme.accentText)
             }
             Text("Four angles, none required. The fifth photo is for a flaw, if there is one.")
-                .font(BowerFont.ui(13))
+                .font(BowerFont.ui(.footnote))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)
                 .padding(.top, 6)
@@ -42,8 +42,8 @@ struct TipsSheet: View {
                                 .background(theme.subtle)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(tip.1).font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
-                                Text(tip.2).font(BowerFont.ui(13)).foregroundStyle(theme.muted).lineSpacing(3)
+                                Text(tip.1).font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
+                                Text(tip.2).font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted).lineSpacing(3)
                             }
                             Spacer(minLength: 0)
                         }

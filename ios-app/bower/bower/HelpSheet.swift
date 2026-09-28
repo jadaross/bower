@@ -53,11 +53,11 @@ struct HelpSheet: View {
         let s = steps[step]
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("How bower works").font(BowerFont.serif(28)).foregroundStyle(theme.text)
+                Text("How bower works").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(14, weight: .semibold))
+                    .font(BowerFont.ui(.body, weight: .semibold))
                     .foregroundStyle(theme.accentText)
             }
 
@@ -80,7 +80,7 @@ struct HelpSheet: View {
                     if let spends = s.spends { tag(spends) }
                 }
                 Text(s.title)
-                    .font(BowerFont.ui(22, weight: .semibold))
+                    .font(BowerFont.ui(.largeTitle, weight: .semibold))
                     .foregroundStyle(theme.text)
                     .padding(.top, 6)
 
@@ -89,7 +89,7 @@ struct HelpSheet: View {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(Array(s.lines.enumerated()), id: \.offset) { i, line in
                         Text(line)
-                            .font(BowerFont.ui(14.5))
+                            .font(BowerFont.ui(.body))
                             .foregroundStyle(i == 0 ? theme.text : theme.muted)
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
@@ -136,7 +136,7 @@ struct HelpSheet: View {
 
     private func tag(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(BowerFont.mono(9.5, weight: .bold)).tracking(0.8)
+            .font(BowerFont.mono(.label, weight: .bold)).tracking(0.8)
             .foregroundStyle(theme.accentText)
             .padding(.vertical, 4).padding(.horizontal, 8)
             .background(theme.accentText.opacity(0.1))
@@ -163,7 +163,7 @@ struct HelpSheet: View {
                             .background(theme.subtle)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                         Text(shot.label)
-                            .font(BowerFont.ui(11, weight: .medium))
+                            .font(BowerFont.ui(.caption, weight: .medium))
                             .foregroundStyle(theme.text)
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
@@ -182,7 +182,7 @@ struct HelpSheet: View {
                 Hairline()
                 HStack(spacing: 6) {
                     ForEach(["Brand · Carhartt", "Size · M", "Condition · Good"], id: \.self) { f in
-                        Text(f).font(BowerFont.mono(10)).foregroundStyle(theme.text)
+                        Text(f).font(BowerFont.mono(.label)).foregroundStyle(theme.text)
                             .padding(.vertical, 4).padding(.horizontal, 7)
                             .background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 6))
                     }
@@ -199,16 +199,16 @@ struct HelpSheet: View {
             VStack(alignment: .leading, spacing: 4) {
                 Kicker("Ask")
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(Money.format(50, state.market.currency)).font(BowerFont.serifUpright(36)).foregroundStyle(theme.text)
+                    Text(Money.format(50, state.market.currency)).font(BowerFont.serifUpright(.large)).foregroundStyle(theme.text)
                     HStack(spacing: 6) {
                         Text("on")
                         Circle().fill(Platform.depop.tint).frame(width: 7, height: 7)
                         Text("Depop")
                     }
-                    .font(BowerFont.ui(14)).foregroundStyle(theme.text)
+                    .font(BowerFont.ui(.body)).foregroundStyle(theme.text)
                 }
                 Text("From 11 listings live right now")
-                    .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                    .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -221,7 +221,7 @@ struct HelpSheet: View {
                 ForEach(Platform.allCases) { p in
                     HStack(spacing: 7) {
                         Circle().fill(p.tint).frame(width: 8, height: 8)
-                        Text(p.name).font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(theme.text)
+                        Text(p.name).font(BowerFont.ui(.footnote, weight: .semibold)).foregroundStyle(theme.text)
                     }
                     .padding(.vertical, 9).padding(.horizontal, 12)
                     .background(theme.card)
@@ -244,10 +244,10 @@ struct HelpSheet: View {
                     Image(systemName: "doc.on.doc").font(.system(size: 9))
                     Text("Copy")
                 }
-                .font(BowerFont.ui(10.5, weight: .medium)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.caption, weight: .medium)).foregroundStyle(theme.muted)
             }
             Text(text)
-                .font(bold ? BowerFont.ui(13.5, weight: .semibold) : BowerFont.ui(12.5))
+                .font(bold ? BowerFont.ui(.body, weight: .semibold) : BowerFont.ui(.footnote))
                 .foregroundStyle(theme.text)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -257,9 +257,9 @@ struct HelpSheet: View {
     private func meterTile(_ limit: Int?, _ name: String, _ what: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(limit.map(String.init) ?? "∞")
-                .font(BowerFont.serifUpright(40)).foregroundStyle(theme.text)
-            Text(name).font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(theme.text)
-            Text(what).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted).lineSpacing(2)
+                .font(BowerFont.serifUpright(.large)).foregroundStyle(theme.text)
+            Text(name).font(BowerFont.ui(.footnote, weight: .semibold)).foregroundStyle(theme.text)
+            Text(what).font(BowerFont.ui(.caption)).foregroundStyle(theme.muted).lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)

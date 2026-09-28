@@ -255,7 +255,7 @@ struct BowerButton: View {
                 if let icon { Image(systemName: icon) }
                 Text(title)
             }
-            .font(BowerFont.ui(small ? 13 : 15, weight: .semibold))
+            .font(BowerFont.ui(small ? .footnote : .callout, weight: .semibold))
             .frame(maxWidth: .infinity)
             .padding(.vertical, small ? 9 : 15)
             .padding(.horizontal, small ? 14 : 16)
@@ -353,7 +353,7 @@ struct Segmented: View {
                         }
                         Text(o.label)
                     }
-                    .font(BowerFont.ui(small ? 12 : 13, weight: active ? .semibold : .medium))
+                    .font(BowerFont.ui(.footnote, weight: active ? .semibold : .medium))
                     .foregroundStyle(active ? theme.text : theme.muted)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, small ? 7 : 9)
@@ -434,7 +434,7 @@ struct NewItemButton: View {
                 Image(systemName: "plus").font(.system(size: 12, weight: .bold))
                 Text("New item")
             }
-            .font(BowerFont.ui(14, weight: .semibold))
+            .font(BowerFont.ui(.body, weight: .semibold))
             .foregroundStyle(theme.text)
             .padding(.vertical, 9)
             .padding(.horizontal, 16)

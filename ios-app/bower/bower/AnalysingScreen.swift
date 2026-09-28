@@ -76,13 +76,13 @@ struct AnalysingScreen: View {
                 Group {
                     if let title {
                         Text(title)
-                            .font(BowerFont.serif(44))
+                            .font(BowerFont.serif(.large))
                             .lineSpacing(2)
                             // Sharpens into place from just below.
                             .transition(Motion.sharpen)
                     } else {
                         Text(state.photos.isEmpty ? "Reading the page" : "Reading your photos")
-                            .font(BowerFont.serif(36))
+                            .font(BowerFont.serif(.large))
                             .opacity(0.9)
                     }
                 }
@@ -219,15 +219,15 @@ struct AnalysingScreen: View {
                                           @ViewBuilder actions: () -> Actions) -> some View {
         VStack(spacing: 18) {
             Text(badge)
-                .font(BowerFont.ui(24, weight: .bold))
+                .font(BowerFont.ui(.largeTitle, weight: .bold))
                 .foregroundStyle(badgeColor)
                 .frame(width: 56, height: 56)
                 .background(.white.opacity(0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             VStack(spacing: 10) {
-                Text(title).font(BowerFont.serif(30)).foregroundStyle(.white).multilineTextAlignment(.center)
+                Text(title).font(BowerFont.serif(.medium)).foregroundStyle(.white).multilineTextAlignment(.center)
                 Text(body)
-                    .font(BowerFont.ui(13.5))
+                    .font(BowerFont.ui(.body))
                     .foregroundStyle(.white.opacity(0.68))
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 270)
@@ -241,7 +241,7 @@ struct AnalysingScreen: View {
 
     private func primaryLabel(_ text: String, fg: Color, bg: Color) -> some View {
         Text(text)
-            .font(BowerFont.ui(15, weight: .semibold))
+            .font(BowerFont.ui(.body, weight: .semibold))
             .foregroundStyle(fg)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)

@@ -21,11 +21,11 @@ struct NotificationsSheet: View {
             lockScreen
 
             Text("Know when it's in.")
-                .font(BowerFont.serif(30))
+                .font(BowerFont.serif(.medium))
                 .foregroundStyle(theme.text)
                 .padding(.top, 22)
             Text("Only when there's something to see.")
-                .font(BowerFont.ui(13.5))
+                .font(BowerFont.ui(.body))
                 .foregroundStyle(theme.muted)
                 .padding(.top, 6)
 
@@ -55,10 +55,10 @@ struct NotificationsSheet: View {
             // The lock screen's own clock, in bower's voice.
             VStack(spacing: 0) {
                 Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                    .font(BowerFont.ui(12.5, weight: .medium))
+                    .font(BowerFont.ui(.footnote, weight: .medium))
                     .foregroundStyle(.white.opacity(0.75))
                 Text("9:41")
-                    .font(BowerFont.serif(58))
+                    .font(BowerFont.serif(.hero))
                     .foregroundStyle(.white)
             }
             .padding(.top, 8)
@@ -96,11 +96,11 @@ struct NotificationsSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Text(title).font(BowerFont.ui(13.5, weight: .semibold)).lineLimit(1)
+                    Text(title).font(BowerFont.ui(.body, weight: .semibold)).lineLimit(1)
                     Spacer(minLength: 6)
-                    Text(when).font(BowerFont.ui(11.5)).opacity(0.6)
+                    Text(when).font(BowerFont.ui(.caption)).opacity(0.6)
                 }
-                Text(body).font(BowerFont.ui(13)).lineLimit(2).opacity(0.9)
+                Text(body).font(BowerFont.ui(.footnote)).lineLimit(2).opacity(0.9)
             }
             .foregroundStyle(.white)
         }

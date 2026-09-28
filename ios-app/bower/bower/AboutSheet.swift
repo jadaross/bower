@@ -11,7 +11,7 @@ struct AboutSheet: View {
                 Spacer()
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
-                    .font(BowerFont.ui(14, weight: .semibold))
+                    .font(BowerFont.ui(.body, weight: .semibold))
                     .foregroundStyle(theme.accentText)
             }
 
@@ -21,7 +21,7 @@ struct AboutSheet: View {
                     Text("bower").foregroundStyle(theme.text)
                     Text(".").foregroundStyle(theme.coral)
                 }
-                .font(BowerFont.serif(40))
+                .font(BowerFont.serif(.large))
                 .wordmarkAccessibility()
             }
             .frame(maxWidth: .infinity)
@@ -33,7 +33,7 @@ struct AboutSheet: View {
                 Text(BowerOrigin.theStage)
                 Text("It exists because writing the listing was the bit that stopped a wardrobe clear-out ever getting finished.")
             }
-            .font(BowerFont.ui(14.5))
+            .font(BowerFont.ui(.body))
             .foregroundStyle(theme.text)
             .lineSpacing(4)
             .fixedSize(horizontal: false, vertical: true)
@@ -42,7 +42,7 @@ struct AboutSheet: View {
             Spacer(minLength: 16)
 
             Text("Photos are read and thrown away. Bower keeps no images.")
-                .font(BowerFont.ui(11.5))
+                .font(BowerFont.ui(.caption))
                 .foregroundStyle(theme.muted)
                 .frame(maxWidth: .infinity)
         }

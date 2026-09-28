@@ -29,10 +29,10 @@ struct IntroduceScreen: View {
 
                 VStack(spacing: 8) {
                     Text("Introduce yourself")
-                        .font(BowerFont.serif(36))
+                        .font(BowerFont.serif(.large))
                         .foregroundStyle(theme.text)
                     Text("So bower knows who it's writing for.")
-                        .font(BowerFont.ui(14))
+                        .font(BowerFont.ui(.body))
                         .foregroundStyle(theme.muted)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 260)
@@ -64,7 +64,7 @@ struct IntroduceScreen: View {
     private func field(_ placeholder: String, text: Binding<String>, field: Field, submitLabel: SubmitLabel, onSubmit: @escaping () -> Void) -> some View {
         VStack(spacing: 6) {
             TextField(placeholder, text: text)
-                .font(BowerFont.serif(30))
+                .font(BowerFont.serif(.medium))
                 .foregroundStyle(theme.text)
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.words)

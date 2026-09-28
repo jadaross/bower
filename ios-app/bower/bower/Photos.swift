@@ -99,7 +99,7 @@ struct PhotoTile: View {
             .overlay(alignment: .topLeading) {
                 if let index {
                     Text("\(index)")
-                        .font(BowerFont.ui(10, weight: .bold))
+                        .font(BowerFont.ui(.caption, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(width: 18, height: 18)
                         .background(.black.opacity(0.5))
@@ -128,7 +128,7 @@ struct PhotoTile: View {
             .overlay(alignment: .bottomLeading) {
                 if let shot = photo.shot {
                     Text(shot.label)
-                        .font(BowerFont.ui(10, weight: .medium))
+                        .font(BowerFont.ui(.caption, weight: .medium))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)

@@ -15,11 +15,11 @@ struct WhyBowerScreen: View {
             }
 
             Text("Why bower?")
-                .font(BowerFont.serif(38))
+                .font(BowerFont.serif(.large))
                 .foregroundStyle(theme.text)
 
             Text(BowerOrigin.bowerbird)
-                .font(BowerFont.ui(14.5))
+                .font(BowerFont.ui(.body))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(4)
                 .padding(.top, 14)
@@ -29,7 +29,7 @@ struct WhyBowerScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(BowerOrigin.theStage)
-                .font(BowerFont.ui(14.5))
+                .font(BowerFont.ui(.body))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(4)
 

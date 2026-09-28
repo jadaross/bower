@@ -18,7 +18,7 @@ struct BowerNav<Leading: View, Trailing: View>: View {
                 Spacer(minLength: 0)
                 if !large {
                     Text(title)
-                        .font(BowerFont.ui(16, weight: .semibold))
+                        .font(BowerFont.ui(.callout, weight: .semibold))
                         .foregroundStyle(theme.text)
                 }
                 Spacer(minLength: 0)
@@ -33,7 +33,7 @@ struct BowerNav<Leading: View, Trailing: View>: View {
                         Text(title).foregroundStyle(theme.text)
                         if wordmark { Text(".").foregroundStyle(theme.coral) }
                     }
-                    .font(BowerFont.serif(36))
+                    .font(BowerFont.serif(.large))
                     .wordmarkAccessibility(title)
                     .accessibilityAddTraits(.isHeader)
                 }
@@ -65,7 +65,7 @@ struct BackButton: View {
                 Image(systemName: "chevron.left").font(.system(size: 16, weight: .semibold))
                 if let label { Text(label) }
             }
-            .font(BowerFont.ui(16, weight: .medium))
+            .font(BowerFont.ui(.callout, weight: .medium))
             .foregroundStyle(theme.accentText)
         }
         .buttonStyle(.bowerPress)
@@ -223,25 +223,25 @@ struct RootView: View {
             BowerNav(title: "Welcome") {
                 EmptyView()
             } trailing: {
-                Text("1 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+                Text("1 / 2").font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
             }
         case .whyBower:
             BowerNav(title: "Welcome") {
                 BackButton(label: "Back") { state.screen = .introduce }
             } trailing: {
-                Text("2 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+                Text("2 / 2").font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
             }
         case .how:
             BowerNav(title: "Set up") {
                 EmptyView()
             } trailing: {
-                Text("1 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+                Text("1 / 2").font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
             }
         case .platforms:
             BowerNav(title: "Set up") {
                 BackButton(label: "Back") { state.screen = .how }
             } trailing: {
-                Text("2 / 2").font(BowerFont.mono(11)).foregroundStyle(theme.muted)
+                Text("2 / 2").font(BowerFont.mono(.label)).foregroundStyle(theme.muted)
             }
         case .capture:
             EmptyView()
@@ -302,7 +302,7 @@ struct BowerTabBar: View {
         return Button { if !soon { onSelect(t) } } label: {
             VStack(spacing: 3) {
                 Image(systemName: icon).font(.system(size: 19))
-                Text(soon ? "Soon" : label).font(BowerFont.ui(10, weight: .medium))
+                Text(soon ? "Soon" : label).font(BowerFont.ui(.caption, weight: .medium))
             }
             .foregroundStyle(soon ? theme.muted.opacity(0.4) : (on ? theme.accentText : theme.muted))
             .frame(maxWidth: .infinity)
@@ -332,7 +332,7 @@ struct LaunchMark: View {
                 Text("bower").foregroundStyle(Color(hex: 0xF2EEE6))
                 Text(".").foregroundStyle(Color(hex: 0xE1563C))
             }
-            .font(BowerFont.serif(62))
+            .font(BowerFont.serif(.hero))
             .wordmarkAccessibility()
         }
     }

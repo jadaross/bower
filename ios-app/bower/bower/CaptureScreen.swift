@@ -114,7 +114,7 @@ struct CaptureScreen: View {
                         Text("bower").foregroundStyle(theme.text)
                         Text(".").foregroundStyle(theme.coral)
                     }
-                    .font(BowerFont.serif(36))
+                    .font(BowerFont.serif(.large))
                     .wordmarkAccessibility()
                 }
             }
@@ -127,7 +127,7 @@ struct CaptureScreen: View {
                         Image(systemName: "lightbulb").font(.system(size: 12, weight: .semibold))
                         Text("Tips")
                     }
-                    .font(BowerFont.ui(13, weight: .semibold))
+                    .font(BowerFont.ui(.footnote, weight: .semibold))
                     .foregroundStyle(theme.accentText)
                     .padding(.horizontal, 14)
                     .frame(height: 34)
@@ -140,7 +140,7 @@ struct CaptureScreen: View {
 
                 Button { showHelp = true } label: {
                     Text("?")
-                        .font(BowerFont.ui(15, weight: .semibold))
+                        .font(BowerFont.ui(.body, weight: .semibold))
                         .foregroundStyle(theme.accentText)
                         .frame(width: 34, height: 34)
                         .background(theme.card)
@@ -183,10 +183,10 @@ struct CaptureScreen: View {
                     .clipShape(Circle())
                 VStack(spacing: 5) {
                     Text("Photograph the piece")
-                        .font(BowerFont.serif(32))
+                        .font(BowerFont.serif(.medium))
                         .foregroundStyle(theme.text)
                     Text("Up to 5 photos.")
-                        .font(BowerFont.ui(13.5))
+                        .font(BowerFont.ui(.body))
                         .foregroundStyle(theme.muted)
                 }
             }
@@ -228,12 +228,12 @@ struct CaptureScreen: View {
     private var adviceLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text("Front, back, size tag, brand label. Up to 5 photos.")
-                .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Button("Tips") { showTips = true }
                 .buttonStyle(.bowerPressText)
-                .font(BowerFont.ui(12.5, weight: .semibold))
+                .font(BowerFont.ui(.footnote, weight: .semibold))
                 .foregroundStyle(theme.accentText)
         }
         .padding(.horizontal, 2)
@@ -254,7 +254,7 @@ struct CaptureScreen: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(state.linkIsUsable ? theme.accentText : theme.muted)
                 TextField("Or paste the shop's link to it", text: $state.link)
-                    .font(BowerFont.ui(14))
+                    .font(BowerFont.ui(.body))
                     .foregroundStyle(theme.text)
                     .keyboardType(.URL)
                     .textContentType(.URL)
@@ -287,7 +287,7 @@ struct CaptureScreen: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(spacing: 10) {
                         TextField("Size", text: $state.linkSize)
-                            .font(BowerFont.ui(14))
+                            .font(BowerFont.ui(.body))
                             .foregroundStyle(theme.text)
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
@@ -305,7 +305,7 @@ struct CaptureScreen: View {
                         } label: {
                             HStack(spacing: 6) {
                                 Text(state.linkCondition?.rawValue ?? "Condition")
-                                    .font(BowerFont.ui(14))
+                                    .font(BowerFont.ui(.body))
                                     .foregroundStyle(state.linkCondition == nil ? theme.muted : theme.text)
                                     .lineLimit(1)
                                 Spacer(minLength: 0)
@@ -321,7 +321,7 @@ struct CaptureScreen: View {
                         }
                     }
                     Text("A page can't know your size or how it has worn. Left blank, bower takes the page's size and calls it Good.")
-                        .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                        .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.horizontal, 2)
                 }
@@ -396,7 +396,7 @@ struct CaptureScreen: View {
     private func costLine(_ text: String) -> some View {
         ZStack {
             Text(text)
-                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                .font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .id(text)
@@ -408,7 +408,7 @@ struct CaptureScreen: View {
     private var clearButton: some View {
         Button("Clear") { state.clearItem() }
             .buttonStyle(.bowerPressText)
-            .font(BowerFont.ui(12.5, weight: .medium))
+            .font(BowerFont.ui(.footnote, weight: .medium))
             .foregroundStyle(theme.muted)
             .padding(.horizontal, 8)
     }
@@ -416,13 +416,13 @@ struct CaptureScreen: View {
     private var turnedAwayNote: some View {
         HStack(alignment: .top, spacing: 8) {
             Text("!")
-                .font(BowerFont.ui(11, weight: .bold))
+                .font(BowerFont.ui(.caption, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
                 .background(theme.coral)
                 .clipShape(Circle())
             Text("That was inappropriate. It wasn't added.")
-                .font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
+                .font(BowerFont.ui(.footnote)).foregroundStyle(theme.text)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 10)
@@ -434,13 +434,13 @@ struct CaptureScreen: View {
     private var overLimitNote: some View {
         HStack(alignment: .top, spacing: 8) {
             Text("!")
-                .font(BowerFont.ui(11, weight: .bold))
+                .font(BowerFont.ui(.caption, weight: .bold))
                 .foregroundStyle(theme.ink)
                 .frame(width: 16, height: 16)
                 .background(theme.pollen)
                 .clipShape(Circle())
             Text("Five photos is the limit. The extras weren't added.")
-                .font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
+                .font(BowerFont.ui(.footnote)).foregroundStyle(theme.text)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 10)
@@ -452,7 +452,7 @@ struct CaptureScreen: View {
     private var preparing: some View {
         HStack(spacing: 8) {
             ProgressView().tint(theme.accentText)
-            Text("Preparing photos…").font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
+            Text("Preparing photos…").font(BowerFont.ui(.footnote)).foregroundStyle(theme.muted)
         }
         .frame(maxWidth: .infinity)
     }
@@ -472,7 +472,7 @@ struct CaptureScreen: View {
                     .overlay {
                         VStack(spacing: 6) {
                             Image(systemName: "plus").font(.system(size: 18, weight: .medium)).foregroundStyle(theme.accentText)
-                            Text("Add").font(BowerFont.ui(11)).foregroundStyle(theme.muted)
+                            Text("Add").font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
                         }
                     }
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(theme.line, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4])))
@@ -494,9 +494,9 @@ struct CaptureScreen: View {
                     Image(systemName: "slash.circle.fill").foregroundStyle(theme.errorText).offset(x: 4, y: -4)
                 }
             VStack(spacing: 6) {
-                Text("No camera access").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                Text("No camera access").font(BowerFont.serif(.medium)).foregroundStyle(theme.text)
                 Text("Bower can't see anything without it. Photos are read and thrown away, never stored.")
-                    .font(BowerFont.ui(13.5))
+                    .font(BowerFont.ui(.body))
                     .foregroundStyle(theme.muted)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 250)

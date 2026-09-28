@@ -18,17 +18,17 @@ struct PlatformsScreen: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Where do you sell?")
-                    .font(BowerFont.serif(38))
+                    .font(BowerFont.serif(.large))
                     .foregroundStyle(theme.text)
                 Text("Priced from your country's listings.")
-                    .font(BowerFont.ui(13.5))
+                    .font(BowerFont.ui(.body))
                     .foregroundStyle(theme.muted)
                     .padding(.top, 8)
             }
 
             if needsMarket, let country = Market.deviceRegionName {
                 Text("We don't cover \(country) yet. Pick the closest.")
-                    .font(BowerFont.ui(13.5))
+                    .font(BowerFont.ui(.body))
                     .foregroundStyle(theme.text)
             }
 
@@ -106,7 +106,7 @@ struct PlatformsScreen: View {
         let on = state.enabled.contains(platform)
         return HStack(spacing: 13) {
             Text(String(platform.name.prefix(1)))
-                .font(BowerFont.ui(16, weight: .bold))
+                .font(BowerFont.ui(.callout, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 36, height: 36)
                 .background(platform.tint)
@@ -114,8 +114,8 @@ struct PlatformsScreen: View {
                 .opacity(on ? 1 : 0.35)
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(platform.name).font(BowerFont.ui(15, weight: .semibold)).foregroundStyle(theme.text)
-                Text(platform.note(in: state.market)).font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                Text(platform.name).font(BowerFont.ui(.body, weight: .semibold)).foregroundStyle(theme.text)
+                Text(platform.note(in: state.market)).font(BowerFont.ui(.caption)).foregroundStyle(theme.muted)
             }
 
             Spacer(minLength: 0)
@@ -148,12 +148,12 @@ struct PlatformsScreen: View {
     private var keepOne: some View {
         HStack(alignment: .top, spacing: 8) {
             Text("!")
-                .font(BowerFont.ui(11, weight: .bold))
+                .font(BowerFont.ui(.caption, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
                 .background(theme.coral)
                 .clipShape(Circle())
-            Text(keepOneText).font(BowerFont.ui(12.5))
+            Text(keepOneText).font(BowerFont.ui(.footnote))
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
