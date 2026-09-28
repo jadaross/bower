@@ -282,15 +282,14 @@ struct SignInScreen: View {
                 await state.didSignIn()
             }
         } catch {
-            failure = "Couldn't finish signing in: \(error.localizedDescription)"
+            failure = "Couldn't sign in: \(error.localizedDescription)"
         }
     }
 
     private static func describe(_ error: APIError) -> String {
         switch error {
-        case .transport(let e): "Couldn't reach the server: \(e.localizedDescription)"
-        case .sessionInvalid:   "Apple returned a credential Supabase rejected. Try again."
-        default:                "Couldn't finish signing in. Try again."
+        case .transport:        "Couldn't sign in. Check your connection and try again."
+        default:                "Couldn't sign in. Try again."
         }
     }
 
@@ -299,11 +298,11 @@ struct SignInScreen: View {
         case .failure(let error):
             // The user dismissing Apple's sheet is not a failure worth a message.
             if let e = error as? ASAuthorizationError, e.code == .canceled { return }
-            failure = "Apple didn't complete the sign-in. Try again."
+            failure = "Couldn't sign in with Apple. Try again."
         case .success(let auth):
             guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
                   let token = credential.identityToken else {
-                failure = "Apple returned an unexpected credential. Try again."
+                failure = "Couldn't sign in with Apple. Try again."
                 return
             }
             working = true
@@ -317,7 +316,7 @@ struct SignInScreen: View {
             } catch {
                 // Surface the SDK's own words. A masked error is how the first
                 // TestFlight build's routing bug hid behind "check your connection".
-                failure = "Couldn't finish signing in: \(error.localizedDescription)"
+                failure = "Couldn't sign in: \(error.localizedDescription)"
             }
         }
     }

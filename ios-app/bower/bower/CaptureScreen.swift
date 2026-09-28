@@ -231,7 +231,7 @@ struct CaptureScreen: View {
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Button("Tips") { showTips = true }
-                .buttonStyle(.bowerPress)
+                .buttonStyle(.bowerPressText)
                 .font(BowerFont.ui(12.5, weight: .semibold))
                 .foregroundStyle(theme.satin)
         }
@@ -385,21 +385,28 @@ struct CaptureScreen: View {
             return "\(again ? "Writing it again uses" : "Uses") 1 of your \(n) bought listing\(n == 1 ? "" : "s")."
         }
         if left == 0 {
-            return ["All \(reads.limit ?? reads.used) listings are used this month.", reads.resetsText].compactMap { $0 }.joined(separator: " ")
+            return ["This month's listings are used.", reads.resetsText].compactMap { $0 }.joined(separator: " ")
         }
         return "\(again ? "Writing it again uses" : "Uses") 1 of your \(left) listing\(left == 1 ? "" : "s")."
     }
 
+    /// One line under the buttons. A new line softens in over the old, so
+    /// the two never read as one.
     private func costLine(_ text: String) -> some View {
-        Text(text)
-            .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
+        ZStack {
+            Text(text)
+                .font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .id(text)
+                .transition(Motion.soften)
+        }
+        .animation(Motion.quick, value: text)
     }
 
     private var clearButton: some View {
         Button("Clear") { state.clearItem() }
-            .buttonStyle(.bowerPress)
+            .buttonStyle(.bowerPressText)
             .font(BowerFont.ui(12.5, weight: .medium))
             .foregroundStyle(theme.muted)
             .padding(.horizontal, 8)
@@ -413,7 +420,7 @@ struct CaptureScreen: View {
                 .frame(width: 16, height: 16)
                 .background(theme.coral)
                 .clipShape(Circle())
-            Text("Sorry, that was inappropriate. It wasn't added.")
+            Text("That was inappropriate. It wasn't added.")
                 .font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -156,7 +156,7 @@ struct RootView: View {
             withAnimation(Motion.move) { shown = new }
         } else if [old, new].contains(where: { $0 == .signin || $0 == .analysing }) || steps.contains(new) {
             forward = true
-            withAnimation(.easeOut(duration: 0.25)) { shown = new }
+            withAnimation(Motion.fade) { shown = new }
         } else {
             var t = Transaction(); t.disablesAnimations = true
             withTransaction(t) { shown = new }
@@ -176,7 +176,7 @@ struct RootView: View {
         Task {
             let left = 0.3 - Date().timeIntervalSince(launched)
             if left > 0 { try? await Task.sleep(for: .seconds(left)) }
-            withAnimation(.easeOut(duration: 0.2)) { showSplash = false }
+            withAnimation(Motion.fade) { showSplash = false }
         }
     }
 

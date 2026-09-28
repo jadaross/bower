@@ -155,8 +155,8 @@ displayed it and it delayed the title by a third of the output.
 
 The first field of the document is `subject`: `clothing`, `not_clothing`,
 `explicit` or `unsafe`. Anything but `clothing` ends the stream at once with a
-`{"rejected": reason}` frame (see `streaming-text.ts`), the unit is refunded, and
-the client shows one of two messages: "we only do clothing" or "that was
+`{"rejected": reason}` frame (see `streaming-text.ts`), the unit is refunded (up to ten a day, #79), and
+the client shows one of two messages: "Only clothes, shoes and bags" or "That was
 inappropriate". A model refusal is reported the same way as `refused`. The app
 also runs Apple's on-device `SensitiveContentAnalysis` before a photo joins the
 pile, but that only works when the user has Sensitive Content Warning on in iOS
@@ -219,6 +219,7 @@ rules, with Apple's fluid-interface principles).
 | `Motion.quick` | State changes: toggles, chips, banners, fills, a disabled button filling in | 160ms, strong ease-out `(0.23, 1, 0.32, 1)` |
 | `Motion.move` | Layout: sliding highlights, things making room, onboarding pages | Spring, no bounce, 0.3s |
 | `Motion.arrive` | The few big moments only: the read's title, the Ask, notification banners | Spring, slight bounce, 0.45s |
+| `Motion.fade` | One whole screen crossfading to another: the splash, the read into its failure page, into or out of a full-bleed page | 200ms ease-out |
 | `Motion.rise` | Anything appearing in place (notes, forms, rows) | Fade + 8pt rise |
 | `Motion.pop` | Adding to or taking from a set (photos in the pile) | Fade + 94% scale |
 | `Motion.sharpen` / `.soften` | Text replacing text: a landing title / a rewrite | Blur clearing, so two texts never overlap |
@@ -227,10 +228,13 @@ rules, with Apple's fluid-interface principles).
 The rules behind them:
 
 - **Every pressable thing presses.** Use `.buttonStyle(.bowerPress)` (0.97), or
-  `.bowerPressLarge` (0.985) for big surfaces such as cards and the camera area. Never
+  `.bowerPressLarge` (0.985) for big surfaces such as cards and the camera area, and
+  `.bowerPressText` for one- or two-word text buttons (Done, Tips, Clear), which grows the
+  tap area to 44pt without moving the layout. `Link`s press too. Never
   `.plain`, except the toggle, segmented control and tab bar, which have their own feedback.
 - **Frequency decides motion.** Things used many times a day (tabs, the listing flow)
-  switch instantly. Occasional things get Quick or Move. Only rare, first-time or payoff
+  switch instantly. A list on a tab cascades (`staggerIn`) only the first time it
+  is shown in a session (`enabled:`). Occasional things get Quick or Move. Only rare, first-time or payoff
   moments get Arrive or a stagger.
 - **Nothing appears from nothing.** No `.scale` from 0: start at 0.6 or higher, with a
   fade. Nothing pops in without a transition either.
@@ -239,7 +243,7 @@ The rules behind them:
 - **Motion shows direction.** Forward slides in from the right and back from the left
   (onboarding, the Help steps); a highlight slides to the chosen segment
   (`matchedGeometryEffect`).
-- **Haptics only on a state change.** `.selection` for toggles, segments and chips;
+- **Haptics only on a state change**, always through `.sensoryFeedback`. `.selection` for toggles, segments and chips;
   `.success` when a listing, a market check or a purchase lands; `.impact(.light)` for thumbs. Nowhere
   else, or they stop meaning anything.
 - **Reduce Motion is built into the tokens.** They turn into fades; `BowerPress` dims
@@ -252,4 +256,7 @@ The rules behind them:
 
 Copy follows the same restraint: no em dashes in anything a user can read (the app, the
 web pages, the store listing), and the fewest words that carry the meaning. A sentence
-the screen already explains is cut.
+the screen already explains is cut. Errors, limits and refusals use the stock lines
+in `docs/copy.md` (no "sorry" or "we", "Check your connection and try again.", a
+refund is "didn't count"). Read it before writing any message that says no, and add
+to it rather than inventing a new phrasing.

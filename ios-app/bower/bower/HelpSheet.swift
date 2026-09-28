@@ -56,7 +56,7 @@ struct HelpSheet: View {
                 Text("How bower works").font(BowerFont.serif(28)).foregroundStyle(theme.text)
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.bowerPress)
+                    .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }

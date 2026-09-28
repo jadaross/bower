@@ -31,7 +31,7 @@ struct PaywallSheet: View {
                     Kicker("bower Plus", color: theme.satin)
                     Spacer()
                     Button("Done") { dismiss() }
-                        .buttonStyle(.bowerPress)
+                        .buttonStyle(.bowerPressText)
                         .font(BowerFont.ui(14, weight: .semibold))
                         .foregroundStyle(theme.satin)
                 }
@@ -55,15 +55,19 @@ struct PaywallSheet: View {
                         .padding(.top, 6)
                 }
 
-                if state.isPlus {
-                    subscribed.padding(.top, 20)
-                } else {
-                    plusCard.padding(.top, 20)
-                    packCard.padding(.top, 12)
+                // Buying Plus lands as one change: the headline sharpens and
+                // the cards give way to the subscribed card together.
+                Group {
+                    if state.isPlus {
+                        subscribed.padding(.top, 20)
+                    } else {
+                        VStack(spacing: 12) { plusCard; packCard }.padding(.top, 20)
+                    }
                 }
+                .transition(Motion.rise)
 
                 if store.loadFailed && store.fixturePrices == nil {
-                    Text("Couldn't reach the App Store. Check your connection.")
+                    Text("Couldn't reach the App Store. Check your connection and try again.")
                         .font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
                         .padding(.top, 12)
                 }
@@ -89,6 +93,7 @@ struct PaywallSheet: View {
         .background(theme.bg)
         .animation(Motion.quick, value: message)
         .animation(Motion.arrive, value: landed)
+        .animation(Motion.arrive, value: state.isPlus)
         .sensoryFeedback(.success, trigger: landed) { _, now in now != nil }
         .task { await store.load() }
         .manageSubscriptionsSheet(isPresented: $manage)

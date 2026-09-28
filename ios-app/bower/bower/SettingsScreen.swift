@@ -282,6 +282,8 @@ struct SettingsScreen: View {
                 if let limit = m.limit, let remaining = m.remaining {
                     HStack(alignment: .firstTextBaseline, spacing: 5) {
                         Text("\(remaining)").font(BowerFont.serif(26)).foregroundStyle(theme.text)
+                            .contentTransition(.numericText(value: Double(remaining)))
+                            .animation(Motion.quick, value: remaining)
                         Text("of \(limit) left").font(BowerFont.serif(15)).foregroundStyle(theme.muted)
                     }
                 } else {
@@ -300,7 +302,7 @@ struct SettingsScreen: View {
                 }
                 .frame(height: 6)
                 .padding(.top, 8)
-                .animation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.3), value: pct)
+                .animation(Motion.quick, value: pct)
             }
         }
     }

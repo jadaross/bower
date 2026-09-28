@@ -10,7 +10,7 @@ struct AboutSheet: View {
             HStack {
                 Spacer()
                 Button("Done") { dismiss() }
-                    .buttonStyle(.bowerPress)
+                    .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
                     .foregroundStyle(theme.satin)
             }
@@ -40,7 +40,7 @@ struct AboutSheet: View {
 
             Spacer(minLength: 16)
 
-            Text("Photos are read and thrown away. bower keeps no images.")
+            Text("Photos are read and thrown away. Bower keeps no images.")
                 .font(BowerFont.ui(11.5))
                 .foregroundStyle(theme.muted)
                 .frame(maxWidth: .infinity)

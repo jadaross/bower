@@ -26,8 +26,18 @@ struct HistoryScreen: View {
         .padding(.top, 4)
         .padding(.bottom, 34)
         .task { await load() }
-        .sheet(item: $selected) { HistoryDetail(item: $0) }
+        .onDisappear { if items?.isEmpty == false { Self.hasArrived = true } }
+        .sheet(item: $selected) {
+            HistoryDetail(item: $0)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(theme.bg)
+        }
     }
+
+    /// History is a tab, and tabs switch instantly. The cards cascade in the
+    /// first time they are shown in a session, then simply appear.
+    @MainActor private static var hasArrived = false
 
     private func load() async {
         failed = false
@@ -52,7 +62,7 @@ struct HistoryScreen: View {
             ForEach(Array(items.enumerated()), id: \.element.id) { i, item in
                 Button { selected = item } label: { card(item) }
                     .buttonStyle(.bowerPressLarge)
-                    .staggerIn(min(i, 5), step: 0.03)
+                    .staggerIn(min(i, 5), step: 0.03, enabled: !Self.hasArrived)
             }
             VStack(spacing: 14) {
                 Text("Text only. Bower keeps no photos.")
@@ -153,7 +163,8 @@ private struct HistoryDetail: View {
                         .font(BowerFont.mono(11)).foregroundStyle(theme.muted)
                     Spacer()
                     Button("Done") { dismiss() }
-                        .font(BowerFont.ui(14, weight: .medium)).foregroundStyle(theme.satin)
+                        .buttonStyle(.bowerPressText)
+                        .font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.satin)
                 }
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
@@ -171,6 +182,7 @@ private struct HistoryDetail: View {
                             }
                             .foregroundStyle(theme.satin)
                         }
+                        .buttonStyle(.bowerPress)
                     }
                 }
 

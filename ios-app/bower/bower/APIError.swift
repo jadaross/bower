@@ -51,22 +51,24 @@ enum AnalyseRejection: String, Sendable {
     init(wire: String) { self = AnalyseRejection(rawValue: wire) ?? .other }
 
     /// The words on the screen. Two messages: it wasn't clothes, or it wasn't
-    /// something bower will look at.
+    /// something bower will look at. Wording follows docs/copy.md: no "sorry",
+    /// no "we", and "didn't count" only where the unit is always refunded
+    /// (a rejection is refunded ten times a day, #79, so it never promises).
     var title: String {
         switch self {
-        case .notClothing:    "Sorry, we can't sell that"
+        case .notClothing:    "Only clothes, shoes and bags"
         case .linkUnreadable: "Couldn't read that link"
         case .slowDown:       "That's a lot in an hour"
-        default:              "Sorry, that was inappropriate"
+        default:              "That was inappropriate"
         }
     }
 
     var body: String {
         switch self {
-        case .notClothing:    "Bower reads clothes, shoes and bags. Take a photo of the piece and try again."
-        case .linkUnreadable: "The shop's page didn't open for bower. Check the link, or add photos instead. Nothing was charged."
-        case .slowDown:       "Try again in a few minutes. Nothing was charged."
-        default:              "Bower can't read that photo. It has been thrown away, and nothing was charged."
+        case .notClothing:    "Photograph the piece and try again."
+        case .linkUnreadable: "The shop's page didn't open. Check the link, or add photos instead. This one didn't count."
+        case .slowDown:       "Try again in a few minutes. This one didn't count."
+        default:              "Bower can't read that photo. It has been thrown away."
         }
     }
 }

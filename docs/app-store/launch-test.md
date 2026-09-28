@@ -32,7 +32,7 @@ On Jada's phone, from TestFlight (purchases are free there):
 ## App Review's path, on an Apple ID that has never used bower
 
 - [ ] Sign in with Apple
-- [ ] Photograph something that is not clothing: "we only do clothing", nothing charged
+- [ ] Photograph something that is not clothing: "Only clothes, shoes and bags"
 - [ ] Write a listing; run a market check; background the app; the notification arrives
 - [ ] Open the paywall from Profile; read the terms; Terms and Privacy links open
 - [ ] Delete the account from Profile

@@ -155,7 +155,7 @@ final class ListingModel {
                 searchError = "That's all your market checks for this month."
                 priceState = .estimated
             } catch {
-                searchError = "The market check didn't come back. Your estimate is still here. Try again when you have signal."
+                searchError = "The market check didn't come back, and it didn't count. Check your connection and try again."
                 priceState = .estimated
             }
         }
@@ -550,7 +550,7 @@ private struct ListingSection: View {
                     Spacer(minLength: 0)
                     if !model.chips.isEmpty || !model.extraKeywords.isEmpty {
                         Button("Reset") { model.resetChips() }
-                            .buttonStyle(.bowerPress).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
+                            .buttonStyle(.bowerPressText).font(BowerFont.ui(12, weight: .medium)).foregroundStyle(theme.muted)
                     }
                 }
                 FlowLayout(spacing: 7) {
@@ -612,6 +612,7 @@ private struct ListingSection: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(model.platform.tint.opacity(0.6), lineWidth: 1))
             }
+            .buttonStyle(.bowerPressLarge)
             .simultaneousGesture(TapGesture().onEnded { model.recordFeedback("opened-platform") })
 
             if model.current != nil {
@@ -633,7 +634,7 @@ private struct ListingSection: View {
                     }
                     .buttonStyle(.bowerPress).accessibilityLabel("Bad listing")
                     Button("Tell us") { feedback = true }
-                        .buttonStyle(.bowerPress)
+                        .buttonStyle(.bowerPressText)
                         .font(BowerFont.ui(12, weight: .semibold))
                         .foregroundStyle(theme.satin)
                         .padding(.leading, 4)
@@ -796,10 +797,10 @@ private struct EditBox: View {
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.satin, lineWidth: 1.5))
 
             HStack(spacing: 8) {
-                Button("Cancel", action: onCancel).buttonStyle(.bowerPress)
+                Button("Cancel", action: onCancel).buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(13, weight: .medium)).foregroundStyle(theme.text)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.subtle).clipShape(RoundedRectangle(cornerRadius: 8))
-                Button("Save") { onSave(draft) }.buttonStyle(.bowerPress)
+                Button("Save") { onSave(draft) }.buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(13, weight: .semibold)).foregroundStyle(.white)
                     .padding(.vertical, 7).padding(.horizontal, 14).background(theme.satin).clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -882,6 +883,7 @@ private struct CompsSheet: View {
                         // only — never sent to the platform's front page.
                         if let url = c.url.flatMap(URL.init(string:)) {
                             Link(destination: url) { compRow(c, openable: true) }
+                                .buttonStyle(.bowerPressLarge)
                         } else {
                             compRow(c, openable: false)
                         }

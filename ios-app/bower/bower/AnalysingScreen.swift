@@ -25,6 +25,7 @@ struct AnalysingScreen: View {
     @State private var phase: Phase = .reading
     @State private var stage = 0
     @State private var title: String?
+    @State private var landed = false
     @State private var task: Task<Void, Never>?
     /// A read is short (seconds), so a background task assertion — not the
     /// full BackgroundTransfer machinery `valuate` uses — is enough to survive
@@ -45,7 +46,8 @@ struct AnalysingScreen: View {
             }
             .transition(.opacity)
         }
-        .animation(.easeOut(duration: 0.2), value: phase)
+        .animation(Motion.fade, value: phase)
+        .sensoryFeedback(.success, trigger: landed) { _, now in now }
         .onAppear(perform: start)
         .onDisappear { task?.cancel(); endBackgroundTask() }
     }
@@ -97,6 +99,7 @@ struct AnalysingScreen: View {
     private func start() {
         phase = .reading
         title = nil
+        landed = false
         stage = 0
 
         endBackgroundTask()
@@ -127,7 +130,7 @@ struct AnalysingScreen: View {
                 Notifications.scheduleNudge()
                 Notifications.listingIsReady(result.listing.title)
                 stage = stages.count
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                landed = true
                 try? await Task.sleep(for: .milliseconds(420))
                 state.screen = .listing
             } catch APIError.allowanceExhausted(let a) {
@@ -161,10 +164,12 @@ struct AnalysingScreen: View {
         fullBleed(
             badge: "!", badgeColor: theme.coral,
             title: "The connection dropped",
-            body: "Your photos are still here. Try again when you have signal."
+            body: "Your photos are still here, and this one didn't count. Check your connection and try again."
         ) {
             Button { start() } label: { primaryLabel("Try again", fg: theme.avenue, bg: .white) }
+                .buttonStyle(.bowerPress)
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white, bg: .white.opacity(0.12)) }
+                .buttonStyle(.bowerPress)
         }
     }
 
@@ -180,10 +185,12 @@ struct AnalysingScreen: View {
                 Button { state.screen = .capture } label: {
                     primaryLabel("Back to the link", fg: theme.avenue, bg: .white)
                 }
+                .buttonStyle(.bowerPress)
             } else {
                 Button { state.photos = []; state.screen = .capture } label: {
                     primaryLabel("Back to photos", fg: theme.avenue, bg: .white)
                 }
+                .buttonStyle(.bowerPress)
             }
         }
     }
@@ -193,11 +200,16 @@ struct AnalysingScreen: View {
     private func allowance(_ a: AllowanceState) -> some View {
         fullBleed(
             badge: "!", badgeColor: theme.pollen,
-            title: "That's the lot for this month",
-            body: ["All \(a.limit ?? a.used) listings are used.", a.resetsText].compactMap { $0 }.joined(separator: " ")
+            title: "This month's listings are used",
+            body: [a.resetsText, "Or keep going now."].compactMap { $0 }.joined(separator: " ")
         ) {
-            Button { state.screen = .settings } label: { primaryLabel("See what's left", fg: .white, bg: .white.opacity(0.12)) }
+            // The same way on as Home's "Get more listings": the paywall.
+            Button { state.screen = .capture; state.paywall = .listings } label: {
+                primaryLabel("Get more listings", fg: theme.avenue, bg: .white)
+            }
+            .buttonStyle(.bowerPress)
             Button { state.screen = .capture } label: { primaryLabel("Back to photos", fg: .white.opacity(0.7), bg: .clear) }
+                .buttonStyle(.bowerPress)
         }
     }
 

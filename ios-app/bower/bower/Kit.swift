@@ -85,6 +85,9 @@ enum Motion {
     static var move: Animation { reduced ? .easeOut(duration: 0.2) : .spring(response: 0.3, dampingFraction: 1) }
     /// The few big moments: the title landing, the Ask, the notifications.
     static var arrive: Animation { reduced ? .easeOut(duration: 0.2) : .spring(response: 0.45, dampingFraction: 0.78) }
+    /// One whole screen crossfading to another: the splash lifting, the read
+    /// turning into its failure page, a step into or out of a full-bleed page.
+    static var fade: Animation { .easeOut(duration: 0.2) }
 
     /// Fades in and rises a few points. For anything that appears in place.
     static var rise: AnyTransition { reduced ? .opacity : .opacity.combined(with: .offset(y: 8)) }
@@ -113,18 +116,27 @@ private struct Blurred: ViewModifier {
 struct StaggerIn: ViewModifier {
     let index: Int
     var step: Double = 0.04
+    /// Off, the rows are simply there: for lists seen often (a tab), which
+    /// cascade only the first time.
+    var enabled: Bool = true
     @State private var shown = false
 
     func body(content: Content) -> some View {
+        let visible = shown || !enabled
         content
-            .opacity(shown ? 1 : 0)
-            .offset(y: shown || Motion.reduced ? 0 : 8)
-            .onAppear { withAnimation(Motion.move.delay(Double(index) * step)) { shown = true } }
+            .opacity(visible ? 1 : 0)
+            .offset(y: visible || Motion.reduced ? 0 : 8)
+            .onAppear {
+                guard enabled else { return }
+                withAnimation(Motion.move.delay(Double(index) * step)) { shown = true }
+            }
     }
 }
 
 extension View {
-    func staggerIn(_ index: Int, step: Double = 0.04) -> some View { modifier(StaggerIn(index: index, step: step)) }
+    func staggerIn(_ index: Int, step: Double = 0.04, enabled: Bool = true) -> some View {
+        modifier(StaggerIn(index: index, step: step, enabled: enabled))
+    }
 }
 
 /// Every pressable thing shrinks a touch while held, so a tap always feels
@@ -132,10 +144,16 @@ extension View {
 /// the press dims instead.
 struct BowerPress: ButtonStyle {
     var scale: CGFloat = 0.97
+    /// Extra tap area around a small label, without moving the layout, so a
+    /// one-word text button still meets 44pt.
+    var slop: EdgeInsets = EdgeInsets()
 
     func makeBody(configuration: Configuration) -> some View {
         let down = configuration.isPressed
         configuration.label
+            .padding(slop)
+            .contentShape(Rectangle())
+            .padding(EdgeInsets(top: -slop.top, leading: -slop.leading, bottom: -slop.bottom, trailing: -slop.trailing))
             .scaleEffect(down && !Motion.reduced ? scale : 1)
             .opacity(down && Motion.reduced ? 0.7 : 1)
             .animation(.timingCurve(0.23, 1, 0.32, 1, duration: 0.12), value: down)
@@ -145,6 +163,9 @@ struct BowerPress: ButtonStyle {
 extension ButtonStyle where Self == BowerPress {
     static var bowerPress: BowerPress { BowerPress() }
     static var bowerPressLarge: BowerPress { BowerPress(scale: 0.985) }
+    /// For one- or two-word text buttons (Done, Tips, Clear, Reset): the same
+    /// press, with the tap area grown to 44pt tall.
+    static var bowerPressText: BowerPress { BowerPress(slop: EdgeInsets(top: 14, leading: 6, bottom: 14, trailing: 6)) }
 }
 
 /// The bars' ground: the theme's chrome tint over a blur, so what scrolls
@@ -430,7 +451,7 @@ enum BowerOrigin {
 
 /// Three blues, smallest to largest, the shiny things a bowerbird would prize.
 struct BowerbirdDots: View {
-    /// Lands them one by one, smallest to largest, the way she'd place them.
+    /// Lands them one by one, smallest to largest, the way he'd place them.
     var arrange = false
 
     @Environment(\.bower) private var theme
