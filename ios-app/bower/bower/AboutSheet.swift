@@ -22,6 +22,7 @@ struct AboutSheet: View {
                     Text(".").foregroundStyle(theme.coral)
                 }
                 .font(BowerFont.serif(40))
+                .wordmarkAccessibility()
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 4)

@@ -127,7 +127,8 @@ struct PlatformsScreen: View {
                         if !state.enable(platform, newValue) { flash(platform) }
                     }
                 ),
-                tint: platform.tint
+                tint: platform.tint,
+                label: platform.name
             )
         }
         .padding(.vertical, 14)

@@ -183,6 +183,14 @@ struct ChromeBackground: View {
 
 // MARK: - Type
 
+extension View {
+    /// The wordmark is two texts, the word and its coral full stop, so it
+    /// is read as one: "bower", never "bower" then "period".
+    func wordmarkAccessibility(_ name: String = "bower") -> some View {
+        accessibilityElement(children: .ignore).accessibilityLabel(name)
+    }
+}
+
 /// The small uppercase mono label used above almost every block.
 struct Kicker: View {
     let text: String
@@ -293,6 +301,8 @@ struct BowerButton: View {
 struct BowerToggle: View {
     @Binding var isOn: Bool
     var tint: Color?
+    /// What VoiceOver calls the switch. The row's own text is read with it.
+    var label: String = ""
 
     @Environment(\.bower) private var theme
 
@@ -312,6 +322,9 @@ struct BowerToggle: View {
         .buttonStyle(.plain)
         .animation(Motion.move, value: isOn)
         .sensoryFeedback(.selection, trigger: isOn)
+        // Drawn as a button, heard as a switch: its name, on or off, and a
+        // double tap that flips it.
+        .accessibilityRepresentation { Toggle(label, isOn: $isOn) }
     }
 }
 
@@ -356,6 +369,7 @@ struct Segmented: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(active ? .isSelected : [])
             }
         }
         .padding(3)

@@ -115,6 +115,7 @@ struct CaptureScreen: View {
                         Text(".").foregroundStyle(theme.coral)
                     }
                     .font(BowerFont.serif(36))
+                    .wordmarkAccessibility()
                 }
             }
             .buttonStyle(.bowerPress)

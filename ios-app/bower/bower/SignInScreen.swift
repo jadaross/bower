@@ -46,6 +46,7 @@ struct SignInScreen: View {
                             Text(".").foregroundStyle(theme.coral)
                         }
                         .font(BowerFont.serif(64))
+                        .wordmarkAccessibility()
 
                         Text("Love selling your clothes.\nHate writing the listings.")
                             .font(BowerFont.ui(16))

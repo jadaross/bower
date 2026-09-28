@@ -34,6 +34,8 @@ struct BowerNav<Leading: View, Trailing: View>: View {
                         if wordmark { Text(".").foregroundStyle(theme.coral) }
                     }
                     .font(BowerFont.serif(36))
+                    .wordmarkAccessibility(title)
+                    .accessibilityAddTraits(.isHeader)
                 }
                 .padding(.bottom, 8)
             }
@@ -310,6 +312,7 @@ struct BowerTabBar: View {
         .buttonStyle(.plain)
         .disabled(soon)
         .accessibilityLabel(soon ? "Scout, coming soon" : label)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 }
 
@@ -330,6 +333,7 @@ struct LaunchMark: View {
                 Text(".").foregroundStyle(Color(hex: 0xE1563C))
             }
             .font(BowerFont.serif(62))
+            .wordmarkAccessibility()
         }
     }
 }

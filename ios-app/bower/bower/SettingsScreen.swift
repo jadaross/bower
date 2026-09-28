@@ -47,6 +47,7 @@ struct SettingsScreen: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.bowerPress)
+                        .accessibilityAddTraits(state.preferred == p ? .isSelected : [])
                     }
                 }
                 Text("Listings are written for this one first. Switch any time.")
@@ -176,7 +177,8 @@ struct SettingsScreen: View {
                         }
                     }
                 }),
-                tint: p.tint
+                tint: p.tint,
+                label: p.name
             )
         }
         .padding(.vertical, 12).padding(.horizontal, 16)
@@ -196,7 +198,7 @@ struct SettingsScreen: View {
                         BowerToggle(isOn: Binding(
                             get: { state.sellerNotes.contains(note) },
                             set: { _ in Task { await state.toggleSellerNote(note) } }
-                        ))
+                        ), label: note.label(in: state.market))
                     }
                     .padding(.vertical, 10).padding(.horizontal, 16)
                 }
