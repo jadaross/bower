@@ -28,7 +28,7 @@ struct AboutSheet: View {
 
             VStack(alignment: .leading, spacing: 16) {
                 Text(BowerOrigin.bowerbird)
-                BowerbirdDots()
+                BowerbirdDisplay(arrange: true, bower: false)
                 Text(BowerOrigin.theStage)
                 Text("It exists because writing the listing was the bit that stopped a wardrobe clear-out ever getting finished.")
             }

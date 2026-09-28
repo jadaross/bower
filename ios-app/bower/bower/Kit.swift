@@ -449,32 +449,140 @@ enum BowerOrigin {
         "The clothes are the same either way. Bower just builds the stage: the brand, the size, the price, the words, so what you already own gets a proper look."
 }
 
-/// Three blues, smallest to largest, the shiny things a bowerbird would prize.
-struct BowerbirdDots: View {
-    /// Lands them one by one, smallest to largest, the way he'd place them.
+/// The bower and its display: six blue things a bowerbird would prize (berries,
+/// bottle caps, a shard of glass, a feather) laid out in front of the arch,
+/// smallest to largest, palest to deepest. The story in `BowerOrigin`, drawn.
+struct BowerbirdDisplay: View {
+    /// Plays the arranging: each piece is dropped in, in the order he found
+    /// them rather than the order they sit, and lands in its place. The
+    /// feather lands crooked and is straightened a beat later, because he is
+    /// fussy. Off, the display is simply there.
     var arrange = false
+    /// The arch beside the display. Off where the mark is already on screen.
+    var bower = true
 
     @Environment(\.bower) private var theme
-    @State private var placed = 0
+
+    /// Left to right as they finally sit. `order` is when each one arrives.
+    private var pieces: [Treasure.Piece] {
+        [
+            .init(kind: .berry, color: theme.shell, size: 13, order: 1, from: CGSize(width: 30, height: -56), spin: -30),
+            .init(kind: .shard, color: theme.shell, size: 16, order: 4, from: CGSize(width: 40, height: -50), spin: 70),
+            .init(kind: .berry, color: theme.sheen, size: 19, order: 2, from: CGSize(width: 24, height: -60), spin: 20),
+            .init(kind: .feather, color: theme.sheen, size: 38, order: 5, from: CGSize(width: 46, height: -58), spin: -50,
+                  rest: -8, landsAt: 22),
+            .init(kind: .cap, color: theme.satin, size: 25, order: 0, from: CGSize(width: 34, height: -52), spin: 40),
+            .init(kind: .berry, color: theme.satin, size: 31, order: 3, from: CGSize(width: 28, height: -64), spin: -25),
+        ]
+    }
 
     var body: some View {
-        HStack(spacing: 10) {
-            dot(theme.shell, 14, 1)
-            dot(theme.sheen, 20, 2)
-            dot(theme.satin, 28, 3)
-        }
-        .task {
-            guard arrange else { placed = 3; return }
-            for n in 1...3 {
-                try? await Task.sleep(for: .milliseconds(n == 1 ? 250 : 80))
-                withAnimation(Motion.arrive) { placed = n }
+        HStack(alignment: .bottom, spacing: 18) {
+            if bower {
+                // The arch's base sits at 84% of its box: stand it on the ground.
+                Arch(size: 84)
+                    .padding(.bottom, -84 * 0.16)
             }
+            HStack(alignment: .bottom, spacing: 13) {
+                ForEach(Array(pieces.enumerated()), id: \.offset) { _, piece in
+                    Treasure(piece: piece, arrange: arrange)
+                }
+            }
+            .padding(.bottom, 1)
         }
-    }
-
-    private func dot(_ color: Color, _ size: CGFloat, _ n: Int) -> some View {
-        Circle().fill(color).frame(width: size, height: size)
-            .scaleEffect(placed >= n || Motion.reduced ? 1 : 0.9)
-            .opacity(placed >= n ? 1 : 0)
+        // The ground they are laid out on, a little wider than the display.
+        .background(alignment: .bottom) {
+            Capsule().fill(theme.line).frame(height: 1).padding(.horizontal, -8)
+        }
+        .accessibilityHidden(true)
     }
 }
+
+/// One blue thing, dropped in from above and to the right, landing with a
+/// little give (`Motion.arrive`).
+private struct Treasure: View {
+    struct Piece {
+        enum Kind { case berry, cap, shard, feather }
+        let kind: Kind
+        let color: Color
+        let size: CGFloat
+        /// When it arrives, 0 first.
+        let order: Int
+        /// Where it is dropped from, relative to where it sits.
+        let from: CGSize
+        /// How far it is turned as it falls.
+        let spin: Double
+        /// How it sits in the end.
+        var rest: Double = 0
+        /// How it first lands, if not already straight: the fussy correction.
+        var landsAt: Double?
+    }
+
+    let piece: Piece
+    let arrange: Bool
+
+    @State private var landed = false
+    @State private var straightened = false
+
+    var body: some View {
+        let still = !arrange
+        let down = landed || still
+        let angle = still || straightened ? piece.rest : (landed ? (piece.landsAt ?? piece.rest) : piece.spin)
+        shape
+            .rotationEffect(.degrees(Motion.reduced ? piece.rest : angle))
+            .offset(down || Motion.reduced ? .zero : piece.from)
+            .scaleEffect(down || Motion.reduced ? 1 : 0.9)
+            .opacity(down ? 1 : 0)
+            .task {
+                guard arrange, !landed else { return }
+                if Motion.reduced {
+                    // No travel: they are simply there, together.
+                    try? await Task.sleep(for: .milliseconds(250))
+                    withAnimation(Motion.fade) { landed = true; straightened = true }
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(300 + piece.order * 140))
+                withAnimation(Motion.arrive) { landed = true }
+                guard piece.landsAt != nil else { straightened = true; return }
+                try? await Task.sleep(for: .milliseconds(520))
+                withAnimation(Motion.move) { straightened = true }
+            }
+    }
+
+    @Environment(\.bower) private var theme
+
+    /// A faint satin edge, so the palest blue still reads on the light ground.
+    private var edge: Color { theme.satin.opacity(0.18) }
+
+    @ViewBuilder private var shape: some View {
+        let s = piece.size
+        switch piece.kind {
+        case .berry:
+            Circle().fill(piece.color)
+                .overlay(Circle().strokeBorder(edge, lineWidth: 0.75))
+                .overlay(alignment: .topLeading) {
+                    // A glint, so it reads as something shiny, not a dot.
+                    Circle().fill(.white.opacity(0.45))
+                        .frame(width: s * 0.26, height: s * 0.26)
+                        .offset(x: s * 0.2, y: s * 0.18)
+                }
+                .frame(width: s, height: s)
+        case .cap:
+            Circle().fill(piece.color)
+                .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1.5).padding(s * 0.18))
+                .frame(width: s, height: s)
+        case .shard:
+            RoundedRectangle(cornerRadius: 3).fill(piece.color)
+                .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(edge, lineWidth: 0.75))
+                .frame(width: s * 0.72, height: s * 0.72)
+                .rotationEffect(.degrees(45))
+                .frame(width: s, height: s)
+        case .feather:
+            Ellipse().fill(piece.color)
+                .overlay(Ellipse().strokeBorder(edge, lineWidth: 0.75))
+                .overlay(Capsule().fill(.white.opacity(0.4)).frame(height: 1).padding(.horizontal, 3))
+                .frame(width: s, height: s * 0.28)
+        }
+    }
+}
+
