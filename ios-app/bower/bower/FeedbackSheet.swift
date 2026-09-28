@@ -31,7 +31,7 @@ struct FeedbackSheet: View {
                 Button("Done") { dismiss() }
                     .buttonStyle(.bowerPressText)
                     .font(BowerFont.ui(14, weight: .semibold))
-                    .foregroundStyle(theme.satin)
+                    .foregroundStyle(theme.accentText)
             }
             Text(about.map { "About \($0)." } ?? "Anything at all. Wrong price, odd wording, something that broke.")
                 .font(BowerFont.ui(13))
@@ -41,7 +41,7 @@ struct FeedbackSheet: View {
 
             if sent {
                 HStack(spacing: 9) {
-                    Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.moss)
+                    Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.confirmText)
                     Text("Sent. Thank you.").font(BowerFont.ui(14.5, weight: .semibold)).foregroundStyle(theme.text)
                 }
                 .padding(.top, 24)
@@ -62,12 +62,12 @@ struct FeedbackSheet: View {
                 .padding(10)
                 .background(theme.card)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(focused ? theme.satin.opacity(0.5) : theme.line, lineWidth: 0.5))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(focused ? theme.accentText.opacity(0.5) : theme.line, lineWidth: 0.5))
                 .padding(.top, 14)
 
                 if failed {
                     Text("Couldn't send that. Check your connection and try again.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.coral).padding(.top, 8)
+                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText).padding(.top, 8)
                         .transition(Motion.rise)
                 }
 

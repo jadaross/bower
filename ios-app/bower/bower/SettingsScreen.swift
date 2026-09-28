@@ -25,7 +25,7 @@ struct SettingsScreen: View {
                 }
                 if blocked != nil {
                     Text("Keep at least one. Nothing to price against otherwise.")
-                        .font(BowerFont.ui(12)).foregroundStyle(theme.coral).padding(.leading, 4)
+                        .font(BowerFont.ui(12)).foregroundStyle(theme.errorText).padding(.leading, 4)
                         .transition(Motion.rise)
                 }
             }
@@ -40,7 +40,7 @@ struct SettingsScreen: View {
                                 Text(p.name).font(BowerFont.ui(14.5)).foregroundStyle(theme.text)
                                 Spacer()
                                 if state.preferred == p {
-                                    Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(theme.satin)
+                                    Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(theme.accentText)
                                 }
                             }
                             .padding(.vertical, 12).padding(.horizontal, 16)
@@ -64,7 +64,7 @@ struct SettingsScreen: View {
             section("Feedback") {
                 Button { feedback = true } label: {
                     HStack(spacing: 12) {
-                        Image(systemName: "bubble.left").font(.system(size: 15)).foregroundStyle(theme.satin)
+                        Image(systemName: "bubble.left").font(.system(size: 15)).foregroundStyle(theme.accentText)
                         VStack(alignment: .leading, spacing: 1) {
                             Text("Tell bower what's wrong").font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
                             Text("A price, some wording, anything.").font(BowerFont.ui(11.5)).foregroundStyle(theme.muted)
@@ -110,7 +110,7 @@ struct SettingsScreen: View {
             .disabled(deleting)
             if deleteFailed {
                 Text("Couldn't delete the account. Check your connection and try again.")
-                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.coral)
+                    .font(BowerFont.ui(11.5)).foregroundStyle(theme.errorText)
                     .multilineTextAlignment(.center).frame(maxWidth: .infinity)
                     .transition(Motion.rise)
             }
@@ -256,7 +256,7 @@ struct SettingsScreen: View {
         Button { state.paywall = .browse } label: {
             HStack(spacing: 12) {
                 Image(systemName: state.isPlus ? "checkmark.seal.fill" : "sparkle")
-                    .font(.system(size: 15)).foregroundStyle(theme.satin)
+                    .font(.system(size: 15)).foregroundStyle(theme.accentText)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(state.isPlus ? "You're on bower Plus" : "bower Plus")
                         .font(BowerFont.ui(14.5, weight: .medium)).foregroundStyle(theme.text)
@@ -299,7 +299,7 @@ struct SettingsScreen: View {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Capsule().fill(theme.subtle)
-                        Capsule().fill(pct > 0.8 ? theme.coral : theme.satin).frame(width: geo.size.width * pct)
+                        Capsule().fill(pct > 0.8 ? theme.errorText : theme.accentText).frame(width: geo.size.width * pct)
                     }
                 }
                 .frame(height: 6)

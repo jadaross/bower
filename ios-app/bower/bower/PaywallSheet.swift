@@ -28,12 +28,12 @@ struct PaywallSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Kicker("bower Plus", color: theme.satin)
+                    Kicker("bower Plus", color: theme.accentText)
                     Spacer()
                     Button("Done") { dismiss() }
                         .buttonStyle(.bowerPressText)
                         .font(BowerFont.ui(14, weight: .semibold))
-                        .foregroundStyle(theme.satin)
+                        .foregroundStyle(theme.accentText)
                 }
 
                 Group {
@@ -68,13 +68,13 @@ struct PaywallSheet: View {
 
                 if store.loadFailed && store.fixturePrices == nil {
                     Text("Couldn't reach the App Store. Check your connection and try again.")
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
+                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
                         .padding(.top, 12)
                 }
 
                 if let message {
                     Text(message)
-                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
+                        .font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
                         .padding(.top, 12)
                         .transition(Motion.rise)
                 }
@@ -122,7 +122,7 @@ struct PaywallSheet: View {
     // MARK: - Plus
 
     private var plusCard: some View {
-        BowerCard(padding: 18, borderColor: theme.satin.opacity(0.45)) {
+        BowerCard(padding: 18, borderColor: theme.accentText.opacity(0.45)) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Plus").font(BowerFont.serif(26)).foregroundStyle(theme.text)
@@ -213,7 +213,7 @@ struct PaywallSheet: View {
 
     private func tick(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 9) {
-            Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.moss)
+            Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(theme.confirmText)
             Text(text).font(BowerFont.ui(14)).foregroundStyle(theme.text)
                 .fixedSize(horizontal: false, vertical: true)
         }

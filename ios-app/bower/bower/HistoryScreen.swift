@@ -70,7 +70,7 @@ struct HistoryScreen: View {
                 Button(clearing ? "Clearing…" : "Clear history") { confirmClear = true }
                     .buttonStyle(.bowerPress)
                     .font(BowerFont.ui(13, weight: .medium))
-                    .foregroundStyle(theme.coral)
+                    .foregroundStyle(theme.errorText)
                     .disabled(clearing)
             }
             .frame(maxWidth: .infinity)
@@ -143,7 +143,7 @@ struct HistoryScreen: View {
     }
 
     private func message(_ text: String) -> some View {
-        Text(text).font(BowerFont.ui(13)).foregroundStyle(theme.coral)
+        Text(text).font(BowerFont.ui(13)).foregroundStyle(theme.errorText)
             .multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 60)
     }
 }
@@ -164,7 +164,7 @@ private struct HistoryDetail: View {
                     Spacer()
                     Button("Done") { dismiss() }
                         .buttonStyle(.bowerPressText)
-                        .font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.satin)
+                        .font(BowerFont.ui(14, weight: .semibold)).foregroundStyle(theme.accentText)
                 }
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.title).font(BowerFont.serif(23)).foregroundStyle(theme.text)
@@ -180,7 +180,7 @@ private struct HistoryDetail: View {
                                 Image(systemName: "link").font(.system(size: 11, weight: .medium))
                                 Text("From \(host.replacingOccurrences(of: "www.", with: ""))").font(BowerFont.ui(12.5))
                             }
-                            .foregroundStyle(theme.satin)
+                            .foregroundStyle(theme.accentText)
                         }
                         .buttonStyle(.bowerPress)
                     }

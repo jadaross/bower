@@ -317,7 +317,7 @@ private struct PriceSection: View {
             }
 
             if let e = model.searchError {
-                Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.coral)
+                Text(e).font(BowerFont.ui(12.5)).foregroundStyle(theme.errorText)
             }
         }
     }
@@ -335,7 +335,7 @@ private struct PriceSection: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Kicker("Checking the market", color: theme.satin)
+                    Kicker("Checking the market", color: theme.accentText)
                     Spacer()
                     Text(String(format: "%02d:%02d", model.elapsed / 60, model.elapsed % 60))
                         .font(BowerFont.mono(11)).foregroundStyle(theme.muted).monospacedDigit()
@@ -623,20 +623,20 @@ private struct ListingSection: View {
                         Image(systemName: model.thumbed[model.platform] == 1 ? "hand.thumbsup.fill" : "hand.thumbsup")
                             .font(.system(size: 15))
                             .symbolEffect(.bounce, value: model.thumbed[model.platform] == 1)
-                            .foregroundStyle(model.thumbed[model.platform] == 1 ? theme.moss : theme.muted)
+                            .foregroundStyle(model.thumbed[model.platform] == 1 ? theme.confirmText : theme.muted)
                     }
                     .buttonStyle(.bowerPress).accessibilityLabel("Good listing")
                     Button { model.thumb(up: false) } label: {
                         Image(systemName: model.thumbed[model.platform] == 0 ? "hand.thumbsdown.fill" : "hand.thumbsdown")
                             .font(.system(size: 15))
                             .symbolEffect(.bounce, value: model.thumbed[model.platform] == 0)
-                            .foregroundStyle(model.thumbed[model.platform] == 0 ? theme.coral : theme.muted)
+                            .foregroundStyle(model.thumbed[model.platform] == 0 ? theme.errorText : theme.muted)
                     }
                     .buttonStyle(.bowerPress).accessibilityLabel("Bad listing")
                     Button("Tell us") { feedback = true }
                         .buttonStyle(.bowerPressText)
                         .font(BowerFont.ui(12, weight: .semibold))
-                        .foregroundStyle(theme.satin)
+                        .foregroundStyle(theme.accentText)
                         .padding(.leading, 4)
                 }
                 .padding(.top, 2)
@@ -718,7 +718,7 @@ private struct ListingSection: View {
         .overlay {
             if model.rewriting {
                 HStack(spacing: 8) {
-                    ProgressView().tint(theme.satin)
+                    ProgressView().tint(theme.accentText)
                     Text("Rewriting…").font(BowerFont.ui(12.5)).foregroundStyle(theme.text)
                 }
                 .padding(.vertical, 8).padding(.horizontal, 14)
@@ -794,7 +794,7 @@ private struct EditBox: View {
             .padding(.vertical, 8).padding(.horizontal, 10)
             .background(theme.bg)
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.satin, lineWidth: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(theme.accentText, lineWidth: 1.5))
 
             HStack(spacing: 8) {
                 Button("Cancel", action: onCancel).buttonStyle(.bowerPressText)
@@ -830,7 +830,7 @@ struct CopyButton: View {
                 face("checkmark", "Copied").opacity(copied ? 1 : 0)
             }
             .font(BowerFont.ui(big ? 12 : 11, weight: .semibold))
-            .foregroundStyle(copied ? theme.moss : theme.muted)
+            .foregroundStyle(copied ? theme.confirmText : theme.muted)
             .padding(.vertical, big ? 7 : 4).padding(.horizontal, big ? 12 : 6)
             .background(big ? theme.subtle : .clear)
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -911,7 +911,7 @@ private struct CompsSheet: View {
                 Text(Money.format(Int(c.price), c.currency)).font(BowerFont.ui(16, weight: .semibold)).foregroundStyle(theme.text)
                 if openable {
                     HStack(spacing: 3) { Text("Open"); Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .bold)) }
-                        .font(BowerFont.ui(10.5)).foregroundStyle(theme.satin)
+                        .font(BowerFont.ui(10.5)).foregroundStyle(theme.accentText)
                 }
             }
         }
