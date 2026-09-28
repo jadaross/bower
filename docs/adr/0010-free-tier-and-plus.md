@@ -71,7 +71,7 @@ by Apple's equalisation, which lands on odd numbers): UK £4.99 and £0.99, US
 $4.99 and $0.99, Ireland €4.99 and €0.99, Australia **A$6.99** and A$1.49
 (a little under a straight conversion of £4.99, by Jada's choice).
 
-- **Unlimited listings** (fair-use ceiling of 150 a month in the terms; a
+- **Unlimited listings** (ceiling of **100** a month, down from 150 on 28 September: 100 cost about £2, so even a subscriber who writes all of them keeps bower in profit with or without the Small Business Program; a
   per-minute rate limit in `withAuth`). Every competitor says "50 listings";
   "unlimited" beside that is the pitch, and a listing costs 2p.
 - **Unlimited market checks** (fair-use ceiling of **50 a month** in the terms,

@@ -36,7 +36,7 @@ const PLUS = {
   name: "bower Plus",
   description: "Unlimited listings and market checks.",
   reviewNote:
-    "Monthly auto-renewable subscription. Unlocks unlimited listings and unlimited market checks (fair use: 150 listings and 50 market checks a month). Opened from Profile (bower Plus) or when a meter runs out. The purchase is verified on our server from Apple's signed transaction.",
+    "Monthly auto-renewable subscription. Unlocks unlimited listings and unlimited market checks (fair use: 100 listings and 50 market checks a month). Opened from Profile (bower Plus) or when a meter runs out. The purchase is verified on our server from Apple's signed transaction.",
 };
 const PACK = {
   productId: "com.jadaross.bower.pack.10",

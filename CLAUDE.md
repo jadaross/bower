@@ -66,7 +66,7 @@ there are no anonymous requests, because the meter needs someone to meter
 | `POST /api/apple/notifications` | App Store Server Notifications V2: renewals, expiries, refunds. **The one route without `withAuth`**: Apple's signed payload is the authentication (ADR-0011). |
 
 `GET /api/profile` also carries `plan` (`free` | `plus`), `plus_expires_at` and
-`pack_listings`. With Plus on, both limits read as null (fair-use ceilings of 150 listings
+`pack_listings`. With Plus on, both limits read as null (ceilings of 100 listings
 and 50 market checks sit behind them, in SQL); bought listings are spent
 only once the month's free ones are gone (ADR-0010, migration 0019).
 

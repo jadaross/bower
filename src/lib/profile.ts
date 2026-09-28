@@ -64,7 +64,7 @@ const SELECT =
 /**
  * The limits the seller sees. Mirrors `spend_allowance`, which is what
  * enforces them: with Plus on, listings and market checks both read as
- * unlimited (fair-use ceilings of 150 and 50 sit behind that, in SQL).
+ * unlimited (ceilings of 100 and 50 sit behind that, in SQL).
  */
 export function shownLimits(
   row: Pick<ProfileRow, "reads_limit" | "searches_limit" | "plus_expires_at">,

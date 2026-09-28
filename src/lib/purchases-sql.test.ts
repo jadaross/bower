@@ -149,14 +149,14 @@ describe("Plus", () => {
   // the app keeps reading "unlimited" and offers a button that always fails.
   it("names the fair-use ceiling when it refuses", async () => {
     const u = await newUser(db);
-    await set(u, "plus_expires_at = $2, reads_used = 150, searches_used = 50, pack_listings = 0", [inAMonth()]);
-    expect(await spend(u, "read")).toMatchObject({ allowed: false, allowance_limit: 150 });
+    await set(u, "plus_expires_at = $2, reads_used = 100, searches_used = 50, pack_listings = 0", [inAMonth()]);
+    expect(await spend(u, "read")).toMatchObject({ allowed: false, allowance_limit: 100 });
     expect(await spend(u, "search")).toMatchObject({ allowed: false, allowance_limit: 50 });
   });
 
-  it("stops at the fair-use ceiling of 150 listings, then spends the pack", async () => {
+  it("stops at 100 listings, then spends the pack", async () => {
     const u = await newUser(db);
-    await set(u, "plus_expires_at = $2, reads_used = 150, pack_listings = 1", [inAMonth()]);
+    await set(u, "plus_expires_at = $2, reads_used = 100, pack_listings = 1", [inAMonth()]);
     expect(await spend(u, "read")).toMatchObject({ allowed: true, source: "pack" });
     expect(await spend(u, "read")).toMatchObject({ allowed: false });
   });

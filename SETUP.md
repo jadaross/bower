@@ -41,6 +41,7 @@ in order:
 | `0019_plus_and_pack.sql` | bower Plus (`plus_expires_at`), the listing pack (`pack_listings`), the `purchases` ledger and `apply_transaction` (ADR-0011) |
 | `0020_valuation_cache.sql` | `valuation_cache`: Price Bands by item key for seven days, shared by every instance (#80) |
 | `0021_rejection_refund_cap.sql` | `refund_rejection`: a rejected read is refunded ten times a day, not forever (#79) |
+| `0022_plus_listings_100.sql` | Plus's listing ceiling from 150 to 100 a month |
 
 Apply them with the CLI (installed as a dev dependency):
 
