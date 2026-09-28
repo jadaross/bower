@@ -423,7 +423,7 @@ struct Hairline: View {
 /// wherever it turns up.
 enum BowerOrigin {
     static let bowerbird =
-        "A male bowerbird doesn't build a nest. He builds a bower, a small stage cleared and dressed with whatever he can find, arranged just so, to win a female. He's fussy about the arrangement, and fussiest of all about blue: bottle caps, berries, feathers, anything rare enough to be worth showing off."
+        "A bower isn't a nest. It's a small stage a bowerbird clears and dresses with whatever it can find, arranged just so, to be chosen. Bowerbirds are fussy about the arrangement, and fussiest of all about blue: bottle caps, berries, feathers, anything rare enough to be worth showing off."
     static let theStage =
         "The clothes are the same either way. Bower just builds the stage: the brand, the size, the price, the words, so what you already own gets a proper look."
 }
