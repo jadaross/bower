@@ -12,7 +12,7 @@ has never used bower (for part 4), and a laptop for part 6.
 
 | Check | How | Result |
 |---|---|---|
-| The meter spends free listings, then the pack; refunds go back to the bucket they came from; Plus reads as unlimited behind 150 listings and 50 checks; lapsed Plus returns to the free numbers | `src/lib/purchases-sql.test.ts`, against a real Postgres with every migration | Pass |
+| The meter spends free listings, then the pack; refunds go back to the bucket they came from; Plus listings are unlimited (paced at 60 an hour) with 50 market checks; lapsed Plus returns to the free numbers | `src/lib/purchases-sql.test.ts`, against a real Postgres with every migration | Pass |
 | A forged, other-app, other-account or Xcode-signed transaction is refused; a replay is a no-op; renewals find their account; refunds take a pack back | `purchases.test.ts`, `purchases-sql.test.ts`, route tests | Pass |
 | Paywall in each market's currency, subscribed state, dark mode, pack balance on Home | Simulator, stub (`-bowerPaywall`, `-bowerPlus`, `-bowerPack`, `-bowerMarket`) | Pass |
 
