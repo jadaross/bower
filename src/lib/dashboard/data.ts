@@ -71,18 +71,20 @@ async function load(opts: LoadOptions): Promise<DashboardData> {
 }
 
 /**
- * Generations without their input/output, plus the two routes whose io the
- * dashboard reads: analyse (photo count, tone, platform, rejection reason)
- * and refine (which chips). Format's io is a whole prompt per call and is
+ * Generations without their input/output, plus the three routes whose io the
+ * dashboard reads: analyse (photo count, tone, platform, rejection reason),
+ * refine (which chips) and link (whether the page could be read). Format's io is a whole prompt per call and is
  * never read, so it is never fetched.
  */
 async function loadGenerations(from: string | undefined): Promise<Generation[]> {
-  const [all, analyse, refine] = await Promise.all([
+  const [all, analyse, refine, link] = await Promise.all([
     fetchGenerations({ from, environment: ENVIRONMENT }),
     fetchGenerations({ from, environment: ENVIRONMENT, name: "analyse", io: true }),
     fetchGenerations({ from, environment: ENVIRONMENT, name: "refine", io: true }),
+    // Small: the URL in, the page's facts (and `found`) out.
+    fetchGenerations({ from, environment: ENVIRONMENT, name: "link", io: true }),
   ]);
-  const io = new Map([...analyse, ...refine].map((g) => [g.id, g]));
+  const io = new Map([...analyse, ...refine, ...link].map((g) => [g.id, g]));
   return all.map((g) => {
     const rich = io.get(g.id);
     return rich ? { ...g, input: rich.input, output: rich.output } : g;

@@ -10,6 +10,7 @@ import {
   isListing,
   itemStats,
   labelFor,
+  linkStats,
   marketChecks,
   people,
   percentile,
@@ -260,6 +261,53 @@ describe("photoStats", () => {
     );
     expect(p.withTag).toBe(1);
     expect(p.tagKnown).toBe(1);
+  });
+});
+
+describe("linkStats", () => {
+  const SAM = FRIEND;
+  const ALEX = "00000000-0000-0000-0000-000000000003";
+  const linked = (over: Partial<Parameters<typeof gen>[0]> & { photos?: number; host?: string }) =>
+    gen({ ...over, input: { photoCount: over.photos ?? 0, link: over.host ?? "cos.com" } });
+
+  it("counts the people who pasted a link and what came of it", () => {
+    const l = linkStats(
+      data({
+        generations: [
+          // Every pasted link is read first, in its own "link" trace. A page that
+          // cannot be read stops there, before any analyse trace exists.
+          gen({ name: "link", userId: SAM, output: { found: true } }),
+          gen({ name: "link", userId: SAM, output: { found: true } }),
+          gen({ name: "link", userId: ALEX, output: { found: false } }),
+          linked({ userId: SAM, host: "cos.com" }),
+          linked({ userId: SAM, host: "zara.com", photos: 3 }),
+          gen({ userId: ALEX, input: { photoCount: 2 } }),
+        ],
+      })
+    );
+    expect(l.people).toBe(2);
+    expect(l.attempts).toBe(3);
+    expect(l.listings).toBe(2);
+    expect(l.linkOnly).toBe(1);
+    expect(l.withPhotos).toBe(1);
+    expect(l.unreadable).toBe(1);
+    expect(l.ofListings).toBe(3);
+    expect(l.shops).toEqual([
+      { label: "cos.com", count: 1 },
+      { label: "zara.com", count: 1 },
+    ]);
+  });
+
+  it("is all zeros before anyone has pasted a link", () => {
+    const l = linkStats(data({ generations: [gen({ input: { photoCount: 2 } })] }));
+    expect(l).toMatchObject({ people: 0, attempts: 0, listings: 0, unreadable: 0, shops: [] });
+  });
+
+  // A link-only listing has no photos; averaging its 0 in would drag
+  // "photos per listing" down for a reason that has nothing to do with photos.
+  it("leaves link-only listings out of the photos average", () => {
+    const p = photoStats(data({ generations: [linked({}), gen({ input: { photoCount: 4 } })] }));
+    expect(p.avgPhotos).toBe(4);
   });
 });
 

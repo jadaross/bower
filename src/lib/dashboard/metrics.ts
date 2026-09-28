@@ -94,7 +94,7 @@ export function dayKeys(data: DashboardData): string[] {
 
 // ── Classification ─────────────────────────────────────────────────────────
 
-export type RejectReason = "not_clothing" | "explicit" | "unsafe" | "refused";
+export type RejectReason = "not_clothing" | "explicit" | "unsafe" | "refused" | "link_unreadable";
 
 function outputObject(g: Generation): Record<string, unknown> | null {
   return g.output && typeof g.output === "object" ? (g.output as Record<string, unknown>) : null;
@@ -121,6 +121,12 @@ export function isListing(g: Generation): boolean {
 export function photoCountOf(g: Generation): number | null {
   const v = inputObject(g)?.photoCount;
   return typeof v === "number" ? v : null;
+}
+
+/** The shop a pasted link was on (its host), or null when the read had no link. */
+export function linkHostOf(g: Generation): string | null {
+  const v = inputObject(g)?.link;
+  return typeof v === "string" && v ? v : null;
 }
 
 export function toneOf(g: Generation): string | null {
@@ -488,7 +494,8 @@ export interface PhotoStats {
 export function photoStats(data: DashboardData): PhotoStats {
   const analyses = data.generations.filter((g) => g.route === "analyse" && !isError(g));
   const listings = analyses.filter(isListing);
-  const counts = listings.map(photoCountOf).filter((n): n is number => n !== null);
+  // A link-only listing has no photos; leaving its 0 out keeps this about photos.
+  const counts = listings.map(photoCountOf).filter((n): n is number => n !== null && n > 0);
   const dist = [1, 2, 3, 4, 5].map((n) => ({ label: `${n}`, count: counts.filter((c) => c === n).length }));
   const tags = listings.map(tagRead).filter((v): v is boolean => v !== null);
   return {
@@ -499,6 +506,44 @@ export function photoStats(data: DashboardData): PhotoStats {
     tagKnown: tags.length,
     rejections: countBy(analyses, (g) => rejectionOf(g)?.replace("_", " ")),
     tone: countBy(listings, toneOf),
+  };
+}
+
+/** Reads that came with a pasted product-page link (added 20 Sep 2026). From the traces. */
+export interface LinkStats {
+  /** Different people who pasted a link. */
+  people: number;
+  /** Reads with a link, written or not. */
+  attempts: number;
+  /** Listings written from a link. */
+  listings: number;
+  /** ...from the link alone, no photos. */
+  linkOnly: number;
+  /** ...from a link with photos. */
+  withPhotos: number;
+  /** Links bower could not read (refunded). */
+  unreadable: number;
+  /** Every traced listing, for the share. */
+  ofListings: number;
+  /** Which shops the links were on, among listings written. */
+  shops: Count[];
+}
+
+export function linkStats(data: DashboardData): LinkStats {
+  const analyses = data.generations.filter((g) => g.route === "analyse" && !isError(g));
+  // Every pasted link is read in its own "link" trace first; a page that cannot
+  // be read ends there, before any analyse trace exists.
+  const reads = data.generations.filter((g) => g.route === "link");
+  const listings = analyses.filter((g) => linkHostOf(g) !== null && isListing(g));
+  return {
+    people: new Set([...reads, ...listings].map((g) => g.userId).filter(Boolean)).size,
+    attempts: Math.max(reads.length, listings.length),
+    listings: listings.length,
+    linkOnly: listings.filter((g) => photoCountOf(g) === 0).length,
+    withPhotos: listings.filter((g) => (photoCountOf(g) ?? 0) > 0).length,
+    unreadable: reads.filter((g) => isError(g) || outputObject(g)?.found === false).length,
+    ofListings: analyses.filter(isListing).length,
+    shops: countBy(listings, linkHostOf),
   };
 }
 

@@ -1,4 +1,4 @@
-import { daily, recentEvents, summary, costStats, feedbackStats, itemStats } from "@/lib/dashboard/metrics";
+import { daily, recentEvents, summary, costStats, feedbackStats, itemStats, linkStats } from "@/lib/dashboard/metrics";
 import { Card, Columns, Stat } from "./_components/charts";
 import { money, num, pct, when } from "./_components/format";
 import { pageData } from "./_components/load";
@@ -18,6 +18,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
   const cost = costStats(data);
   const fb = feedbackStats(data);
   const it = itemStats(data);
+  const ln = linkStats(data);
   // Listings with a trace: the denominator of anything read from Langfuse scores.
   const traced = fb.funnel[0].count;
   const events = recentEvents(data, 14);
@@ -32,6 +33,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
         <Stat label="People with an account" value={num(s.accounts)} hint={s.newAccounts ? `+${s.newAccounts} in this range` : "none new in this range"} />
         <Stat label="Used it in this range" value={num(s.activePeople)} hint={s.neverWrote ? `${s.neverWrote} signed up and never wrote a listing` : "everyone has written at least one"} tone={s.neverWrote ? "warn" : undefined} />
         <Stat label="Listings written" value={num(s.listings)} hint={s.rejections ? `${s.rejections} photo set${s.rejections === 1 ? "" : "s"} rejected` : "no rejections"} />
+        <Stat label="Pasted a link" value={num(ln.people)} hint={ln.people ? `${num(ln.listings)} listing${ln.listings === 1 ? "" : "s"} written from one` : "nobody yet in this range"} />
         <Stat label="Market checks" value={num(s.checks)} hint={s.listings ? `${pct(it.checked, s.listings)} of listings went on to one` : undefined} />
         <Stat label="Spend" value={money(s.spend)} hint={cost.perListingAllIn !== null ? `${money(cost.perListingAllIn)} per listing, all in` : undefined} />
         <Stat label="Thumbs up" value={thumbsTotal ? pct(s.thumbsUp, thumbsTotal) : "—"} hint={thumbsTotal ? `${s.thumbsUp} up · ${s.thumbsDown} down` : "no thumbs yet"} tone={s.thumbsDown > s.thumbsUp ? "bad" : s.thumbsUp ? "good" : undefined} />

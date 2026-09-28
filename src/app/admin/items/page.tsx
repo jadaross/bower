@@ -1,4 +1,4 @@
-import { itemStats, labelFor, marketStats, photoStats } from "@/lib/dashboard/metrics";
+import { itemStats, labelFor, linkStats, marketStats, photoStats } from "@/lib/dashboard/metrics";
 import { Bars, Card, Stat } from "../_components/charts";
 import { gbp, num, pct, when } from "../_components/format";
 import { pageData } from "../_components/load";
@@ -11,6 +11,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
   const ph = photoStats(data);
   const it = itemStats(data);
   const mk = marketStats(data);
+  const ln = linkStats(data);
   const rejected = ph.rejections.reduce((s, r) => s + r.count, 0);
   const gap = ph.listings < it.rows.length;
   const traced = `${num(ph.listings)} of ${num(it.rows.length)} traced`;
@@ -22,7 +23,7 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
 
       <div className="kpis">
         <Stat label="Listings written" value={num(it.rows.length)} />
-        <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint={gap ? `of a possible 5 · over the ${traced}` : "of a possible 5"} />
+        <Stat label="Photos per listing" value={ph.avgPhotos === null ? "—" : ph.avgPhotos.toFixed(1)} hint={gap ? `of a possible 5, listings with photos · over the ${traced}` : "of a possible 5, listings with photos"} />
         <Stat label="Tag read" value={ph.tagKnown ? pct(ph.withTag, ph.tagKnown) : "—"} hint={gap ? `a brand, size or fabric read off a label · ${traced}` : "a brand, size or fabric read off a label"} tone={ph.tagKnown && ph.withTag / ph.tagKnown < 0.3 ? "warn" : undefined} />
         <Stat label="Rejected" value={num(rejected)} hint={rejected ? ph.rejections.map((r) => `${r.count} ${r.label}`).join(" · ") : gap ? `none among the ${traced}` : "nothing that was not clothing"} tone={rejected ? "warn" : undefined} />
         <Stat label="Typical estimate" value={gbp(it.medianEstimate)} hint="median of the photo-only price band midpoint" />
@@ -37,8 +38,33 @@ export default async function Items({ searchParams }: { searchParams: Promise<Qu
           <div style={{ height: 12 }} />
           <Bars items={ph.tone} of={ph.listings} color="--s3" />
         </Card>
-        <Card title="Rejections" sub="Photo sets bower would not write for. Each one refunded the listing." kicker={gap ? traced : undefined} span="c4">
+        <Card title="Rejections" sub="Reads bower would not write for: photos that were not clothing, or a link it could not read. Refunded, up to ten a day each." kicker={gap ? traced : undefined} span="c4">
           <Bars items={ph.rejections} color="--s2" empty="Every photo set was clothing" />
+        </Card>
+      </div>
+
+      <h1 style={{ fontSize: 26, marginTop: 24 }}>Links</h1>
+      <p>Pasting the link to the item in a shop, added on 20 Sep 2026. bower reads the page and writes from it, with or without photos. Counted from the traces.</p>
+      <div className="kpis">
+        <Stat label="People who pasted a link" value={num(ln.people)} hint={ln.attempts ? `${num(ln.attempts)} link${ln.attempts === 1 ? "" : "s"} pasted in all` : "nobody yet in this range"} />
+        <Stat label="Listings from a link" value={num(ln.listings)} hint={ln.ofListings ? `${pct(ln.listings, ln.ofListings)} of the ${num(ln.ofListings)} traced listings` : undefined} />
+        <Stat label="Link alone" value={num(ln.linkOnly)} hint={ln.listings ? `${num(ln.withPhotos)} with photos as well` : "no photos, just the page"} />
+        <Stat label="Couldn't read the page" value={num(ln.unreadable)} hint={ln.attempts ? `${pct(ln.unreadable, ln.attempts)} of links pasted` : undefined} tone={ln.attempts && ln.unreadable / ln.attempts > 0.25 ? "warn" : undefined} />
+      </div>
+      <div className="grid">
+        <Card title="Shops" sub="Where the links pointed, for listings written" span="c6">
+          <Bars items={ln.shops} of={ln.listings} empty="No listings from a link yet" />
+        </Card>
+        <Card title="Link or photos" sub="What each traced listing was written from" span="c6">
+          <Bars
+            items={[
+              { label: "Photos only", count: ln.ofListings - ln.listings },
+              { label: "Link and photos", count: ln.withPhotos },
+              { label: "Link only", count: ln.linkOnly },
+            ]}
+            of={ln.ofListings}
+            color="--s3"
+          />
         </Card>
       </div>
 
