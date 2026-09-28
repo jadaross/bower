@@ -71,11 +71,18 @@ by Apple's equalisation, which lands on odd numbers): UK £4.99 and £0.99, US
 $4.99 and $0.99, Ireland €4.99 and €0.99, Australia **A$6.99** and A$1.49
 (a little under a straight conversion of £4.99, by Jada's choice).
 
-- **Unlimited listings** (ceiling of **100** a month, down from 150 on 28 September: 100 cost about £2, so even a subscriber who writes all of them keeps bower in profit with or without the Small Business Program; a
+- **Unlimited listings, and it means it** (28 September). No monthly cap:
+  "unlimited" with a hard stop behind it is what the ASA (a user past the
+  threshold must not be stopped), the ACCC (Amaysim and Lycamobile, fined)
+  and the FTC (AT&T, $60 million) have each ruled misleading, and Apple asks
+  a subscription to say plainly what it gives. Only pace is limited: 60
+  listings an hour, which no person photographing clothes reaches, answered
+  as "try again in a few minutes", never the paywall (migration 0023). At
+  2p a listing, even 150 a month is £3. (Briefly a 100 cap, then this.) Also a
   per-minute rate limit in `withAuth`). Every competitor says "50 listings";
   "unlimited" beside that is the pitch, and a listing costs 2p.
-- **Unlimited market checks** (fair-use ceiling of **50 a month** in the terms,
-  enforced in `spend_allowance`). Decided 27 September: "10" read as stingy
+- **50 market checks a month**, named on the paywall (28 September: first
+  sold as "unlimited" behind a 50 ceiling, renamed for the reason above; enforced in `spend_allowance`). Decided 27 September: "10" read as stingy
   beside "unlimited listings", and "unlimited" is the line the paywall sells.
   The typical subscriber (6 checks) is unchanged at £2.52 margin; one who
   really uses all 50 checks and 40 listings costs £5.30 against £3.46, about

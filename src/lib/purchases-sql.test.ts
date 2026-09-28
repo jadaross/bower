@@ -131,11 +131,27 @@ describe("spending listings: the month's free ones, then the pack", () => {
 });
 
 describe("Plus", () => {
-  it("shows listings and market checks as unlimited", async () => {
+  it("shows listings as unlimited and market checks as 50 a month", async () => {
     const u = await newUser(db);
     await set(u, "plus_expires_at = $2, searches_used = 3", [inAMonth()]);
     expect(await spend(u, "read")).toMatchObject({ allowed: true, allowance_limit: null, source: "plus" });
-    expect(await spend(u, "search")).toMatchObject({ allowed: true, allowance_limit: null, source: "plus" });
+    expect(await spend(u, "search")).toMatchObject({ allowed: true, allowance_limit: 50, source: "plus" });
+  });
+
+  // Jada, 28 Sep: "unlimited" has to mean it (ASA, ACCC, FTC), so a person
+  // writing listings is never stopped; only a bot's pace is.
+  it("never stops a person writing listings, however many in a month", async () => {
+    const u = await newUser(db);
+    await set(u, "plus_expires_at = $2, reads_used = 500", [inAMonth()]);
+    expect(await spend(u, "read")).toMatchObject({ allowed: true, source: "plus" });
+  });
+
+  it("slows a bot down at 60 listings in an hour, and lets it go again an hour on", async () => {
+    const u = await newUser(db);
+    await set(u, "plus_expires_at = $2, plus_hour_start = now(), plus_hour_count = 60", [inAMonth()]);
+    expect(await spend(u, "read")).toMatchObject({ allowed: false, source: "rate_limited" });
+    await set(u, "plus_hour_start = now() - interval '61 minutes'");
+    expect(await spend(u, "read")).toMatchObject({ allowed: true, source: "plus" });
   });
 
   it("stops market checks at the fair-use ceiling of 50", async () => {
@@ -147,18 +163,17 @@ describe("Plus", () => {
 
   // Unlimited while it lasts, but a refusal has to name the real ceiling, or
   // the app keeps reading "unlimited" and offers a button that always fails.
-  it("names the fair-use ceiling when it refuses", async () => {
+  it("names the market-check ceiling when it refuses", async () => {
     const u = await newUser(db);
-    await set(u, "plus_expires_at = $2, reads_used = 100, searches_used = 50, pack_listings = 0", [inAMonth()]);
-    expect(await spend(u, "read")).toMatchObject({ allowed: false, allowance_limit: 100 });
+    await set(u, "plus_expires_at = $2, searches_used = 50", [inAMonth()]);
     expect(await spend(u, "search")).toMatchObject({ allowed: false, allowance_limit: 50 });
   });
 
-  it("stops at 100 listings, then spends the pack", async () => {
+  it("keeps a bought pack untouched while Plus is on", async () => {
     const u = await newUser(db);
-    await set(u, "plus_expires_at = $2, reads_used = 100, pack_listings = 1", [inAMonth()]);
-    expect(await spend(u, "read")).toMatchObject({ allowed: true, source: "pack" });
-    expect(await spend(u, "read")).toMatchObject({ allowed: false });
+    await set(u, "plus_expires_at = $2, reads_used = 300, pack_listings = 4", [inAMonth()]);
+    expect(await spend(u, "read")).toMatchObject({ allowed: true, source: "plus" });
+    expect((await profile(u)).pack_listings).toBe(4);
   });
 
   it("goes back to the free numbers once it has expired", async () => {

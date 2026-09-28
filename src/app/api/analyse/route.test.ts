@@ -164,6 +164,16 @@ describe("POST /api/analyse — the meter", () => {
     await expect(readStringStream(res)).rejects.toMatchObject({ reason: "not_clothing" });
   });
 
+  // Plus listings are unlimited; only a bot's pace is refused, and that is a
+  // "slow down", never a used-up allowance or the paywall.
+  it("answers 429 when Plus listings come faster than 60 an hour", async () => {
+    spendAllowance.mockResolvedValue({ allowed: false, used: 300, limit: null, resetsAt: "2026-10-01T00:00:00+00:00", source: "rate_limited" });
+    const res = await POST(post({ images: [PHOTO], tone: "casual" }));
+    expect(res.status).toBe(429);
+    expect((await res.json()).code).toBe("rate_limited");
+    expect(analyseListingStream).not.toHaveBeenCalled();
+  });
+
   it("hands a listing spent from the pack back to the pack", async () => {
     spendAllowance.mockResolvedValue({ allowed: true, used: 10, limit: 10, resetsAt: "2026-10-01T00:00:00+00:00", source: "pack" });
     analyseListingStream.mockReturnValue(failingStream());

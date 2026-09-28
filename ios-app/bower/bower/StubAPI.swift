@@ -40,7 +40,7 @@ struct StubAPI: BowerAPIClient {
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
             allowance: AllowanceState(used: spent ? 10 : 4, limit: unlimited || plus ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
-            searches: AllowanceState(used: spent ? 3 : 1, limit: unlimited || plus ? nil : 3, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: spent ? 3 : 1, limit: unlimited ? nil : (plus ? 50 : 3), resetsAt: "2026-10-01T00:00:00Z"),
             plan: plus ? "plus" : "free",
             plusExpiresAt: plus ? "2026-10-25T12:00:00Z" : nil,
             packListings: pack
@@ -67,7 +67,7 @@ struct StubAPI: BowerAPIClient {
             enabledPlatforms: [.vinted, .depop, .ebay],
             preferredPlatform: .depop,
             allowance: AllowanceState(used: 10, limit: plus ? nil : 10, resetsAt: "2026-10-01T00:00:00Z"),
-            searches: AllowanceState(used: 3, limit: plus ? nil : 3, resetsAt: "2026-10-01T00:00:00Z"),
+            searches: AllowanceState(used: 3, limit: plus ? 50 : 3, resetsAt: "2026-10-01T00:00:00Z"),
             plan: plus ? "plus" : "free",
             plusExpiresAt: plus ? "2026-10-25T12:00:00Z" : nil,
             packListings: plus ? 0 : 10

@@ -42,6 +42,7 @@ in order:
 | `0020_valuation_cache.sql` | `valuation_cache`: Price Bands by item key for seven days, shared by every instance (#80) |
 | `0021_rejection_refund_cap.sql` | `refund_rejection`: a rejected read is refunded ten times a day, not forever (#79) |
 | `0022_plus_listings_100.sql` | Plus's listing ceiling from 150 to 100 a month |
+| `0023_plus_unlimited_listings.sql` | Plus listings truly unlimited, paced at 60 an hour (`rate_limited`); Plus checks 50 a month, shown |
 
 Apply them with the CLI (installed as a dev dependency):
 

@@ -25,8 +25,10 @@ export interface AllowanceState {
 /**
  * Where a spent unit came from: the month's free allowance, Plus, or (listings
  * only) the bought pack. A refund has to go back to the same place.
+ * `rate_limited` is a refusal, not a source: Plus listings are unlimited but
+ * paced at 60 an hour (migration 0023).
  */
-export type SpendSource = "monthly" | "plus" | "pack";
+export type SpendSource = "monthly" | "plus" | "pack" | "rate_limited";
 
 export interface SpendResult extends AllowanceState {
   allowed: boolean;
@@ -104,6 +106,14 @@ export async function refundRejection(userId: string, source: SpendSource | null
     return false;
   }
   return data === true;
+}
+
+/** 429 for a Plus listing faster than 60 an hour: wait a few minutes, nothing charged. */
+export function rateLimited(): Response {
+  return Response.json(
+    { error: "That's a lot of listings in an hour. Try again in a few minutes.", code: "rate_limited" },
+    { status: 429 }
+  );
 }
 
 /** 402 with everything the client needs to explain the wall it just hit. */

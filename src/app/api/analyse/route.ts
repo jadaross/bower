@@ -1,5 +1,5 @@
 import { withAuth } from "@/lib/auth";
-import { allowanceExhausted, refundAllowance, refundRejection, spendAllowance, type SpendSource } from "@/lib/allowance";
+import { allowanceExhausted, rateLimited, refundAllowance, refundRejection, spendAllowance, type SpendSource } from "@/lib/allowance";
 import { AnalyseRejected, analyseListingStream } from "@/lib/llm/analyse";
 import { recordItem } from "@/lib/history";
 import { getListingContext } from "@/lib/profile";
@@ -105,6 +105,7 @@ export const POST = withAuth(async (request, user) => {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
   }
+  if (!spend.allowed && spend.source === "rate_limited") return rateLimited();
   if (!spend.allowed) return allowanceExhausted(spend, "read");
 
   const sessionId = request.headers.get("x-bower-session") ?? undefined;

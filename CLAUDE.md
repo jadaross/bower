@@ -26,7 +26,7 @@ npm run lint     # ESLint (flat config, eslint.config.mjs)
 ```
 
 ```bash
-npm test         # Vitest — 463 tests across the backend
+npm test         # Vitest — 466 tests across the backend
 ```
 
 The iOS app lives in `ios-app/bower/` and builds with Xcode 26; the deployment target is iOS 17, which is as far back as the on-device Sensitive Content check goes (iPhone XS/XR and later).
@@ -66,8 +66,9 @@ there are no anonymous requests, because the meter needs someone to meter
 | `POST /api/apple/notifications` | App Store Server Notifications V2: renewals, expiries, refunds. **The one route without `withAuth`**: Apple's signed payload is the authentication (ADR-0011). |
 
 `GET /api/profile` also carries `plan` (`free` | `plus`), `plus_expires_at` and
-`pack_listings`. With Plus on, both limits read as null (ceilings of 100 listings
-and 50 market checks sit behind them, in SQL); bought listings are spent
+`pack_listings`. With Plus on, listings are unlimited (no monthly cap; paced at 60 an hour,
+a 429 past that) and market checks are 50 a month, both enforced in SQL. Never
+write "unlimited" for anything with a hard stop behind it (ADR-0010, 28 Sep); bought listings are spent
 only once the month's free ones are gone (ADR-0010, migration 0019).
 
 `PATCH /api/profile` also takes `seller_notes`: the opt-in facts about the seller a
@@ -117,7 +118,7 @@ fanned out to.
 ### Where v1 stands
 
 **Built, both sides.** Backend: five routes, auth, metering on reads and searches,
-the Valuation, account deletion, 463 tests. Client: eight screens — the dark welcome
+the Valuation, account deletion, 466 tests. Client: eight screens — the dark welcome
 (sign in), "what bower does", where-you-sell, home, the read, price-and-listing,
 history, profile — plus three sheets on home: Tips (what photographs well), `?`
 (how bower works) and About (tap the mark). Five photos, four suggested angles;

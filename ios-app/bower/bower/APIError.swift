@@ -43,6 +43,9 @@ enum AnalyseRejection: String, Sendable {
     /// The pasted product page could not be read. Raised before any listing is
     /// attempted, so nothing was charged and the link is still there to fix.
     case linkUnreadable = "link_unreadable"
+    /// Plus listings are unlimited but paced at 60 an hour (a 429). Never the
+    /// paywall: nothing is used up, it just has to wait.
+    case slowDown = "rate_limited"
     case other
 
     init(wire: String) { self = AnalyseRejection(rawValue: wire) ?? .other }
@@ -53,6 +56,7 @@ enum AnalyseRejection: String, Sendable {
         switch self {
         case .notClothing:    "Sorry, we can't sell that"
         case .linkUnreadable: "Couldn't read that link"
+        case .slowDown:       "That's a lot in an hour"
         default:              "Sorry, that was inappropriate"
         }
     }
@@ -61,6 +65,7 @@ enum AnalyseRejection: String, Sendable {
         switch self {
         case .notClothing:    "Bower reads clothes, shoes and bags. Take a photo of the piece and try again."
         case .linkUnreadable: "The shop's page didn't open for bower. Check the link, or add photos instead. Nothing was charged."
+        case .slowDown:       "Try again in a few minutes. Nothing was charged."
         default:              "Bower can't read that photo. It has been thrown away, and nothing was charged."
         }
     }

@@ -137,6 +137,8 @@ struct AnalysingScreen: View {
                 await state.signOut()
             } catch APIError.rejected(let reason) {
                 phase = .rejected(reason)
+            } catch APIError.server(429, _) {
+                phase = .rejected(.slowDown)
             } catch {
                 phase = .failed
             }

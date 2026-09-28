@@ -126,7 +126,7 @@ struct PaywallSheet: View {
                 }
                 VStack(alignment: .leading, spacing: 9) {
                     tick("Unlimited listings")
-                    tick("Unlimited market checks")
+                    tick("50 market checks a month")
                     tick("A price for every platform, with the listings behind it")
                 }
                 .padding(.top, 14)
@@ -162,7 +162,7 @@ struct PaywallSheet: View {
                     Spacer()
                     price(store.packPrice, per: "once")
                 }
-                Text("Listings only. They never expire and are used after your free ones. Plus adds market checks.")
+                Text("Listings only. They never expire and are used after your free ones. Plus adds unlimited listings and 50 market checks.")
                     .font(BowerFont.ui(12.5)).foregroundStyle(theme.muted)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 6)
@@ -187,7 +187,7 @@ struct PaywallSheet: View {
         BowerCard(padding: 18) {
             VStack(alignment: .leading, spacing: 9) {
                 tick("Unlimited listings")
-                tick("Unlimited market checks")
+                tick("50 market checks a month")
                 BowerButton(title: "Manage subscription", kind: .secondary) { manage = true }
                     .padding(.top, 9)
             }
