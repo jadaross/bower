@@ -28,7 +28,7 @@ struct Arch: View {
                 p.closeSubpath()
                 p.addEllipse(in: CGRect(x: 43 * u, y: 27 * u, width: 14 * u, height: 14 * u))
             }
-            .fill(stroke ?? theme.satin, style: FillStyle(eoFill: true))
+            .fill(stroke ?? theme.accentText, style: FillStyle(eoFill: true))
 
             Circle()
                 .fill(dot ?? theme.pollen)

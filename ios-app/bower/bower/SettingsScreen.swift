@@ -136,6 +136,7 @@ struct SettingsScreen: View {
             await Notifications.dumpPending()
             #endif
         }
+        .onAppear { if DebugLaunch.sheet("feedback") { feedback = true } }
         .sheet(isPresented: $feedback) {
             FeedbackSheet(screen: "profile")
                 .environment(\.bower, theme)

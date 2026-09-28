@@ -90,6 +90,7 @@ struct PaywallSheet: View {
             .padding(.top, 18)
             .padding(.bottom, 24)
         }
+        .debugScrollAnchor()
         .background(theme.bg)
         .animation(Motion.quick, value: message)
         .animation(Motion.arrive, value: landed)

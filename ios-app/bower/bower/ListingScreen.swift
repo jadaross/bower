@@ -29,6 +29,10 @@ struct ListingScreen: View {
             // `-bowerSearch` runs the market check as soon as the listing is
             // up, so the priced state can be screenshotted without a tap.
             if CommandLine.arguments.contains("-bowerSearch"), model.priceState == .estimated { model.search() }
+            if DebugLaunch.sheet("comps") {
+                for _ in 0..<40 where model.bands[model.platform] == nil { try? await Task.sleep(for: .milliseconds(250)) }
+                model.compsFor = model.platform
+            }
             #endif
         }
         .sheet(item: $model.compsFor) { platform in
@@ -461,6 +465,9 @@ private struct PriceSection: View {
                 }
             }
             .padding(.vertical, 13).padding(.horizontal, 14)
+            // Room under "Post here first", which sits over the top edge, so
+            // it never touches the name at larger text sizes.
+            .padding(.top, winner ? 5 : 0)
             .background(theme.card)
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(winner ? p.tint.opacity(0.4) : theme.line, lineWidth: 0.5))
@@ -644,6 +651,7 @@ private struct ListingSection: View {
             }
         }
         .padding(.horizontal, 22)
+        .onAppear { if DebugLaunch.sheet("feedback") { feedback = true } }
         .sheet(isPresented: $feedback) {
             FeedbackSheet(screen: "listing",
                           about: "the \(model.platform.name) listing for \(model.listing.map { "\($0.brand) \($0.clothingType)" } ?? "this item")",
@@ -893,6 +901,7 @@ private struct CompsSheet: View {
                 }
                 .padding(20)
             }
+            .debugScrollAnchor()
         }
         .background(theme.bg)
         .environment(\.bower, .of(scheme))

@@ -26,6 +26,8 @@ struct bowerApp: App {
             if let i = args.firstIndex(of: "-bowerLink"), i + 1 < args.count {
                 s.link = args[i + 1]
             }
+            // `-bowerPhotos 3` starts with stand-in photos in the pile.
+            s.photos = DebugLaunch.photos
             // `-bowerMarket US` (or AU) selling there, in its currency.
             if let m = StubAPI.market { s.market = m }
             // The paywall's prices, per market, since the stub has no App Store.

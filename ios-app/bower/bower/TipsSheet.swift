@@ -53,6 +53,7 @@ struct TipsSheet: View {
                 }
                 .padding(.top, 8)
             }
+            .debugScrollAnchor()
             .scrollBounceBehavior(.basedOnSize)
         }
         .padding(.horizontal, 22)

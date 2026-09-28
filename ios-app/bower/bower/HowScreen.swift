@@ -23,7 +23,7 @@ struct HowScreen: View {
                 .font(BowerFont.ui(.body))
                 .foregroundStyle(theme.muted)
                 .lineSpacing(3)
-                .frame(maxWidth: 300, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 8)
 
             VStack(alignment: .leading, spacing: 0) {

@@ -118,6 +118,7 @@ struct RootView: View {
                                 .id(current)
                                 .transition(pageTransition)
                         }
+                        .debugScrollAnchor()
                         .scrollBounceBehavior(.basedOnSize)
                     }
                 }

@@ -19,7 +19,7 @@ struct SignInScreen: View {
     @State private var failure: String?
     @State private var notice: String?
 
-    @State private var showEmail = false
+    @State private var showEmail = DebugLaunch.sheet("email")
     @State private var signingUp = true
     @State private var email = ""
     @State private var password = ""

@@ -42,6 +42,7 @@ struct HistoryScreen: View {
     private func load() async {
         failed = false
         do { items = try await state.api.history() } catch { failed = true }
+        if DebugLaunch.sheet("detail") { selected = items?.first }
     }
 
     private var empty: some View {
@@ -220,6 +221,7 @@ private struct HistoryDetail: View {
             }
             .padding(22)
         }
+        .debugScrollAnchor()
         .background(theme.bg.ignoresSafeArea())
         .environment(\.bower, theme)
     }

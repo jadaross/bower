@@ -42,6 +42,7 @@ struct CaptureScreen: View {
                     }
                     .frame(maxWidth: .infinity, minHeight: empty ? geo.size.height : 0, alignment: .top)
                 }
+                .debugScrollAnchor()
                 .scrollBounceBehavior(.basedOnSize)
             }
         }
@@ -52,6 +53,11 @@ struct CaptureScreen: View {
         .animation(Motion.quick, value: importing)
         .animation(Motion.quick, value: turnedAway)
         .animation(Motion.quick, value: overLimit)
+        .onAppear {
+            showTips = DebugLaunch.sheet("tips")
+            showHelp = DebugLaunch.sheet("help") || DebugLaunch.helpStep != nil
+            showAbout = DebugLaunch.sheet("about")
+        }
         .sheet(isPresented: $showTips) {
             TipsSheet()
                 .environment(\.bower, theme)
@@ -253,7 +259,7 @@ struct CaptureScreen: View {
                 Image(systemName: "link")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(state.linkIsUsable ? theme.accentText : theme.muted)
-                TextField("Or paste the shop's link to it", text: $state.link)
+                TextField("", text: $state.link, prompt: Text("Or paste the shop's link to it").foregroundStyle(theme.muted))
                     .font(BowerFont.ui(.body))
                     .foregroundStyle(theme.text)
                     .keyboardType(.URL)
@@ -286,7 +292,7 @@ struct CaptureScreen: View {
             if state.photos.isEmpty, state.trimmedLink != nil {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(spacing: 10) {
-                        TextField("Size", text: $state.linkSize)
+                        TextField("", text: $state.linkSize, prompt: Text("Size").foregroundStyle(theme.muted))
                             .font(BowerFont.ui(.body))
                             .foregroundStyle(theme.text)
                             .textInputAutocapitalization(.characters)

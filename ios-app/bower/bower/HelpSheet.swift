@@ -9,7 +9,7 @@ struct HelpSheet: View {
     @Environment(\.bower) private var theme
     @Environment(\.dismiss) private var dismiss
 
-    @State private var step = 0
+    @State private var step = DebugLaunch.helpStep ?? 0
     /// Which way the steps are moving, so each slides in from the side it came from.
     @State private var forward = true
 
